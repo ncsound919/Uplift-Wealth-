@@ -1,10 +1,12 @@
+export type Page = 'dashboard' | 'portfolio' | 'academy' | 'revenue' | 'planner';
+
 interface NavigationProps {
-  currentPage: string;
-  onNavigate: (page: any) => void;
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
 }
 
 export default function Navigation({ currentPage, onNavigate }: NavigationProps) {
-  const navItems = [
+  const navItems: { id: Page; label: string }[] = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'portfolio', label: '💼 Portfolio' },
     { id: 'academy', label: '🎓 Academy' },
