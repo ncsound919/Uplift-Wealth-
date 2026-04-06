@@ -99,15 +99,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function updateUserData(data: Partial<User>) {
     if (!currentUser) return;
 
-    const updatedData = { ...userData, ...data };
+    const base: User = userData ?? {
+      id: currentUser.uid,
+      email: currentUser.email || '',
+      fullName: currentUser.displayName || '',
+      goals: [],
+      skills: [],
+      subscriptionTier: 'Free',
+      createdAt: new Date()
+    };
+
+    const updatedData: User = { ...base, ...data };
     await setDoc(doc(db, 'users', currentUser.uid), updatedData, { merge: true });
-    setUserData(updatedData as User);
+    setUserData(updatedData);
   }
 
   async function loadUserData(user: FirebaseUser) {
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists()) {
-      setUserData(userDoc.data() as User);
+      const data = userDoc.data();
+      // Convert Firestore Timestamp to Date for createdAt
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        data.createdAt = data.createdAt.toDate();
+      }
+      setUserData(data as User);
     }
   }
 

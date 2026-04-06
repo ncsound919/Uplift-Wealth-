@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
@@ -17,17 +17,26 @@ type Page = 'home' | 'login' | 'onboarding' | 'strategies' | NavPage;
 function AppContent() {
   const { currentUser, logout } = useAuth();
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [pendingPage, setPendingPage] = useState<Page | null>(null);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(
     () => localStorage.getItem('upliftWealthOnboarding') !== null
   );
 
   const handleLoginSuccess = () => {
     if (!hasCompletedOnboarding) {
-      setCurrentPage('onboarding');
+      setPendingPage('onboarding');
     } else {
-      setCurrentPage('dashboard');
+      setPendingPage('dashboard');
     }
   };
+
+  // Navigate to pending page once currentUser is confirmed set in context
+  useEffect(() => {
+    if (currentUser && pendingPage) {
+      setCurrentPage(pendingPage);
+      setPendingPage(null);
+    }
+  }, [currentUser, pendingPage]);
 
   const handleGetStarted = () => {
     setCurrentPage('login');

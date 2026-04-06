@@ -204,16 +204,14 @@ For beginners, we recommend this learning sequence:
 **Cloud Data Sync with Firebase:**
 - ✅ Secure authentication with Firebase Auth
 - ✅ Real-time data synchronization across devices
-- ✅ End-to-end encrypted data storage in Firestore
+- ✅ Data encrypted at rest and in transit by Firebase/Google Cloud infrastructure
 - ✅ User data is private and accessible only to the account owner
 - ✅ Google OAuth for quick and secure sign-in
 - ⚠️ Requires internet connection for cloud features
-- ⚠️ Local fallback available for offline use
 
 **Security Features:**
 - Password authentication with minimum 6 characters
-- Secure session management
-- Protected API endpoints
+- Secure session management via Firebase Auth tokens
 - Data validation and sanitization
 
 ## 🤝 Contributing

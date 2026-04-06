@@ -13,15 +13,25 @@ export default function WealthStrategies() {
   useEffect(() => {
     const allStrategies = portfolioAnalyticsService.getWealthBuildingStrategies();
     setStrategies(allStrategies);
-
-    // Set recommended strategy based on user profile
+    // Set initial recommended strategy
     const recommended = portfolioAnalyticsService.recommendStrategy(
       userProfile.age,
       userProfile.riskTolerance,
       userProfile.timeHorizon
     );
     setSelectedStrategy(recommended);
-  }, [userProfile]);
+  }, []); // Load static strategies once on mount
+
+  useEffect(() => {
+    if (strategies.length === 0) return;
+    // Recompute recommended strategy when profile changes
+    const recommended = portfolioAnalyticsService.recommendStrategy(
+      userProfile.age,
+      userProfile.riskTolerance,
+      userProfile.timeHorizon
+    );
+    setSelectedStrategy(recommended);
+  }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getRiskColor = (risk: string) => {
     switch (risk) {

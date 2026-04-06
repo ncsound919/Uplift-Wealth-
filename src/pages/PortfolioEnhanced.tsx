@@ -109,7 +109,7 @@ export default function PortfolioEnhanced() {
       </div>
 
       {/* Advanced Analytics Section */}
-      {showAnalytics && assets.length > 0 && (
+      {assets.length > 0 && (
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '20px' }}>Advanced Analytics</h2>
@@ -122,6 +122,8 @@ export default function PortfolioEnhanced() {
             </button>
           </div>
 
+          {showAnalytics && (
+            <>
           <div className="grid grid-3" style={{ marginBottom: '20px' }}>
             <div className="stat-card">
               <div className="stat-label">Total Gain/Loss</div>
@@ -188,6 +190,8 @@ export default function PortfolioEnhanced() {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       )}
 

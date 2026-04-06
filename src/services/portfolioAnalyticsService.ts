@@ -43,6 +43,16 @@ export interface WealthBuildingStrategy {
 }
 
 class PortfolioAnalyticsService {
+  private simulatedCache: {
+    fingerprint: string;
+    monthlyReturns: { month: string; return: number }[];
+    performanceMetrics: { dayChange: number; weekChange: number; monthChange: number; yearChange: number };
+  } | null = null;
+
+  private getPortfolioFingerprint(assets: PortfolioAsset[]): string {
+    return assets.map(a => `${a.id}:${a.valueUSD}`).sort().join(',');
+  }
+
   // Calculate comprehensive portfolio analytics
   calculateAnalytics(
     assets: PortfolioAsset[],
@@ -50,10 +60,10 @@ class PortfolioAnalyticsService {
   ): PortfolioAnalytics {
     const totalValue = assets.reduce((sum, asset) => sum + asset.valueUSD, 0);
 
-    // Calculate total cost from buy transactions
+    // Calculate total cost from buy transactions; fall back to totalValue (0% gain/loss) when unknown
     const totalCost = transactions
       .filter(t => t.type === 'buy')
-      .reduce((sum, t) => sum + (t.amount * t.price), 0) || totalValue * 0.95; // Fallback if no transactions
+      .reduce((sum, t) => sum + (t.amount * t.price), 0) || totalValue;
 
     const totalGainLoss = totalValue - totalCost;
     const totalGainLossPercent = totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
@@ -76,11 +86,16 @@ class PortfolioAnalyticsService {
     // Calculate asset allocation percentages
     const assetAllocation = this.calculateAssetAllocation(assets, totalValue);
 
-    // Generate monthly returns (simulated)
-    const monthlyReturns = this.generateMonthlyReturns();
-
-    // Calculate performance metrics
-    const performanceMetrics = this.calculatePerformanceMetrics(totalValue, transactions);
+    // Generate simulated values once per unique portfolio state to avoid re-render jumps
+    const fingerprint = this.getPortfolioFingerprint(assets);
+    if (!this.simulatedCache || this.simulatedCache.fingerprint !== fingerprint) {
+      this.simulatedCache = {
+        fingerprint,
+        monthlyReturns: this.generateMonthlyReturns(),
+        performanceMetrics: this.generatePerformanceMetrics()
+      };
+    }
+    const { monthlyReturns, performanceMetrics } = this.simulatedCache;
 
     return {
       totalValue,
@@ -244,11 +259,8 @@ class PortfolioAnalyticsService {
     });
   }
 
-  private calculatePerformanceMetrics(
-    _currentValue: number,
-    _transactions: Transaction[]
-  ): { dayChange: number; weekChange: number; monthChange: number; yearChange: number } {
-    // Simplified calculation - in real app would use historical data
+  private generatePerformanceMetrics(): { dayChange: number; weekChange: number; monthChange: number; yearChange: number } {
+    // Simplified simulation - in real app would use historical data
     return {
       dayChange: (Math.random() - 0.45) * 4, // -1.8% to +2.2%
       weekChange: (Math.random() - 0.4) * 8, // -3.2% to +4.8%
