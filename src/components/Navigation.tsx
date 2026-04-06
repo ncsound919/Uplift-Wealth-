@@ -1,4 +1,4 @@
-export type Page = 'dashboard' | 'portfolio' | 'academy' | 'revenue' | 'planner';
+export type Page = 'dashboard' | 'portfolio' | 'academy' | 'revenue' | 'planner' | 'strategies';
 
 interface NavigationProps {
   currentPage: Page;
@@ -9,9 +9,10 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
   const navItems: { id: Page; label: string }[] = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'portfolio', label: '💼 Portfolio' },
+    { id: 'strategies', label: '📈 Strategies' },
     { id: 'academy', label: '🎓 Academy' },
     { id: 'revenue', label: '💰 Revenue Hub' },
-    { id: 'planner', label: '📈 Financial Planner' },
+    { id: 'planner', label: '🎯 Planner' },
   ];
 
   return (
