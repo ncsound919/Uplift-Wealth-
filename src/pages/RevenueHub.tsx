@@ -11,7 +11,7 @@ export default function RevenueHub() {
   const sortedIdeas = [...filteredIdeas].sort((a, b) => b.skillMatchScore - a.skillMatchScore);
 
   return (
-    <div className="page" style={{ marginLeft: '250px' }}>
+    <div className="page main-content with-nav">
       <div className="page-header">
         <h1 className="page-title">Revenue Hub 💰</h1>
         <p className="page-description">
