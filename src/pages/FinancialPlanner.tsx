@@ -168,7 +168,7 @@ export default function FinancialPlanner() {
                 <select
                   className="form-select"
                   value={newGoal.category}
-                  onChange={(e) => setNewGoal({ ...newGoal, category: e.target.value as any })}
+                  onChange={(e) => setNewGoal({ ...newGoal, category: e.target.value as FinancialGoal['category'] })}
                 >
                   <option value="emergency">Emergency Fund</option>
                   <option value="retirement">Retirement</option>

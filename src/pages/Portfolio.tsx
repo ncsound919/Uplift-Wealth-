@@ -118,7 +118,7 @@ export default function Portfolio() {
             <div className="stat-label">Total Portfolio Value</div>
             <div className="stat-value">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             <div className="stat-change positive">
-              ↑ $234.20 (1.9%) today
+              ↑ $234.20 (1.9%) today (demo)
             </div>
           </div>
 
@@ -192,7 +192,7 @@ export default function Portfolio() {
               <select
                 className="form-select"
                 value={newAsset.assetType}
-                onChange={(e) => setNewAsset({ ...newAsset, assetType: e.target.value as any })}
+                onChange={(e) => setNewAsset({ ...newAsset, assetType: e.target.value as PortfolioAsset['assetType'] })}
               >
                 <option value="stocks">Stocks</option>
                 <option value="crypto">Cryptocurrency</option>

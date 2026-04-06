@@ -6,15 +6,17 @@ import RevenueHub from './pages/RevenueHub';
 import FinancialPlanner from './pages/FinancialPlanner';
 import Portfolio from './pages/Portfolio';
 import Onboarding from './pages/Onboarding';
-import Navigation from './components/Navigation';
+import Navigation, { Page as NavPage } from './components/Navigation';
 import './styles/App.css';
 
-type Page = 'home' | 'onboarding' | 'dashboard' | 'academy' | 'revenue' | 'planner' | 'portfolio';
+type Page = 'home' | 'onboarding' | NavPage;
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(
+    () => localStorage.getItem('upliftWealthOnboarding') !== null
+  );
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -62,9 +64,9 @@ function App() {
   return (
     <div className="app">
       {isAuthenticated && currentPage !== 'onboarding' && (
-        <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
+        <Navigation currentPage={currentPage as NavPage} onNavigate={handleNavigate} />
       )}
-      <main className="main-content">
+      <main className={`main-content${isAuthenticated && currentPage !== 'onboarding' ? ' with-nav' : ''}`}>
         {renderPage()}
       </main>
     </div>

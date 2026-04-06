@@ -1,12 +1,38 @@
 import { useState } from 'react';
 import { revenueIdeas } from '../data/revenueIdeas';
 
+function getUserSkills(): string[] {
+  try {
+    const stored = localStorage.getItem('upliftWealthOnboarding');
+    if (!stored) return [];
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed?.skills) ? parsed.skills : [];
+  } catch {
+    return [];
+  }
+}
+
+function computeSkillMatchScore(requiredSkills: string[], userSkills: string[]): number {
+  if (userSkills.length === 0 || requiredSkills.length === 0) return 50;
+  const matched = requiredSkills.filter(s => userSkills.includes(s)).length;
+  return Math.round((matched / requiredSkills.length) * 100);
+}
+
 export default function RevenueHub() {
   const [filter, setFilter] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
 
+  const userSkills = getUserSkills();
+
+  const ideasWithScores = revenueIdeas.map(idea => ({
+    ...idea,
+    skillMatchScore: userSkills.length > 0
+      ? computeSkillMatchScore(idea.requiredSkills, userSkills)
+      : idea.skillMatchScore
+  }));
+
   const filteredIdeas = filter === 'all'
-    ? revenueIdeas
-    : revenueIdeas.filter(idea => idea.difficulty === filter);
+    ? ideasWithScores
+    : ideasWithScores.filter(idea => idea.difficulty === filter);
 
   const sortedIdeas = [...filteredIdeas].sort((a, b) => b.skillMatchScore - a.skillMatchScore);
 

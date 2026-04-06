@@ -65,6 +65,7 @@ export interface RevenueIdea {
   skillMatchScore: number;
   difficulty: 'easy' | 'medium' | 'hard';
   timeCommitment: string;
+  requiredSkills: string[];
 }
 
 export interface Transaction {

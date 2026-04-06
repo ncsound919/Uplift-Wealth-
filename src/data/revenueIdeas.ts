@@ -8,7 +8,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$500 - $3,000/month',
     skillMatchScore: 85,
     difficulty: 'easy',
-    timeCommitment: '10-20 hours/week'
+    timeCommitment: '10-20 hours/week',
+    requiredSkills: ['Writing']
   },
   {
     id: '2',
@@ -17,7 +18,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$1,000 - $4,000/month',
     skillMatchScore: 78,
     difficulty: 'easy',
-    timeCommitment: '15-25 hours/week'
+    timeCommitment: '15-25 hours/week',
+    requiredSkills: ['Teaching']
   },
   {
     id: '3',
@@ -26,7 +28,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$500 - $10,000/month',
     skillMatchScore: 65,
     difficulty: 'medium',
-    timeCommitment: '20-30 hours/week'
+    timeCommitment: '20-30 hours/week',
+    requiredSkills: ['Marketing', 'Sales']
   },
   {
     id: '4',
@@ -35,7 +38,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$800 - $3,500/month',
     skillMatchScore: 72,
     difficulty: 'easy',
-    timeCommitment: '10-20 hours/week'
+    timeCommitment: '10-20 hours/week',
+    requiredSkills: ['Marketing', 'Design']
   },
   {
     id: '5',
@@ -44,7 +48,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$2,000 - $8,000/month',
     skillMatchScore: 60,
     difficulty: 'hard',
-    timeCommitment: '20-40 hours/week'
+    timeCommitment: '20-40 hours/week',
+    requiredSkills: ['Programming']
   },
   {
     id: '6',
@@ -53,7 +58,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$800 - $2,500/month',
     skillMatchScore: 88,
     difficulty: 'easy',
-    timeCommitment: '15-25 hours/week'
+    timeCommitment: '15-25 hours/week',
+    requiredSkills: ['Customer service']
   },
   {
     id: '7',
@@ -62,7 +68,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$200 - $5,000/month',
     skillMatchScore: 70,
     difficulty: 'medium',
-    timeCommitment: '10-30 hours/week'
+    timeCommitment: '10-30 hours/week',
+    requiredSkills: ['Design', 'Writing', 'Teaching']
   },
   {
     id: '8',
@@ -71,7 +78,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$100 - $10,000/month',
     skillMatchScore: 55,
     difficulty: 'medium',
-    timeCommitment: '15-30 hours/week'
+    timeCommitment: '15-30 hours/week',
+    requiredSkills: ['Video editing', 'Marketing']
   },
   {
     id: '9',
@@ -80,7 +88,8 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$100 - $5,000/month',
     skillMatchScore: 68,
     difficulty: 'medium',
-    timeCommitment: '10-20 hours/week'
+    timeCommitment: '10-20 hours/week',
+    requiredSkills: ['Marketing', 'Writing']
   },
   {
     id: '10',
@@ -89,6 +98,7 @@ export const revenueIdeas: RevenueIdea[] = [
     estimatedRevenueRange: '$500 - $4,000/month',
     skillMatchScore: 62,
     difficulty: 'medium',
-    timeCommitment: '10-25 hours/week'
+    timeCommitment: '10-25 hours/week',
+    requiredSkills: ['Photography']
   }
 ];
