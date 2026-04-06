@@ -51,9 +51,24 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     { id: 'planner', label: 'Set Financial Goals', icon: '🎯', description: 'Plan your future' },
   ];
 
-  const onboardingData = localStorage.getItem('upliftWealthOnboarding');
-  const userName = onboardingData ? JSON.parse(onboardingData).fullName : 'Member';
+  const getUserNameFromOnboarding = () => {
+    const onboardingData = localStorage.getItem('upliftWealthOnboarding');
 
+    if (!onboardingData) {
+      return 'Member';
+    }
+
+    try {
+      const parsedData = JSON.parse(onboardingData);
+      return typeof parsedData?.fullName === 'string' && parsedData.fullName.trim()
+        ? parsedData.fullName
+        : 'Member';
+    } catch {
+      return 'Member';
+    }
+  };
+
+  const userName = getUserNameFromOnboarding();
   return (
     <div className="page" style={{ marginLeft: '250px' }}>
       <div className="page-header">
