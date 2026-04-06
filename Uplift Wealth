@@ -1,0 +1,204 @@
+{
+  "site": {
+    "name": "Uplift Wealth",
+    "tagline": "Deploy AI Agents. Build Revenue. Master Wealth.",
+    "domain": "upliftwealth.com",
+    "description": "All-in-one platform for revenue generation, skill building, financial strategy, crypto/blockchain, trading simulators, and AI agent deployment. Educational tools and simulations only.",
+    "version": "1.0.0-mvp",
+    "launch_year": 2026,
+    "legal_disclaimer": "All content, tools, simulators, and AI agents are for educational and simulation purposes only. Not financial, investment, tax, or trading advice. Past performance is not indicative of future results. Consult licensed professionals. Crypto and futures involve high risk of loss."
+  },
+  "branding": {
+    "primary_color": "#10b981",
+    "accent_color": "#3b82f6",
+    "logo_text": "Uplift Wealth",
+    "hero_image_prompt": "Modern financial dashboard with glowing AI agents, upward growth charts, crypto icons, diverse people building wealth, clean futuristic UI, green and blue tones"
+  },
+  "tech_stack": {
+    "core_platform": "Bubble.io (recommended) or FlutterFlow/WeWeb/NxCode AI builder",
+    "ai_agent_engine": "MindStudio / Relevance AI / Grok API + OpenAI/Anthropic via plugins",
+    "database": "Bubble DB or Supabase",
+    "market_data_apis": ["CoinMarketCap", "Alpha Vantage / Twelve Data", "Alpaca (paper trading)"],
+    "payments": "Stripe",
+    "auth": "Built-in + Google/Email + 2FA",
+    "charts": "Chart.js or Bubble charts"
+  },
+  "user_roles": [
+    {
+      "name": "Free",
+      "limits": {
+        "agents": 2,
+        "courses": "Basic",
+        "simulators": "Read-only"
+      }
+    },
+    {
+      "name": "Premium",
+      "price_monthly": 29,
+      "limits": {
+        "agents": "Unlimited",
+        "courses": "Full academy",
+        "simulators": "Full access + advanced"
+      }
+    },
+    {
+      "name": "Pro",
+      "price_monthly": 99,
+      "limits": {
+        "agents": "Unlimited + white-label",
+        "features": "API access, custom builds, affiliate tools"
+      }
+    }
+  ],
+  "pages": [
+    {
+      "path": "/",
+      "type": "public",
+      "name": "Home",
+      "sections": ["hero", "how_it_works", "featured_agents", "testimonials", "pricing_teaser", "cta"]
+    },
+    {
+      "path": "/dashboard",
+      "type": "private",
+      "name": "Dashboard",
+      "widgets": ["greeting", "active_agents", "portfolio_summary", "revenue_tracker", "quick_actions"]
+    },
+    {
+      "path": "/revenue-hub",
+      "type": "private",
+      "name": "Revenue Hub",
+      "features": ["idea_generator", "skill_matcher", "hustle_tracker"]
+    },
+    {
+      "path": "/ai-agents",
+      "type": "private",
+      "name": "AI Agents",
+      "subpages": ["marketplace", "builder", "my_agents", "logs"]
+    },
+    {
+      "path": "/financial-planner",
+      "type": "private",
+      "name": "Financial Planner",
+      "features": ["goal_tracker", "budget_simulator", "net_worth_calculator"]
+    },
+    {
+      "path": "/crypto-blockchain",
+      "type": "private",
+      "name": "Crypto & Blockchain",
+      "features": ["academy_modules", "wallet_simulator", "portfolio_analyzer"]
+    },
+    {
+      "path": "/trading-futures",
+      "type": "private",
+      "name": "Trading & Futures",
+      "features": ["paper_trading_simulator", "strategy_backtester", "market_scanner"]
+    },
+    {
+      "path": "/investment-accounts",
+      "type": "private",
+      "name": "Investment Accounts",
+      "features": ["guided_setup", "portfolio_dashboard", "affiliate_embeds"]
+    },
+    {
+      "path": "/academy",
+      "type": "private",
+      "name": "Academy",
+      "features": ["courses", "quizzes", "progress_tracker", "ai_tutor"]
+    },
+    {
+      "path": "/community",
+      "type": "private",
+      "name": "Community",
+      "features": ["forums", "agent_sharing", "live_qa"]
+    },
+    {
+      "path": "/pricing",
+      "type": "public",
+      "name": "Pricing"
+    }
+  ],
+  "navigation": {
+    "sidebar": ["Dashboard", "Revenue Hub", "AI Agents", "Financial Planner", "Crypto & Blockchain", "Trading & Futures", "Investment Accounts", "Academy", "Community"],
+    "footer": ["About", "Blog", "Legal", "Support", "Affiliates"]
+  },
+  "database_schema": {
+    "User": {
+      "fields": ["email", "full_name", "goals_json", "skills_array", "subscription_tier", "onboarding_results_json", "created_at"]
+    },
+    "AIAgent": {
+      "fields": ["name", "type", "category", "base_prompt", "custom_instructions", "owner_user", "status", "deployment_date", "last_run", "performance_metrics_json"]
+    },
+    "AgentRunLog": {
+      "fields": ["agent", "timestamp", "input", "output", "action_taken", "success"]
+    },
+    "RevenueIdea": {
+      "fields": ["title", "description", "estimated_revenue_range", "skill_match_score", "linked_agent"]
+    },
+    "PortfolioSnapshot": {
+      "fields": ["user", "asset_type", "ticker", "quantity", "value_usd", "date", "simulated"]
+    },
+    "LearningModule": {
+      "fields": ["title", "category", "content_rich_text", "quiz_questions_array", "duration_minutes"]
+    },
+    "SimulatedTransaction": {
+      "fields": ["user", "type", "asset", "amount", "profit_loss", "date"]
+    }
+  },
+  "ai_agent_templates": [
+    {
+      "name": "Revenue Generator",
+      "category": "revenue",
+      "description": "Suggests personalized side hustles based on user skills and location"
+    },
+    {
+      "name": "Crypto Portfolio Optimizer",
+      "category": "crypto",
+      "description": "Analyzes holdings and suggests rebalancing (educational only)"
+    },
+    {
+      "name": "Trading Signals Bot",
+      "category": "trading",
+      "description": "Scans markets and provides simulation insights"
+    },
+    {
+      "name": "Financial Goal Planner",
+      "category": "planning",
+      "description": "Tracks progress toward user-defined wealth goals"
+    },
+    {
+      "name": "Skill-to-Income Matcher",
+      "category": "skills",
+      "description": "Links skills to revenue opportunities + learning paths"
+    }
+  ],
+  "workflows": {
+    "deploy_agent": {
+      "steps": [
+        "Select template or builder",
+        "Customize prompt/goals/risk",
+        "Save to DB",
+        "Trigger API call to AI engine",
+        "Schedule recurring runs (15min–daily)",
+        "Store logs and send alerts"
+      ]
+    },
+    "onboarding": {
+      "steps": ["Signup", "Goal quiz", "Auto-recommend first agent", "Deploy prompt"]
+    }
+  },
+  "integrations": {
+    "market_data": "CoinMarketCap for crypto prices + historical; Alpaca or TradingView for paper trading simulation",
+    "payments": "Stripe checkout for subscriptions and one-time agent unlocks",
+    "alerts": "Email + in-app notifications via Bubble workflows"
+  },
+  "monetization": {
+    "models": ["Freemium", "Monthly subscriptions", "One-time custom agent builds ($49–199)", "Affiliate commissions from broker referrals"],
+    "affiliates": ["Coinbase", "Robinhood", "Futures brokers (educational links only)"]
+  },
+  "compliance": {
+    "disclaimer_required": true,
+    "every_page": "Educational simulations only. Not investment advice.",
+    "agent_outputs": "Always frame as 'consider researching' or 'simulation results'",
+    "no_live_trading": "Paper trading/simulators only at MVP"
+  }
+}
