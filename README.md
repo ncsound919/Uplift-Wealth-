@@ -45,7 +45,7 @@ Uplift Wealth is an all-in-one educational platform for revenue generation, skil
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ installed
+- Node.js 20.19+ or 22.12+ installed
 - npm or yarn package manager
 
 ### Installation
