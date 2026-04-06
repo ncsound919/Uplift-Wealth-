@@ -98,7 +98,7 @@ export default function Portfolio() {
   };
 
   return (
-    <div className="page" style={{ marginLeft: '250px' }}>
+    <div className="page main-content with-nav">
       <div className="page-header">
         <h1 className="page-title">Portfolio Dashboard 💼</h1>
         <p className="page-description">
