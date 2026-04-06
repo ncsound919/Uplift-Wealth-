@@ -139,17 +139,45 @@ class PortfolioAnalyticsService {
   }
 
   private calculateVolatility(transactions: Transaction[]): number {
-    if (transactions.length < 2) return 0;
+    const relevantTransactions = transactions
+      .filter(t => t.type === 'buy' || t.type === 'sell')
+      .slice()
+      .sort((a, b) => {
+        const getTimestamp = (value: unknown): number => {
+          if (value instanceof Date) return value.getTime();
+          if (typeof value === 'number') return value;
+          if (typeof value === 'string') return new Date(value).getTime();
+          if (value && typeof value === 'object') {
+            const dateValue = value as { toDate?: () => Date; seconds?: number };
+            if (typeof dateValue.toDate === 'function') {
+              return dateValue.toDate().getTime();
+            }
+            if (typeof dateValue.seconds === 'number') {
+              return dateValue.seconds * 1000;
+            }
+          }
+          return 0;
+        };
 
-    // Calculate returns between transactions
-    const returns = transactions
-      .slice(1)
-      .map((t, i) => {
-        const prevValue = transactions[i].amount * transactions[i].price;
-        const currValue = t.amount * t.price;
-        return ((currValue - prevValue) / prevValue) * 100;
+        return getTimestamp(a.date) - getTimestamp(b.date);
       });
 
+    if (relevantTransactions.length < 2) return 0;
+
+    // Calculate returns between chronologically ordered transactions
+    const returns = relevantTransactions
+      .slice(1)
+      .map((t, i) => {
+        const prevValue = relevantTransactions[i].amount * relevantTransactions[i].price;
+        const currValue = t.amount * t.price;
+
+        if (prevValue <= 0) return null;
+
+        return ((currValue - prevValue) / prevValue) * 100;
+      })
+      .filter((r): r is number => r !== null && Number.isFinite(r));
+
+    if (returns.length === 0) return 0;
     // Calculate standard deviation
     const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
     const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
