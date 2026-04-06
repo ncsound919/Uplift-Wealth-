@@ -20,16 +20,15 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
       <ul className="nav-menu">
         {navItems.map((item) => (
           <li key={item.id} className="nav-item">
-            <a
+            <button
+              type="button"
               className={`nav-link ${currentPage === item.id ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 onNavigate(item.id);
               }}
-              href={`#${item.id}`}
             >
               {item.label}
-            </a>
+            </button>
           </li>
         ))}
       </ul>
