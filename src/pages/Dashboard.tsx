@@ -70,7 +70,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const userName = getUserNameFromOnboarding();
   return (
-    <div className="page" style={{ marginLeft: '250px' }}>
+    <div className="page main-content with-nav">
       <div className="page-header">
         <h1 className="page-title">Welcome back, {userName}! 👋</h1>
         <p className="page-description">Here's your wealth-building progress at a glance</p>
