@@ -70,7 +70,7 @@ export default function FinancialPlanner() {
   const overallProgress = totalTargets > 0 ? (totalSaved / totalTargets) * 100 : 0;
 
   return (
-    <div className="page" style={{ marginLeft: '250px' }}>
+    <div className="page main-content with-nav">
       <div className="page-header">
         <h1 className="page-title">Financial Planner 📈</h1>
         <p className="page-description">
