@@ -199,7 +199,7 @@ export default function PortfolioEnhanced() {
             <div className="stat-label">Total Portfolio Value</div>
             <div className="stat-value">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
             <div className="stat-change positive">
-              ↑ ${analytics.performanceMetrics.dayChange.toFixed(2)} ({analytics.performanceMetrics.dayChange.toFixed(2)}%) today
+              ↑ {analytics.performanceMetrics.dayChange.toFixed(2)}% today
             </div>
           </div>
 
