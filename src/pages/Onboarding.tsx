@@ -68,7 +68,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const canProceed = () => {
     switch (step) {
       case 1:
-        return formData.fullName.length > 0;
+        return formData.fullName.trim().length > 0;
       case 2:
         return formData.goals.length > 0;
       case 3:
