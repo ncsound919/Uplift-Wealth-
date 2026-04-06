@@ -27,7 +27,7 @@ export default function Academy() {
 
   if (selectedModule) {
     return (
-      <div className="page" style={{ marginLeft: '250px', maxWidth: '900px' }}>
+      <div className="page main-content with-nav" style={{ maxWidth: '900px' }}>
         <div style={{ marginBottom: '24px' }}>
           <button
             className="btn"
