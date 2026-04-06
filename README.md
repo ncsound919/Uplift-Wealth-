@@ -8,6 +8,33 @@ Uplift Wealth is an all-in-one educational platform for revenue generation, skil
 
 ## 🎯 Features
 
+### 🔐 User Authentication & Cloud Sync
+- **Firebase Authentication**: Secure email/password and Google OAuth login
+- **Cloud Data Sync**: Real-time synchronization of portfolio and financial data across devices
+- **User Profiles**: Personalized experience with saved preferences and goals
+- **Secure Storage**: All user data encrypted and stored in Firebase Firestore
+
+### 📈 Real-Time Market Data
+- **Live Price Updates**: Simulated real-time stock and cryptocurrency price feeds
+- **Market Monitoring**: Track price changes and daily movements
+- **Multi-Asset Support**: Stocks, cryptocurrency, bonds, and cash holdings
+- **Price History**: View historical performance and trends
+
+### 💼 Advanced Portfolio Analytics
+- **Performance Metrics**: Track total returns, gains/losses, and portfolio growth
+- **Diversification Analysis**: Measure portfolio diversification with detailed scoring
+- **Risk Assessment**: Understand your portfolio's risk level and volatility
+- **Sharpe Ratio**: Evaluate risk-adjusted returns
+- **Best/Worst Performers**: Identify top and bottom performing assets
+- **Asset Allocation**: Visual breakdown of your investment distribution
+
+### 🎯 Wealth Building Strategies
+- **Personalized Strategies**: Get recommendations based on age, risk tolerance, and goals
+- **5 Investment Strategies**: Conservative, Balanced, Growth, Aggressive, and Income-focused
+- **Target Allocations**: Detailed asset allocation recommendations
+- **Risk Profiles**: Match strategies to your risk tolerance
+- **Implementation Guidance**: Tips and best practices for each strategy
+
 ### 📚 Financial Literacy Academy
 - **Beginner-Friendly Courses**: Learn the fundamentals of personal finance, budgeting, investing, cryptocurrency, and more
 - **Interactive Learning**: Engaging content with quizzes to test your knowledge
@@ -61,7 +88,17 @@ cd Uplift-Wealth-
 npm install
 ```
 
-3. Start the development server:
+3. Set up Firebase (required for authentication and cloud sync):
+   - Create a Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
+   - Enable Authentication (Email/Password and Google providers)
+   - Create a Firestore database
+   - Copy your Firebase configuration
+
+4. Configure environment variables:
+   - Copy `.env.example` to `.env`
+   - Add your Firebase configuration values to `.env`
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
@@ -118,9 +155,13 @@ Uplift-Wealth-/
 
 - **Frontend Framework**: React 19 with TypeScript
 - **Build Tool**: Vite
+- **Authentication**: Firebase Authentication
+- **Database**: Firebase Firestore (Cloud NoSQL)
+- **Real-time Data**: Custom market data simulation service
 - **Styling**: Custom CSS with CSS Variables
-- **State Management**: React Hooks (useState)
+- **State Management**: React Hooks (useState, useEffect, useContext)
 - **Type Safety**: TypeScript 6.0
+- **Charts & Analytics**: Recharts (for future visualizations)
 
 ## 🎨 Design System
 
@@ -160,11 +201,18 @@ For beginners, we recommend this learning sequence:
 
 ## 🔒 Privacy & Data
 
-Currently, all data is stored locally in your browser's localStorage. This means:
-- ✅ Your data stays on your device
-- ✅ No account creation required
-- ⚠️ Data will be lost if you clear browser data
-- ⚠️ Data is not synced across devices
+**Cloud Data Sync with Firebase:**
+- ✅ Secure authentication with Firebase Auth
+- ✅ Real-time data synchronization across devices
+- ✅ Data encrypted at rest and in transit by Firebase/Google Cloud infrastructure
+- ✅ User data is private and accessible only to the account owner
+- ✅ Google OAuth for quick and secure sign-in
+- ⚠️ Requires internet connection for cloud features
+
+**Security Features:**
+- Password authentication with minimum 6 characters
+- Secure session management via Firebase Auth tokens
+- Data validation and sanitization
 
 ## 🤝 Contributing
 
@@ -186,14 +234,20 @@ See the [LICENSE](LICENSE) file for details.
 
 ## 🎯 Roadmap
 
+Completed features:
+- [x] User authentication and cloud data sync
+- [x] Real-time market data integration
+- [x] Advanced portfolio analytics
+- [x] Wealth building strategies
+
 Future enhancements may include:
-- [ ] User authentication and cloud data sync
-- [ ] Real-time market data integration
 - [ ] AI-powered financial advice chatbot
 - [ ] Community features and forums
 - [ ] Mobile app (React Native)
-- [ ] Advanced portfolio analytics
 - [ ] Integration with real brokerage APIs (paper trading)
+- [ ] Advanced charting and technical analysis
+- [ ] Tax optimization tools
+- [ ] Automated portfolio rebalancing
 
 ## 💡 Support
 
