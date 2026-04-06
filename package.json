@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/ncsound919/Uplift-Wealth-#readme",
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "dependencies": {
     "react": "^19.2.4",
