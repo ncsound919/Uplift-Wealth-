@@ -2,15 +2,24 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+function getRequiredEnvVar(name: string): string {
+  const value = import.meta.env[name];
+
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`Missing required Firebase environment variable: ${name}`);
+  }
+
+  return value;
+}
+
 // Firebase configuration
-// In production, these should be environment variables
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "uplift-wealth.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "uplift-wealth",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "uplift-wealth.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abc123"
+  apiKey: getRequiredEnvVar('VITE_FIREBASE_API_KEY'),
+  authDomain: getRequiredEnvVar('VITE_FIREBASE_AUTH_DOMAIN'),
+  projectId: getRequiredEnvVar('VITE_FIREBASE_PROJECT_ID'),
+  storageBucket: getRequiredEnvVar('VITE_FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: getRequiredEnvVar('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+  appId: getRequiredEnvVar('VITE_FIREBASE_APP_ID')
 };
 
 // Initialize Firebase
