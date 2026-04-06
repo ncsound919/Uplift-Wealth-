@@ -23,7 +23,6 @@ export default function WealthStrategies() {
   }, []); // Load static strategies once on mount
 
   useEffect(() => {
-    if (strategies.length === 0) return;
     // Recompute recommended strategy when profile changes
     const recommended = portfolioAnalyticsService.recommendStrategy(
       userProfile.age,
@@ -31,7 +30,7 @@ export default function WealthStrategies() {
       userProfile.timeHorizon
     );
     setSelectedStrategy(recommended);
-  }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userProfile]);
 
   const getRiskColor = (risk: string) => {
     switch (risk) {

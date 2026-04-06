@@ -50,7 +50,7 @@ class PortfolioAnalyticsService {
   } | null = null;
 
   private getPortfolioFingerprint(assets: PortfolioAsset[]): string {
-    return assets.map(a => `${a.id}:${a.valueUSD}`).sort().join(',');
+    return assets.map(a => `${a.id}:${a.valueUSD.toFixed(2)}`).sort().join(',');
   }
 
   // Calculate comprehensive portfolio analytics
