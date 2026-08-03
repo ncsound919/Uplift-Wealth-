@@ -14,68 +14,37 @@ jobs:
     name: Pre-deploy Tests
     uses: ./.github/workflows/ci.yml
 
-  build:
-    name: Production Build
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build production bundle
-        run: npm run build
-        env:
-          NODE_ENV: production
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ github.sha }}
-          path: dist/
-          retention-days: 7
-
   deploy:
-    name: Deploy to Production
-    needs: build
+    name: Deploy to Render
+    needs: test
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${{ steps.deploy.outputs.url }}
-
+      url: https://uplift-wealth.onrender.com
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-${{ github.sha }}
-          path: dist/
-
-      - name: Deploy to hosting
-        id: deploy
+      - name: Trigger Render Deploy Hook
         run: |
-          echo "Production deploy placeholder"
-          echo "url=https://fintechfoundations.edu" >> $GITHUB_OUTPUT
-        env:
-          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          echo "Render deploy triggered"
 
   smoke-test:
     name: Post-deploy Smoke Test
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify deployment is live
+      - name: Wait for /api/health (max 5 min)
         run: |
-          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/
-          echo ""
-          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/api/health
-          echo ""
-          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/sitemap.xml
-          echo ""
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null "https://uplift-wealth.onrender.com/api/health"; then
+              echo "health OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "health endpoint never became ready" >&2
+          exit 1
+
+      - name: Verify site endpoints
+        run: |
+          curl -fsS -o /dev/null -w "root: %{http_code}\n" https://uplift-wealth.onrender.com/
+          curl -fsS -o /dev/null -w "sitemap: %{http_code}\n" https://uplift-wealth.onrender.com/sitemap.xml
