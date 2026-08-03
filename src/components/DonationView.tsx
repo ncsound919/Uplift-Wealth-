@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Heart, 
@@ -10,7 +10,8 @@ import {
   BookOpen, 
   Layers, 
   ArrowLeft,
-  Video
+  Video,
+  CreditCard
 } from 'lucide-react';
 import { YouTubeVideoPlayer } from './YouTubeVideoPlayer';
 
@@ -114,7 +115,15 @@ interface DonationViewProps {
 export function DonationView({ onBackToDashboard }: DonationViewProps) {
   const [copied, setCopied] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number | null>(25);
+  const [stripeLink, setStripeLink] = useState<string | null>(null);
   const cashtag = "$helptools";
+
+  useEffect(() => {
+    fetch('/api/donation-link')
+      .then((r) => r.json())
+      .then((d) => setStripeLink(d.url || null))
+      .catch(() => setStripeLink(null));
+  }, []);
 
   const handleCopyCashtag = () => {
     navigator.clipboard.writeText(cashtag);
@@ -257,6 +266,19 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
           </div>
 
         </div>
+
+        {/* Stripe Payment Link */}
+        {stripeLink && (
+          <a
+            href={stripeLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-bold transition-colors"
+          >
+            <CreditCard className="w-4 h-4" />
+            Donate via Stripe (card / Apple Pay)
+          </a>
+        )}
       </div>
 
       {/* Suggested Donation Amounts & Impact */}

@@ -647,6 +647,10 @@ app.get('/api/sandbox/load', authenticate, (req: AuthenticatedRequest, res: Resp
 });
 
 // 6.7 DONATIONS & COMMUNITY IMPACT METRICS
+app.get('/api/donation-link', (req, res) => {
+  res.json({ url: process.env.STRIPE_DONATION_LINK || 'https://buy.stripe.com/dRm6oJa7yevp2jF3em3oA06' });
+});
+
 app.get('/api/donations/stats', (req, res) => {
   const totalPledged = db.donations.reduce((sum, d) => sum + d.amount, 0);
   const totalContributors = new Set(db.donations.map(d => d.userId)).size;
