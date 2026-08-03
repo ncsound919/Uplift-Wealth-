@@ -504,12 +504,10 @@ export default function App() {
           {/* Logo Brand Header */}
           <div className="hidden md:flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className={`flex items-center ${isSidebarCollapsed ? 'hidden' : ''}`}>
-              <div className="w-7 h-7 bg-slate-900 dark:bg-blue-600 rounded-lg flex items-center justify-center text-white mr-2 shadow-sm">
-                <GraduationCap className="w-4 h-4" />
-              </div>
+              <img src="/uplift-logo-192.png" alt="Uplift Wealth" className="w-7 h-7 rounded-lg object-contain mr-2 shadow-sm" />
               <div>
-                <h1 className="text-sm font-black font-display tracking-tight text-slate-900 dark:text-white leading-none">FinTech</h1>
-                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Foundations</span>
+                <h1 className="text-sm font-black font-display tracking-tight text-slate-900 dark:text-white leading-none">Uplift</h1>
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Wealth</span>
               </div>
             </div>
             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 transition-colors">
@@ -518,9 +516,7 @@ export default function App() {
           </div>
           {isSidebarCollapsed && (
             <div className="hidden md:flex flex-col items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-7 h-7 bg-slate-900 dark:bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-sm">
-                <GraduationCap className="w-4 h-4" />
-              </div>
+              <img src="/uplift-logo-192.png" alt="Uplift Wealth" className="w-7 h-7 rounded-lg object-contain shadow-sm" />
             </div>
           )}
 

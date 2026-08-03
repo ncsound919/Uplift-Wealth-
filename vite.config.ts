@@ -12,17 +12,17 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon-192.png', 'favicon-512.png', 'robots.txt', 'sitemap.xml'],
+        includeAssets: ['uplift-logo-192.png', 'uplift-logo-512.png', 'robots.txt', 'sitemap.xml'],
         manifest: {
-          name: 'FinTech Foundations',
-          short_name: 'FinTechFoundations',
+          name: 'Uplift Wealth',
+          short_name: 'Uplift Wealth',
           description: 'Free interactive fintech education platform with 15 modules, trading simulators, and gamified learning.',
           theme_color: '#059669',
           background_color: '#f8fafc',
           display: 'standalone',
           icons: [
-            { src: 'favicon-192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'favicon-512.png', sizes: '512x512', type: 'image/png' },
+            { src: 'uplift-logo-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'uplift-logo-512.png', sizes: '512x512', type: 'image/png' },
           ],
         },
         workbox: {

@@ -12,10 +12,10 @@ export function PageMeta({
   title,
   description = 'Free interactive fintech education platform with 15 modules, trading simulators, and gamified learning.',
   canonical,
-  ogImage = '/og-image.png',
+  ogImage = '/brand-wealth.jpg',
   ogType = 'website',
 }: PageMetaProps) {
-  const fullTitle = `${title} — FinTech Foundations`;
+  const fullTitle = `${title} — Uplift Wealth`;
   const baseUrl = 'https://fintechfoundations.edu';
 
   return (

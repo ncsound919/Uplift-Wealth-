@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('FinTech Foundations', () => {
+test.describe('Uplift Wealth', () => {
   test('homepage loads with branding', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText(/FinTech/i).first()).toBeVisible();

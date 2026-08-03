@@ -156,6 +156,8 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
       {/* Main Hero Header */}
       <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 md:p-10 border border-indigo-900/60 shadow-xl text-white space-y-6 text-center relative overflow-hidden">
         
+        <img src="/donations.png" alt="Support Uplift Wealth" className="w-full max-w-xl mx-auto rounded-2xl border border-white/10 shadow-2xl" />
+        
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black uppercase tracking-wider">
           <Heart className="w-3.5 h-3.5 text-emerald-400 fill-current animate-pulse" />
           <span>Open-Source Community Donation</span>
