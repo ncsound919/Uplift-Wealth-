@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "FinTech Foundations",
+    "tagline": "Domina el Dinero Moderno",
+    "skipToContent": "Saltar al contenido principal"
+  },
+  "nav": {
+    "profile": "Mi Perfil",
+    "pathways": "Rutas de Aprendizaje",
+    "progress": "Mi Progreso",
+    "library": "Biblioteca de Clases",
+    "history": "Historia de las Finanzas Afroamericanas",
+    "dots": "Conectando los Puntos",
+    "glossary": "Diccionario Financiero",
+    "builder": "Constructor de Negocios",
+    "map": "Mapa de Inicio Fintech",
+    "support": "Apoyar",
+    "games": "Juegos Educativos",
+    "stockSim": "Sim. de Acciones",
+    "lending": "Préstamos Alternativos",
+    "insurance": "Seguro Paramétrico",
+    "compliance": "Filtro de Cumplimiento",
+    "popQuiz": "Quiz Fintech"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido de nuevo",
+    "syllabusRank": "Rango del Plan",
+    "totalXP": "XP Total",
+    "modules": "Módulos",
+    "lessons": "Lecciones",
+    "continue": "Continuar Aprendiendo",
+    "streak": "días de racha"
+  },
+  "profile": {
+    "title": "Mi Perfil y Progreso",
+    "credentials": "Logros e Insignias Obtenidas",
+    "modulesCompleted": "Módulos Completados",
+    "lessonsDone": "Lecciones Hechas",
+    "currentStreak": "Racha Actual",
+    "timeInvested": "Tiempo Invertido"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "complete": "Completar",
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "expert": "Experto",
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión"
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  }
+}

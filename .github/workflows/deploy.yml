@@ -1,0 +1,81 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Pre-deploy Tests
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: Production Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+
+      - name: Deploy to hosting
+        id: deploy
+        run: |
+          echo "Production deploy placeholder"
+          echo "url=https://fintechfoundations.edu" >> $GITHUB_OUTPUT
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+  smoke-test:
+    name: Post-deploy Smoke Test
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployment is live
+        run: |
+          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/
+          echo ""
+          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/api/health
+          echo ""
+          curl -fsS -o /dev/null -w "%{http_code}" https://fintechfoundations.edu/sitemap.xml
+          echo ""

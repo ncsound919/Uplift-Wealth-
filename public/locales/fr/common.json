@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "FinTech Foundations",
+    "tagline": "Maîtrisez l'Argent Moderne",
+    "skipToContent": "Aller au contenu principal"
+  },
+  "nav": {
+    "profile": "Mon Profil",
+    "pathways": "Parcours d'Apprentissage",
+    "progress": "Ma Progression",
+    "library": "Bibliothèque de Cours",
+    "history": "Histoire de la Finance Afro-Américaine",
+    "dots": "Relier les Points",
+    "glossary": "Dictionnaire Financier",
+    "builder": "Créateur d'Entreprise",
+    "map": "Carte de Démarrage Fintech",
+    "support": "Soutenir",
+    "games": "Jeux Éducatifs",
+    "stockSim": "Sim. Boursier",
+    "lending": "Prêt Alternatif",
+    "insurance": "Assurance Paramétrique",
+    "compliance": "Filtre de Conformité",
+    "popQuiz": "Quiz Fintech"
+  },
+  "dashboard": {
+    "welcome": "Bon retour",
+    "syllabusRank": "Rang du Programme",
+    "totalXP": "XP Total",
+    "modules": "Modules",
+    "lessons": "Leçons",
+    "continue": "Continuer l'Apprentissage",
+    "streak": "jours de série"
+  },
+  "profile": {
+    "title": "Mon Profil & Progression",
+    "credentials": "Succès & Badges Obtenus",
+    "modulesCompleted": "Modules Terminés",
+    "lessonsDone": "Leçons Faites",
+    "currentStreak": "Série Actuelle",
+    "timeInvested": "Temps Investi"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "complete": "Terminer",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "expert": "Expert",
+    "signIn": "Se Connecter",
+    "signOut": "Se Déconnecter"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  }
+}

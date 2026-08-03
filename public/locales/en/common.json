@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "FinTech Foundations",
+    "tagline": "Master Modern Money",
+    "skipToContent": "Skip to main content"
+  },
+  "nav": {
+    "profile": "My Profile",
+    "pathways": "Learning Pathways",
+    "progress": "My Progress",
+    "library": "Lecture Library",
+    "history": "History of Black American Finance",
+    "dots": "Connecting The Dots",
+    "glossary": "Finance Dictionary",
+    "builder": "Business Builder",
+    "map": "Fintech Starter Map",
+    "support": "Support",
+    "games": "Educational Games",
+    "stockSim": "Stock Sim",
+    "lending": "Alternative Lending",
+    "insurance": "Parametric Insurance",
+    "compliance": "Compliance Screener",
+    "popQuiz": "FinTech Pop Quiz"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "syllabusRank": "Syllabus Rank",
+    "totalXP": "Total XP",
+    "modules": "Modules",
+    "lessons": "Lessons",
+    "continue": "Continue Learning",
+    "streak": "day streak"
+  },
+  "profile": {
+    "title": "My Profile & Progress",
+    "credentials": "Earned Achievements & Badges",
+    "modulesCompleted": "Modules Completed",
+    "lessonsDone": "Lessons Done",
+    "currentStreak": "Current Streak",
+    "timeInvested": "Time Invested"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "complete": "Complete",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "expert": "Expert",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  }
+}

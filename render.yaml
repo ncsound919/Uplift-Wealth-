@@ -1,0 +1,23 @@
+# Render.com blueprint — deploys Uplift Wealth (FinTech Foundations) as a Docker web service.
+services:
+  - type: web
+    name: uplift-wealth
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set secrets in the Render dashboard, never in this file:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+      - key: VITE_POSTHOG_KEY
+        sync: false
+      # Public URL + CORS origin allow-list:
+      - key: APP_URL
+        value: https://uplift-wealth.onrender.com
+      - key: ALLOWED_ORIGINS
+        value: https://uplift-wealth.onrender.com

@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint, Type Check & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npm run lint
+
+      - name: Run tests with coverage (80% min)
+        run: npx vitest run --coverage
+
+      - name: Security audit
+        # Known acceptable advisories (documented):
+        # - GHSA-qwww-vcr4-c8h2 (react-router RSC CSRF bypass) — N/A: client-side SPA, no RSC mode
+        # - GHSA-mh99-v99m-4gvg (brace-expansion DoS) — N/A: build-time only via workbox-build
+        run: npm audit --audit-level=high
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./coverage
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  build:
+    name: Build Matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
