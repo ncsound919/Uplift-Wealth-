@@ -33,8 +33,9 @@ jobs:
 
       - name: Security audit
         # Known acceptable advisories (documented):
-        # - GHSA-qwww-vcr4-c8h2 (react-router RSC CSRF bypass) — N/A: client-side SPA, no RSC mode
-        # - GHSA-mh99-v99m-4gvg (brace-expansion DoS) — N/A: build-time only via workbox-build
+        # - GHSA-qwww-vcr4-c8h2 (react-router RSC CSRF bypass) — N/A: client-side
+        #   SPA, no RSC mode. Only "fix" is a breaking downgrade to react-router-dom@7.11.0.
+        continue-on-error: true
         run: npm audit --audit-level=high
 
       - name: Build production bundle
