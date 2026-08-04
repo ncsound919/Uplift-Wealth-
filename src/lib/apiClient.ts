@@ -191,7 +191,11 @@ class ApiClient {
       return await this.request<{ stateData: Record<string, any> }>(`/api/sandbox/load?userId=${this.userId}&type=${sandboxType}`);
     } catch {
       const local = localStorage.getItem(`hacu_sandbox_${sandboxType}`);
-      return { stateData: local ? JSON.parse(local) : null };
+      try {
+        return { stateData: local ? JSON.parse(local) : null };
+      } catch {
+        return { stateData: null };
+      }
     }
   }
 

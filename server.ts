@@ -497,9 +497,9 @@ app.put('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Resp
   };
 
   if (name && typeof name === 'string') current.name = name.trim().slice(0, 100);
-  if (track && typeof track === 'string') current.track = track;
+  if (track && typeof track === 'string' && ['beginner', 'intermediate', 'advanced', 'all'].includes(track)) current.track = track;
   if (role && ['student', 'builder', 'institution', 'admin'].includes(role)) current.role = role;
-  if (avatar && typeof avatar === 'string') current.avatar = avatar;
+  if (avatar && typeof avatar === 'string' && avatar.length < 2048) current.avatar = avatar;
 
   current.lastActive = new Date().toISOString();
   db.users[userId] = current;
@@ -556,6 +556,12 @@ app.post('/api/quiz/submit', authenticate, (req: AuthenticatedRequest, res: Resp
     return res.status(400).json({ error: 'Missing required fields: moduleId, score, totalQuestions' });
   }
 
+  if (typeof score !== 'number' || typeof totalQuestions !== 'number' || 
+      !Number.isFinite(score) || !Number.isFinite(totalQuestions) ||
+      score < 0 || totalQuestions <= 0 || score > totalQuestions) {
+    return res.status(400).json({ error: 'Invalid score or totalQuestions: must be finite numbers with 0 <= score <= totalQuestions' });
+  }
+
   const pct = score / totalQuestions;
   const passed = pct >= 0.7;
 
@@ -606,6 +612,11 @@ app.post('/api/sandbox/save', authenticate, (req: AuthenticatedRequest, res: Res
 
   if (!sandboxType || !stateData) {
     return res.status(400).json({ error: 'Missing required fields: sandboxType and stateData object.' });
+  }
+
+  const validSandboxTypes = ['trading', 'capstone', 'underwriting', 'parametric', 'fraud'];
+  if (typeof sandboxType !== 'string' || !validSandboxTypes.includes(sandboxType)) {
+    return res.status(400).json({ error: `Invalid sandboxType. Must be one of: ${validSandboxTypes.join(', ')}` });
   }
 
   if (!db.sandboxes[userId]) {
@@ -666,8 +677,8 @@ app.post('/api/donation-intent', authenticate, (req: AuthenticatedRequest, res: 
   const userId = req.user!.id;
   const { amount, tierLabel } = req.body;
 
-  if (!amount || typeof amount !== 'number' || amount <= 0) {
-    return res.status(400).json({ error: 'Valid donation amount required.' });
+  if (!amount || typeof amount !== 'number' || amount <= 0 || amount > 10000 || !Number.isFinite(amount)) {
+    return res.status(400).json({ error: 'Valid donation amount required (0 < amount <= 10000).' });
   }
 
   const donation = {

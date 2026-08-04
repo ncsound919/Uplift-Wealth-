@@ -10,11 +10,11 @@ interface AuthModalProps {
   defaultEmail?: string;
 }
 
-export function AuthModal({ isOpen, onClose, onSuccess, defaultEmail = 'ncsound919@gmail.com' }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, onSuccess, defaultEmail = '' }: AuthModalProps) {
   const [mode, setMode] = useState<'login' | 'signup' | 'google'>('login');
   const [email, setEmail] = useState(defaultEmail);
-  const [password, setPassword] = useState('password123');
-  const [name, setName] = useState('FinTech Scholar');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
