@@ -11,7 +11,8 @@ import {
   Layers, 
   ArrowLeft,
   Video,
-  CreditCard
+  CreditCard,
+  Mail
 } from 'lucide-react';
 import { YouTubeVideoPlayer } from './YouTubeVideoPlayer';
 
@@ -381,6 +382,28 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
           description="Hands-on trading simulators, underwriting games, parametric smart contract triggers, and venture pitch canvas builders built for practical mastery."
           colorClass="bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400"
         />
+      </div>
+
+      {/* Instructor Contact */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm space-y-4">
+        <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <Mail className="w-5 h-5 text-blue-500" />
+          <span>Instructor Contact</span>
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Email</p>
+            <a href="mailto:tap4500@gmail.com" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">tap4500@gmail.com</a>
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Phone</p>
+            <a href="tel:9843656059" className="text-slate-700 dark:text-slate-300 font-medium hover:underline">984-365-6059</a>
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Instagram</p>
+            <a href="https://instagram.com/tap919" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">@tap919</a>
+          </div>
+        </div>
       </div>
 
     </motion.div>

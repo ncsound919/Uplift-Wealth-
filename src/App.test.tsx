@@ -261,6 +261,7 @@ describe('App', () => {
 
   it('toggles dark mode', async () => {
     await renderApp();
+    fireEvent.click(screen.getByText(/Settings/i));
     const toggle = screen.getByText(/Light Mode/i);
     fireEvent.click(toggle);
     expect(localStorage.getItem('is_dark_mode')).toBe('false');
@@ -310,7 +311,7 @@ describe('App', () => {
 
   it('navigates to donate view', async () => {
     await renderApp();
-    const support = screen.getByText(/\$helptools/i);
+    const support = screen.getByText(/^Support$/i);
     fireEvent.click(support);
     await waitFor(() => expect(screen.getByTestId('donation-mock')).toBeInTheDocument());
   });
@@ -414,12 +415,14 @@ const getGamesButton = () => {
   it('renders dark mode by default', async () => {
     localStorage.removeItem('is_dark_mode');
     await renderApp();
+    fireEvent.click(screen.getByText(/Settings/i));
     expect(screen.getByText(/Light Mode/i)).toBeInTheDocument();
   });
 
   it('toggles back to dark mode', async () => {
     localStorage.setItem('is_dark_mode', 'false');
     await renderApp();
+    fireEvent.click(screen.getByText(/Settings/i));
     expect(screen.getByText(/Dark Mode/i)).toBeInTheDocument();
     fireEvent.click(screen.getByText(/Dark Mode/i));
     expect(screen.getByText(/Light Mode/i)).toBeInTheDocument();
@@ -688,12 +691,14 @@ const getGamesButton = () => {
   it('reads dark mode false from localStorage on mount', async () => {
     localStorage.setItem('is_dark_mode', 'false');
     await renderApp();
+    fireEvent.click(screen.getByText(/Settings/i));
     expect(screen.getByText(/Dark Mode/i)).toBeInTheDocument();
   });
 
   it('reads dark mode true from localStorage on mount', async () => {
     localStorage.setItem('is_dark_mode', 'true');
     await renderApp();
+    fireEvent.click(screen.getByText(/Settings/i));
     expect(screen.getByText(/Light Mode/i)).toBeInTheDocument();
   });
 
@@ -853,7 +858,7 @@ const getGamesButton = () => {
 
   it('returns to dashboard from donate view via onBackToDashboard', async () => {
     await renderApp();
-    fireEvent.click(screen.getByText(/\$helptools/i));
+    fireEvent.click(screen.getByText(/^Support$/i));
     await waitFor(() => expect(screen.getByTestId('donation-mock')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('donation-back'));

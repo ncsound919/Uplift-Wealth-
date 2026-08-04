@@ -10,6 +10,12 @@ vi.mock('motion/react', () => {
 
 function enterBizName(name = 'Velo') {
   const input = screen.getByPlaceholderText(/e.g. Velo, Bold, Aura/i);
+  enterFounder();
+  fireEvent.change(input, { target: { value: name } });
+}
+
+function enterFounder(name = 'Nia R.') {
+  const input = screen.getByPlaceholderText(/Your Full Legal Name/i);
   fireEvent.change(input, { target: { value: name } });
 }
 
@@ -23,6 +29,7 @@ function clickNext(count: number) {
 function goToDossier(name = 'Velo') {
   clickNext(5);
   enterBizName(name);
+  enterFounder();
   clickNext(6);
 }
 
@@ -262,6 +269,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText(/C-Corporation \(Delaware standard\)/).closest('button')!;
     fireEvent.click(btn);
@@ -272,6 +280,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText(/Solo Proprietorship/).closest('button')!;
     fireEvent.click(btn);
@@ -283,6 +292,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 2; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const wyBtn = screen.getByText('Wyoming').closest('button')!;
     fireEvent.click(wyBtn);
@@ -293,6 +303,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 2; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText(/Active Focus: Delaware/i)).toBeInTheDocument();
   });
@@ -302,6 +313,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText(/Home residential address/i).closest('button')!;
     fireEvent.click(btn);
@@ -312,6 +324,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText(/Shared \/ Coworking space/i).closest('button')!;
     fireEvent.click(btn);
@@ -323,6 +336,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const antiFraudBtn = screen.getByText('Sardine / Socure Shield').closest('button')!;
     fireEvent.click(antiFraudBtn);
@@ -333,6 +347,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const kycBtn = screen.getByText('Persona KYC / Alloy AML').closest('button')!;
     fireEvent.click(kycBtn);
@@ -344,6 +359,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText('Viral Web Widgets & SEO').closest('button')!;
     fireEvent.click(btn);
@@ -354,6 +370,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText('Solo founder (bootstrap)');
     fireEvent.click(btn);
@@ -364,6 +381,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const btn = screen.getByText('Solo Split').closest('button')!;
     fireEvent.click(btn);
@@ -375,6 +393,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
   });
@@ -383,6 +402,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText('4. FinCEN BOI & Tax Calendar'));
     expect(screen.getByText(/FinCEN Beneficial Ownership/i)).toBeInTheDocument();
@@ -392,6 +412,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText('4. FinCEN BOI & Tax Calendar'));
     const checkbox = screen.getByRole('checkbox');
@@ -403,6 +424,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText(/Run stress test simulator/i)).toBeInTheDocument();
   });
@@ -425,6 +447,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText('Reset Assembly Line')).toBeInTheDocument();
   });
@@ -433,6 +456,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Reset Assembly Line'));
@@ -455,6 +479,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/C-Corporation \(Delaware standard\)/).closest('button')!);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -475,6 +500,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/Limited Liability Company \(LLC\)/).closest('button')!);
     for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -487,6 +513,7 @@ describe('FintechBusinessBuilder', () => {
   function runSimTest() {
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/Run stress test simulator/i));
   }
@@ -507,6 +534,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder onAwardXp={mockAwardXp} />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     act(() => { fireEvent.click(screen.getByText(/Run stress test simulator/i)); });
     expect(screen.getByText(/FinTech Sandbox Stress Test Simulator/i)).toBeInTheDocument();
@@ -519,6 +547,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 5; i < 11; i++) {
       const nextBtn = screen.queryByRole('button', { name: /next step/i });
       if (nextBtn && !nextBtn.hasAttribute('disabled')) fireEvent.click(nextBtn);
@@ -540,6 +569,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     const paymentApi = screen.getByText('Stripe Core / Adyen API').closest('button')!;
     fireEvent.click(paymentApi);
@@ -605,6 +635,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName('AB');
+  enterFounder();
     clickNext(5); // steps 7,8,9,10,11 (LLC/Delaware/virtual/default apis)
     fireEvent.click(screen.getByText('Slicing Split').closest('button')!);
     expect(screen.getByText('B+')).toBeInTheDocument();
@@ -616,6 +647,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName('AB');
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/Solo Proprietorship/).closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -634,6 +666,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName('AB');
+  enterFounder();
     clickNext(3); // steps 7,8,9
     fireEvent.click(screen.getByText(/Home residential address/i).closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -651,6 +684,7 @@ describe('FintechBusinessBuilder', () => {
     clickNext(4);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     clickNext(4); // steps 7,8,9,10
     fireEvent.click(screen.getByText('Circle Mint SDK / Coinbase API').closest('button')!);
     expect(screen.getByText(/Web3 Trailblazer/i)).toBeInTheDocument();
@@ -690,6 +724,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     clickNext(5);
     enterBizName();
+  enterFounder();
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/C-Corporation \(Delaware standard\)/).closest('button')!);
     clickNext(5); // steps 8,9,10,11,12
@@ -725,6 +760,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
+  enterFounder();
     clickNext(5); // steps 7,8,9,10,11
     fireEvent.click(screen.getByText('In-app Referral Dividends').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -740,6 +776,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     clickNext(5);
     enterBizName();
+  enterFounder();
     clickNext(5); // steps 7,8,9,10,11
     fireEvent.click(screen.getByText('Viral Web Widgets & SEO').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
@@ -754,6 +791,7 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     clickNext(5);
     enterBizName();
+  enterFounder();
     clickNext(4); // steps 7,8,9,10
     fireEvent.click(screen.getByText('Persona KYC / Alloy AML').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));

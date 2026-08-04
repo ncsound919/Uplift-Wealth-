@@ -66,7 +66,10 @@ import {
   Rocket,
   TrendingUp,
   Briefcase,
-  BarChart3
+  BarChart3,
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { capture } from './lib/analytics';
@@ -90,6 +93,7 @@ export default function App() {
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('is_dark_mode') !== 'false';
   });
@@ -649,19 +653,14 @@ export default function App() {
                   navigate('/article');
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'dots_article'
-                    ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <Network className="w-4 h-4 text-amber-400" />
-                  <span>Connecting The Dots</span>
-                </div>
-                <span className="text-xs bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-black px-1.5 py-0.5 rounded uppercase">
-                  3D Loop
-                </span>
+                <Network className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Connecting The Dots</span>
               </button>
 
               {/* 6. Finance Dictionary */}
@@ -676,19 +675,14 @@ export default function App() {
                   navigate('/glossary');
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'glossary'
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>Finance Dictionary</span>
-                </div>
-                <span className="text-xs bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-black px-1.5 py-0.5 rounded uppercase">
-                  Phase 8
-                </span>
+                <Sparkles className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Finance Dictionary</span>
               </button>
 
               {/* 7. Fintech Business Builder */}
@@ -703,19 +697,14 @@ export default function App() {
                   navigate('/business-builder');
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'business_builder'
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <Briefcase className="w-4 h-4 text-emerald-500" />
-                  <span>Business Builder</span>
-                </div>
-                <span className="text-xs bg-emerald-100 dark:bg-emerald-900/60 text-emerald-750 dark:text-emerald-300 font-black px-1.5 py-0.5 rounded uppercase">
-                  Venture
-                </span>
+                <Briefcase className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Business Builder</span>
               </button>
 
               {/* 7b. Wealth Building */}
@@ -730,19 +719,14 @@ export default function App() {
                   navigate('/wealth-building');
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'wealth_building' || activeView === 'wealth_credit' || activeView === 'wealth_investing' || activeView === 'wealth_real_estate' || activeView === 'wealth_business' || activeView === 'wealth_group_economics' || activeView === 'wealth_side_hustles' || activeView === 'wealth_emergency_fund'
-                    ? "bg-gradient-to-r from-emerald-500 to-amber-500 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
-                  <span>Wealth Building</span>
-                </div>
-                <span className="text-xs bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-black px-1.5 py-0.5 rounded uppercase">
-                  Personal Wealth
-                </span>
+                <TrendingUp className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Wealth Building</span>
               </button>
 
               {/* 8. Fintech Starter Map */}
@@ -757,19 +741,14 @@ export default function App() {
                   navigate('/map');
                 }}
                 className={cn(
-                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'fintech_map'
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <Rocket className="w-4 h-4 text-blue-400" />
-                  <span>Fintech Starter Map</span>
-                </div>
-                <span className="text-xs bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-black px-1.5 py-0.5 rounded uppercase">
-                  Real World
-                </span>
+                <Rocket className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Fintech Starter Map</span>
               </button>
 
               {/* 8. Support */}
@@ -784,14 +763,14 @@ export default function App() {
                   navigate('/donate');
                 }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-emerald-500/30",
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'donation'
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
-                <Heart className="w-4 h-4 text-emerald-500 fill-current animate-pulse shrink-0" />
-                <span>Support ($helptools)</span>
+                <Heart className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                <span>Support</span>
               </button>
             </div>
 
@@ -807,85 +786,81 @@ export default function App() {
                 navigate('/games');
               }}
               className={cn(
-                "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                 activeView === 'games'
-                  ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm"
+                  ? "bg-blue-600 text-white shadow-sm"
                   : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
               )}
             >
-              <div className="flex items-center gap-3">
-                <Gamepad2 className="w-4 h-4 text-purple-500" />
-                <span>Games</span>
-              </div>
-              <span className="text-xs bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-black px-1.5 py-0.5 rounded uppercase">
-                Play
-              </span>
+              <Gamepad2 className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <span>Games</span>
             </button>
           </div>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60 space-y-3 shrink-0">
-          
-          
-          {/* Contact Info */}
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60 space-y-2 shrink-0">
+
+          {/* Settings (language + theme) */}
           {!isSidebarCollapsed && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl p-4 space-y-2 mt-4">
-              <span className="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 block mb-2">Instructor Contact</span>
-              <div className="flex items-center text-xs text-slate-600 dark:text-slate-400 gap-2">
-                <span className="font-bold">E:</span> tap4500@gmail.com
-              </div>
-              <div className="flex items-center text-xs text-slate-600 dark:text-slate-400 gap-2">
-                <span className="font-bold">P:</span> 984-365-6059
-              </div>
-              <div className="flex items-center text-xs text-slate-600 dark:text-slate-400 gap-2">
-                <span className="font-bold">IG:</span> @tap919
-              </div>
-            </div>
+            <>
+              <button
+                onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </span>
+                {isSettingsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {isSettingsOpen && (
+                <div className="space-y-3 px-1.5 pb-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Language</span>
+                    <LanguageSwitcher />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">UI Theme</span>
+                    <button
+                      onClick={() => setIsDarkMode(!isDarkMode)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-3xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer text-slate-750 dark:text-slate-200 overflow-hidden"
+                    >
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isDarkMode ? (
+                          <motion.div
+                            key="sun"
+                            initial={{ y: -12, opacity: 0, rotate: -45 }}
+                            animate={{ y: 0, opacity: 1, rotate: 0 }}
+                            exit={{ y: 12, opacity: 0, rotate: 45 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Sun className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Light Mode</span>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="moon"
+                            initial={{ y: -12, opacity: 0, rotate: -45 }}
+                            animate={{ y: 0, opacity: 1, rotate: 0 }}
+                            exit={{ y: 12, opacity: 0, rotate: 45 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>Dark Mode</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-
-          {/* Language Switcher */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Language</span>
-            <LanguageSwitcher />
-          </div>
-
-          {/* Theme Switcher */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">UI Theme</span>
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-3xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer text-slate-750 dark:text-slate-200 overflow-hidden"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {isDarkMode ? (
-                  <motion.div
-                    key="sun"
-                    initial={{ y: -12, opacity: 0, rotate: -45 }}
-                    animate={{ y: 0, opacity: 1, rotate: 0 }}
-                    exit={{ y: 12, opacity: 0, rotate: 45 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <Sun className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Light Mode</span>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="moon"
-                    initial={{ y: -12, opacity: 0, rotate: -45 }}
-                    animate={{ y: 0, opacity: 1, rotate: 0 }}
-                    exit={{ y: 12, opacity: 0, rotate: 45 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="flex items-center gap-1.5"
-                  >
-                    <Moon className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Dark Mode</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
 
           <div className="flex items-center gap-2">
             <button

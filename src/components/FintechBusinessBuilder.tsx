@@ -146,7 +146,7 @@ export function FintechBusinessBuilder({
   const [marketingChannel, setMarketingChannel] = useState<string>('Developer Relations & API documentation');
 
   // NEW DYNAMIC USER PARAMETERS (Specific to founder identity & structuring)
-  const [founderName, setFounderName] = useState<string>('Alex Wright');
+  const [founderName, setFounderName] = useState<string>('');
   const [founderState, setFounderState] = useState<string>('California');
   const [fundingStrategy, setFundingStrategy] = useState<string>('Seed Venture Capital SAFE ($500K - $2M)');
   const [equitySplit, setEquitySplit] = useState<string>('Equal 50/50 Split (4-Year Vesting with 1-Year Cliff)');
@@ -995,7 +995,7 @@ export function FintechBusinessBuilder({
                           <span className="text-xs text-slate-400 italic">Type a keyword above to compile visual brand shield</span>
                         )}
                         <div className="text-xs bg-slate-200/50 dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-250 dark:border-slate-850 inline-block text-slate-600 dark:text-slate-400 font-mono">
-                          Founder: <span className="text-slate-900 dark:text-slate-200 font-bold">{founderName || 'Alex Wright'}</span> ({founderState})
+                          Founder: <span className="text-slate-900 dark:text-slate-200 font-bold">{founderName || 'Your Name'}</span> ({founderState})
                         </div>
                       </div>
                       
@@ -1628,7 +1628,7 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-500">Founder Legal Identity</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white uppercase font-mono max-w-[130px] truncate">{founderName || 'Alex Wright'}</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white uppercase font-mono max-w-[130px] truncate">{founderName || 'Your Name'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-500">Legal Entity</span>
@@ -1748,7 +1748,7 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
               setFoundersCount('Co-founding partnership');
               setSelectedApis(['Payments API Integration', 'KYC Identity Decisioning']);
               setMarketingChannel('Developer Relations & API documentation');
-              setFounderName('Alex Wright');
+              setFounderName('');
               setFounderState('California');
               setFundingStrategy('Seed Venture Capital SAFE ($500K - $2M)');
               setEquitySplit('Equal 50/50 Split (4-Year Vesting with 1-Year Cliff)');
