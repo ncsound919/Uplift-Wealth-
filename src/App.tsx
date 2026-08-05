@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { Dashboard } from './components/Dashboard';
 import { PageMeta } from './components/PageMeta';
 import { SearchModal } from './components/SearchModal';
@@ -17,6 +17,7 @@ const ArchitectureOfExtraction = lazy(() => import('./components/ArchitectureOfE
 const DonationView = lazy(() => import('./components/DonationView').then(m => ({ default: m.DonationView })));
 const FintechStarterMap = lazy(() => import('./components/FintechStarterMap').then(m => ({ default: m.FintechStarterMap })));
 const FinanceGlossary = lazy(() => import('./components/FinanceGlossary').then(m => ({ default: m.FinanceGlossary })));
+const BookLibrary = lazy(() => import('./components/BookLibrary').then(m => ({ default: m.BookLibrary })));
 const ConnectingTheDotsArticle = lazy(() => import('./components/ConnectingTheDotsArticle').then(m => ({ default: m.ConnectingTheDotsArticle })));
 const FintechBusinessBuilder = lazy(() => import('./components/FintechBusinessBuilder').then(m => ({ default: m.FintechBusinessBuilder })));
 const ProgressDashboard = lazy(() => import('./components/ProgressDashboard').then(m => ({ default: m.ProgressDashboard })));
@@ -61,6 +62,7 @@ import {
   MapPin,
   Briefcase,
   BarChart3,
+  BookOpen,
   Settings,
   ChevronDown,
   ChevronUp
@@ -83,7 +85,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Sidebar Views and settings states
-  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'book_library' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -180,6 +182,10 @@ export default function App() {
       setActiveDirectGame(null);
     } else if (path === '/glossary') {
       setActiveView('glossary');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path === '/book-library') {
+      setActiveView('book_library');
       setActiveModuleId(null);
       setActiveDirectGame(null);
     } else if (path === '/business-builder') {
@@ -619,6 +625,28 @@ export default function App() {
                 <span>Finance Dictionary</span>
               </button>
 
+              {/* Book Library */}
+              <button
+                onClick={() => {
+                  setActiveView('book_library');
+                  setActiveModuleId(null);
+                  setIsBuildingModule(false);
+                  setEditingModule(null);
+                  setActiveDirectGame(null);
+                  setIsMobileMenuOpen(false);
+                  navigate('/book-library');
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  activeView === 'book_library'
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                )}
+              >
+                <BookOpen className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <span>Book Library</span>
+              </button>
+
               {/* 4. Fintech Business Builder */}
               <button
                 onClick={() => {
@@ -919,6 +947,17 @@ export default function App() {
             >
               <PageMeta title="Finance Dictionary" canonical="/glossary" />
               <FinanceGlossary />
+            </motion.div>
+          ) : activeView === 'book_library' ? (
+            <motion.div
+              key="book-library-view"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="Book Library" canonical="/book-library" />
+              <BookLibrary />
             </motion.div>
           ) : activeView === 'dots_article' ? (
             <motion.div

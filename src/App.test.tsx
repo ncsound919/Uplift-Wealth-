@@ -16,7 +16,7 @@ const { apiClientMock, mockNavigate, mockConfetti, currentPath } = vi.hoisted(()
   currentPath: { value: '/' },
 }));
 
-vi.mock('react-router-dom', () => ({
+vi.mock('react-router', () => ({
   useLocation: () => ({ pathname: currentPath.value, search: '', hash: '', state: null }),
   useNavigate: () => mockNavigate,
   MemoryRouter: ({ children }: any) => <div>{children}</div>,

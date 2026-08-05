@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { wealthChapters } from '../data/wealthChapters';
 import { useChapterCompletion } from '../hooks/useChapterCompletion';
 import { CompoundGrowthVisualizer } from './wealth/tools/CompoundGrowthVisualizer';

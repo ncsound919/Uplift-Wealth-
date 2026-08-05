@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, renderHook } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { MarkCompleteButton } from './MarkCompleteButton';
 import { CompoundGrowthVisualizer } from './tools/CompoundGrowthVisualizer';
 import { CreditActionPlan } from './tools/CreditActionPlan';
@@ -16,8 +16,8 @@ vi.mock('remark-math', () => ({ default: () => () => {} }));
 vi.mock('rehype-katex', () => ({ default: () => () => {} }));
 
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual('react-router');
   return { ...actual, useNavigate: () => mockNavigate };
 });
 

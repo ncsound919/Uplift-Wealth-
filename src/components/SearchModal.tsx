@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, BookOpen, GraduationCap, Microscope, Layers } from 'lucide-react';
 import { search, SearchResult, getTypeLabel, getTypeColor } from '../lib/searchIndex';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 const typeIcons: Record<SearchResult['type'], typeof BookOpen> = {
   module: Layers,
