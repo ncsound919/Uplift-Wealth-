@@ -416,7 +416,7 @@ A $5,000 balance at 22% APR, paid off at different fixed monthly payments, illus
 
 | Payoff Scenario ($5,000 balance, 22% APR) | Monthly Payment | Time to Pay Off | Total Interest Paid |
 | :--- | :--- | :--- | :--- |
-| **Minimum payment only** (approx. 2% of balance) | ~$100 â€ " declining | ~40+ years / grows if fees added | $7,000 " $12,000+ |
+| **Minimum payment only** (approx. 2% of balance) | ~$100 †" declining | ~40+ years / grows if fees added | $7,000 " $12,000+ |
 | **Fixed $150/month** | $150 | ~4.4 years | ~$2,880 |
 | **Fixed $250/month** | $250 | ~2.3 years | ~$1,410 |
 | **Fixed $400/month** | $400 | ~1.3 years | ~$780 |
@@ -527,7 +527,7 @@ Modern fintech enables a four-tier laddered pathway from precarity to durable ow
 3. **Compounding & Community Prosperity (Classes 5"7):** Opening capital markets through fractional shares, parametric risk protection, and transparent protocol liquidity.
 4. **Long-Term Growth & Ownership (Classes 8"12):** Building compliant fintech ventures, modernizing Minority Depository Institutions (MDIs), and establishing sustainable software equity models.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Major R.R. Wright Sr.** (1855"1947), born into slavery, became an educator and civil rights advocate who went on to establish **Citizens and Southern Bank and Trust Company** in Philadelphia in 1920. He championed bank safety and helped thousands of Black Americans secure home loans and business funding during the Great Migration.
 * **Books to Read:** *Banking on Freedom: Black Women in U.S. Finance Before the New Deal* by Shennette Garrett-Scott. This award-winning book highlights how Black women built mutual savings programs and financial networks that broke through institutional redlines.
 * **Movies & Documentaries:** *Owned: A Tale of Two Americas* (2018) " A compelling documentary revealing how post-war banking machinery and structural policies formed the stark wealth and housing disparities we see today.`
@@ -694,7 +694,7 @@ Under the Electronic Fund Transfer Act (EFTA) and **Regulation E**, consumers ha
 ### P2P Digital Wallets
 Platforms like Venmo, Cash App, and PayPal create "closed-loop" systems. When you Venmo a friend $20, no actual bank rails are touched instantly; Venmo simply adjusts its internal database. You only touch traditional rails when you "cash out" to your external bank via ACH or instant debit transfer.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **The Early Black Cooperative Societies** of the late 19th and early 20th centuries. Denied standard banking access, emancipated families created mutual aid networks and cooperative associations to safely pool and transfer money, a historical precursor to the closed-loop peer-to-peer sending networks we use today.
 * **Books to Read:** *Collective Courage: A History of African American Cooperative Economic Thought and Practice* by Jessica Gordon Nembhard. This book is the definitive history of Black cooperative economic struggles and successes.
 * **Movies & Documentaries:** *The Black Power Mixtape 1967-1975* (2011) " An insightful documentary showcasing how community-led economic self-reliance and local food and financial aid programs operated.`
@@ -711,7 +711,7 @@ To accept a card payment, a merchant needs:
 
 ### The Stripe Model: Online PSP
 Stripe consolidated this fragmented ecosystem into a single platform-as-a-service (PSP) with an elegant developer API.
-* **Pricing:** Standard flat fee of **2.9% + 30Ã‚Â¢** per transaction.
+* **Pricing:** Standard flat fee of **2.9% + 30Â¢** per transaction.
 * **Unit Economics:** Stripe pays the card issuer (Interchange), the network (Visa/Mastercard assessment fee), and retains the remaining margin (often 0.5% - 0.8% of volume) as gross profit.
 
 ### The Square (Block) Model: Offline Omnichannel
@@ -785,33 +785,33 @@ Traditional money movement has a separation between **Clearing** (sending the me
 Payments is now a global competition measured in seconds. Here is where the rails stand as of 2026:
 
 * **FedNow (US):** The Federal Reserve's instant rail launched in July 2023 and has grown fast. By mid-2026 it had ~1,828 participating banks and credit unions and settled **$853 billion across 8.4 million payments in 2025** (+459% year-over-year). It is still high-value/low-volume vs. consumer apps.
-* **India's UPI:** The global benchmark. UPI processes **640+ million transactions per day** â€” more than Visa processes globally â€” and handles ~84% of India's digital payments. It proved that a free, interoperable, real-time rail can leapfrog the card networks in emerging markets.
-* **EU's SEPA Instant:** Made mandatory by the EU Instant Payments Regulation â€” banks must offer instant transfers (receiving since Jan 2025, sending since Oct 2025).
+* **India's UPI:** The global benchmark. UPI processes **640+ million transactions per day** — more than Visa processes globally — and handles ~84% of India's digital payments. It proved that a free, interoperable, real-time rail can leapfrog the card networks in emerging markets.
+* **EU's SEPA Instant:** Made mandatory by the EU Instant Payments Regulation — banks must offer instant transfers (receiving since Jan 2025, sending since Oct 2025).
 
-> **Why it matters:** Speed is now the battleground. But faster settlement also means fraud is harder to reverse â€” which is why every new rail pairs instant clearing with new fraud controls.
+> **Why it matters:** Speed is now the battleground. But faster settlement also means fraud is harder to reverse — which is why every new rail pairs instant clearing with new fraud controls.
 
 ### BNPL: The New Credit Layer (2026)
 Buy Now, Pay Later (Affirm, Klarna, Afterpay) hit roughly **$70 billion in US transaction value in 2025** (~1.1% of credit card spend) and $560B+ globally.
-* The "pay-in-four" model is interest-free short-term credit at checkout â€” the merchant pays the 2â€“8% fee.
+* The "pay-in-four" model is interest-free short-term credit at checkout — the merchant pays the 2–8% fee.
 * The CFPB issued an interpretive rule (2024) classifying pay-in-four lenders as credit-card providers under the Truth in Lending Act; enforcement was paused after the 2025 administration change, so US BNPL remains **lightly regulated**.
-* Watch-outs: default rates run ~2% (vs ~10% for general credit accounts) largely because autopay is required â€” but missed payments still hit credit files.
+* Watch-outs: default rates run ~2% (vs ~10% for general credit accounts) largely because autopay is required — but missed payments still hit credit files.
 
 ### Stablecoins Enter the Mainstream
 Stablecoins (digital dollars pegged 1:1) crossed a **~$300 billion market** in 2026, with ~90% of it USDT + USDC.
-* **Stripe acquired Bridge for $1.1 billion (2024)** â€” the largest fintech infrastructure bet on stablecoins for cross-border payouts, settling 24/7 for cents instead of days via correspondent banks.
+* **Stripe acquired Bridge for $1.1 billion (2024)** — the largest fintech infrastructure bet on stablecoins for cross-border payouts, settling 24/7 for cents instead of days via correspondent banks.
 * **Regulation arrived:** the US **GENIUS Act** (July 2025) requires stablecoin issuers to hold 1:1 reserves; the EU's **MiCA** framework is fully live since December 2024.
 
 ### The $30 Billion Swipe-Fee Battle
-Merchant interchange still averages ~1.8â€“2.2% per card transaction â€” the largest chunk of "swipe fees." A proposed ~$30B Visa/Mastercard interchange settlement was denied preliminary approval in June 2024 and remains **stuck in court as of 2026**, so merchant fee relief is not yet in effect. The DOJ also sued Visa (Sept 2024) over debit network monopolization.
+Merchant interchange still averages ~1.8–2.2% per card transaction — the largest chunk of "swipe fees." A proposed ~$30B Visa/Mastercard interchange settlement was denied preliminary approval in June 2024 and remains **stuck in court as of 2026**, so merchant fee relief is not yet in effect. The DOJ also sued Visa (Sept 2024) over debit network monopolization.
 
 ### Fraud Has Moved from Theft to Deception
 The FTC reported a record **$15.9 billion in consumer fraud losses in 2025**.
 * Card fraud itself is rare (~0.1% of transactions) thanks to tokenization and AI risk scoring.
-* The fastest-growing losses are **authorized push-payment scams** â€” fraudsters tricking people into sending money through P2P apps and instant rails, where settlement is final and hard to claw back.
+* The fastest-growing losses are **authorized push-payment scams** — fraudsters tricking people into sending money through P2P apps and instant rails, where settlement is final and hard to claw back.
 * The lesson: on instant rails, **confirmation of payee** and careful verification matter more than ever.
 
 ### Tap-to-Pay Finally Won
-Contactless ("tap") payments went from <1% of US face-to-face card transactions in 2017 to **60%+ in 2025** (75%+ per Mastercard). Apple Pay and Google Pay never send your real card number â€” they use **tokenization** (a device-specific token + per-transaction cryptogram), which is why tap fraud is so rare.`
+Contactless ("tap") payments went from <1% of US face-to-face card transactions in 2017 to **60%+ in 2025** (75%+ per Mastercard). Apple Pay and Google Pay never send your real card number — they use **tokenization** (a device-specific token + per-transaction cryptogram), which is why tap fraud is so rare.`
       },
       {
         id: "m2-game",
@@ -881,7 +881,7 @@ Modern fintechs (such as **Greenwood**) demonstrate how BaaS and sponsor partner
 * **Interchange Revenue Sharing:** Sharing card interchange revenue back with MDIs and community grant funds.
 * **Community Trust Anchors:** Linking HBCUs, faith-based networks, and community foundations directly to modern digital rails without losing local governance.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Alonzo Herndon** (1858"1927), born into slavery, became Atlanta's first Black millionaire and founded the **Atlanta Life Insurance Company**. He used his immense financial success to seed and support early community banking initiatives, recognizing that Black-owned banking was the key to unlocking small business capital.
 * **Books to Read:** *Black Fortune: How the First Generation of African Americans Born into Freedom Became the Nation's First Millionaires* by Shomari Wills. It chronicles Herndon and other pioneers building banks and insurance enterprises.
 * **Movies & Documentaries:** *Boss: The Black Experience in Business* (PBS, 2019) " An exceptional documentary tracing the history of Black entrepreneurship, including the founding of early community banks and financial cooperatives.`
@@ -1047,7 +1047,7 @@ Machine learning models (XGBoost, neural networks) can automate underwriting in 
 * **Prohibited Proxies:** If a model uses zip code, education institution, or device metadata, it can recreate redlining under the guise of math.
 * **ECOA & Reg B Audits:** Under the Equal Credit Opportunity Act (ECOA), lenders must continuously audit model weights to ensure predictive accuracy does not compromise distributional fairness or create illegal discriminatory proxies.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **The civil rights activists of the 1960s and 1970s** whose relentless organizing led to the passage of the **Fair Housing Act of 1968** and the **Equal Credit Opportunity Act of 1974**. These landmark pieces of legislation outlawed lending discrimination based on race, sex, or marital status, legally dismantling explicit redlining maps.
 * **Books to Read:** *Race for Profit: How Banks and the Real Estate Industry Undermined Black Homeownership* by Keeanga-Yamahtta Taylor. This finalist for the Pulitzer Prize exposes how the transition from redlining to predatory inclusion continued to extract wealth from Black home buyers.
 * **Movies & Documentaries:** *A Raisin in the Sun* (1961) " An iconic dramatic film portraying a Chicago Black family's multi-generational struggle with predatory housing covenants, insurance claims, and their dream of acquiring a home in an exclusive neighborhood.`
@@ -1212,7 +1212,7 @@ Trading platforms like Robinhood pioneered:
 1. **Fractional Shares:** Letting users buy $5 of a stock worth $3,000, managed by broker ledger pooling.
 2. **Payment for Order Flow (PFOF):** Selling trade orders to retail market makers (e.g., Citadel Securities), allowing for zero-commission retail trading.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Robert F. Smith** (born 1962), founder and CEO of **Vista Equity Partners**. As one of America's leading tech investors, he leveraged enterprise software acquisitions to build a multi-billion dollar private equity empire. In 2019, he made history by announcing he would pay off the entire student debt of that year's Morehouse College graduating class, demonstrating the power of tech equity as a tool for liberating community potential.
 * **Books to Read:** *The Wealth Choice: Success Secrets of Black Millionaires* by Dennis Kimbro. This book studies the habits, mindsets, and wealth-building strategies of successful Black entrepreneurs and investors.
 * **Movies & Documentaries:** *Becoming Warren Buffett* (HBO, 2017) " A deep dive into the philosophy of compounding wealth and value investing over decades. It shows how compound interest turns small savings into massive generational assets.`
@@ -1230,18 +1230,18 @@ The government raises retirement account limits every year. Here are the 2026 nu
 | **401(k)** (employee deferral) | **$24,500** |
 | **401(k)** (employer + employee combined) | **$72,000** |
 | **Catch-up** (age 50+) | $8,000 extra |
-| **Super catch-up** (ages 60â€“63) | $11,250 extra |
+| **Super catch-up** (ages 60–63) | $11,250 extra |
 | **HSA** (self / family) | **$4,400 / $8,750** |
 
-> **Quick rule of thumb (Fidelity):** aim to have saved **1x your salary by 30, 3x by 40, 6x by 50, 8x by 60, 10x by 67** â€” with a **15% total savings rate** (your money + employer match).
+> **Quick rule of thumb (Fidelity):** aim to have saved **1x your salary by 30, 3x by 40, 6x by 50, 8x by 60, 10x by 67** — with a **15% total savings rate** (your money + employer match).
 
 ### Index Funds Beat Most Pros
 The evidence is overwhelming: over the 20 years through 2025, the S&P 500 returned ~**10.9% per year** (with dividends reinvested), while **92% of actively managed funds underperformed the index** over the same period. Over 15 years, no fund category had a majority of active managers beat their benchmark.
 
 Why passive wins:
-1. **Lower fees** â€” index funds cost 0.03â€“0.10% vs 0.5â€“1%+ for active.
-2. **Less trading** â€” fewer taxable events.
-3. **Math** â€” active funds as a group *are* the market, so after costs most must trail it.
+1. **Lower fees** — index funds cost 0.03–0.10% vs 0.5–1%+ for active.
+2. **Less trading** — fewer taxable events.
+3. **Math** — active funds as a group *are* the market, so after costs most must trail it.
 
 That's why the default for most savers is a **broad, cheap index fund** (like an S&P 500 or total-market fund) inside a retirement account.
 
@@ -1250,24 +1250,24 @@ Target-date funds hold a diversified mix of stocks and bonds and automatically s
 
 ### Roth vs. Traditional (and the Backdoor)
 - **Roth wins** if you expect to be in a *higher* tax bracket in retirement (younger savers, low current income). Contributions are after-tax; growth and withdrawals are tax-free forever.
-- **Traditional wins** if you're in a *high* bracket now and expect lower in retirement â€” you get a deduction today and pay tax later.
-- **The backdoor Roth** (non-deductible Traditional IRA contribution â†’ immediate Roth conversion) **remains legal in 2026** â€” the 2025 tax bill did not eliminate it. High earners use it to bypass the Roth income phase-out ($153Kâ€“$168K single in 2026). Confirm details with a tax professional.
+- **Traditional wins** if you're in a *high* bracket now and expect lower in retirement — you get a deduction today and pay tax later.
+- **The backdoor Roth** (non-deductible Traditional IRA contribution → immediate Roth conversion) **remains legal in 2026** — the 2025 tax bill did not eliminate it. High earners use it to bypass the Roth income phase-out ($153K–$168K single in 2026). Confirm details with a tax professional.
 
 ### The HSA: The Best Retirement Account You're Not Using
 A Health Savings Account has a **triple tax advantage**:
 1. Contributions are tax-deductible.
 2. Growth is tax-free.
-3. Withdrawals for qualified medical expenses are tax-free â€” forever.
+3. Withdrawals for qualified medical expenses are tax-free — forever.
 
 The hack: pay current medical bills out of pocket, let the HSA invest and grow tax-free, and reimburse yourself decades later. After 65 you can also spend it on non-medical expenses penalty-free.
 
 ### The Wealth Gap Is an Access Gap
 This is why these accounts matter for our community:
 * Only **~34% of Black families** own a retirement account vs **~62% of white families** (2022 Survey of Consumer Finances).
-* Median net worth: **$285K white vs $44.9K Black** â€” a 6:1 gap.
-* But the tide is turning: **~40% of Black Americans owned stocks in 2022**, up from just under a third in 2016 â€” the fastest-growing group of new investors, driven by $0-commission, $0-minimum apps like Cash App, Robinhood, and Fidelity.
+* Median net worth: **$285K white vs $44.9K Black** — a 6:1 gap.
+* But the tide is turning: **~40% of Black Americans owned stocks in 2022**, up from just under a third in 2016 — the fastest-growing group of new investors, driven by $0-commission, $0-minimum apps like Cash App, Robinhood, and Fidelity.
 
-The next frontier is converting that new participation into long-horizon retirement wealth â€” maxing the employer match, opening a Roth IRA, and automating monthly contributions.`
+The next frontier is converting that new participation into long-horizon retirement wealth — maxing the employer match, opening a Roth IRA, and automating monthly contributions.`
       },
       {
         id: "m5-game",
@@ -1401,7 +1401,7 @@ While parametric insurance is incredibly fast, it introduces a unique challenge 
 ### Claims Automation
 Applying machine learning models to analyze smartphone photographs of minor car accidents to calculate auto-damage and wire settlements in minutes, eliminating administrative overhead.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **The Free African Society** (founded in Philadelphia in 1787 by Richard Allen and Absalom Jones). Operating as the first mutual aid and beneficial society for free Black people, it functioned exactly like a modern community insurance fund: members paid regular dues, and the society paid out automatic, standard benefits for sickness, burial, and widows' support, establishing the bedrock for cooperative insurance in America.
 * **Books to Read:** *Banking on Freedom* by Shennette Garrett-Scott (with focus on Black mutual aid programs). This book details how beneficial and mutual protection societies served as the primary insurance models for Black communities.
 * **Movies & Documentaries:** *The Black Church: This Is Our Story, This Is Our Song* (PBS, 2021) " A rich documentary series hosted by Henry Louis Gates Jr. that illustrates how early Black congregations organized mutual insurance funds, educational academies, and community protection frameworks.`
@@ -1424,7 +1424,7 @@ Traditional insurance relies on **Actuarial Science**"using statistics and proba
 Parametric insurance bypasses manual loss adjustment by linking payout smart contracts directly to trusted external data streams, known as **Oracles**.
 * **What is an Oracle?** In financial engineering and web3, an oracle is a secure pipeline that brings real-world offline data (e.g., weather reports, flight schedules, stock prices) into digital agreements.
 * **The Workflow:** 
-  1. **The Contract:** A wine grower buys parametric frost insurance. Payout triggers if temperatures in their vineyard drop below -2Ã‚Â°C for more than 4 consecutive hours.
+  1. **The Contract:** A wine grower buys parametric frost insurance. Payout triggers if temperatures in their vineyard drop below -2Â°C for more than 4 consecutive hours.
   2. **The Oracle Stream:** A regional weather station feeds authenticated temperature sensor logs to the contract.
   3. **The Automatic Settlement:** If the threshold is breached, the contract automatically settles. The grower receives funds in their bank account the next morning, eliminating claims files entirely.`
       },
@@ -1567,7 +1567,7 @@ Decentralized Finance (DeFi) reconstructs investment services like trading and l
 * **The Formula:** Pricing is managed mathematically via \`x * y = k\`, allowing trades to occur directly against the pool, eliminating traditional market makers.
 * **Lending Protocols (e.g., Aave):** Smart contract-mediated lending pools where depositors earn interest and borrowers can secure loans instantly by locking crypto-collateral.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Cleve Mesidor** (born 1974), the Executive Director of the **National Policy Network of Women of Color in Blockchain** and a former Obama administration official. She has been a leading national voice advocating for Web3 and decentralized ledgers as open, borderless alternatives to traditional credit scoring and banking gates for historically excluded communities.
 * **Books to Read:** *The Bitcoin Standard: The Decentralized Alternative to Central Banking* by Saifedean Ammous. It provides a comprehensive historical analysis of the evolution of sound money and the rise of decentralized ledger technologies.
 * **Movies & Documentaries:** *Trust Machine: The Story of Blockchain* (2018) " A gripping documentary that traces the roots of decentralized networks, explaining how smart contracts can disrupt global centralization and open credit pathways for the unbanked.`
@@ -1590,11 +1590,11 @@ The constant product formula \`x * y = k\` is the mathematical engine of decentr
   * \`k\` is the constant invariant that must remain unchanged during a swap.
 
 ### How a Swap is Calculated
-When a trader swaps \`ÃŽ"x\` of Token A into the pool, they receive \`ÃŽ"y\` of Token B. The new state of the pool must satisfy:
-\`(x + ÃŽ"x) * (y - ÃŽ"y) = k\`
+When a trader swaps \`Î"x\` of Token A into the pool, they receive \`Î"y\` of Token B. The new state of the pool must satisfy:
+\`(x + Î"x) * (y - Î"y) = k\`
 
-Rearranging this formula to solve for \`ÃŽ"y\` (the tokens the trader receives):
-\`ÃŽ"y = y - (k / (x + ÃŽ"x))\`
+Rearranging this formula to solve for \`Î"y\` (the tokens the trader receives):
+\`Î"y = y - (k / (x + Î"x))\`
 
 Because the curve is hyperbolic, buying a token drives its relative price up. The larger your trade size relative to the pool size, the more "slippage" you experience, meaning you get a progressively worse rate.
 
@@ -1651,31 +1651,31 @@ Liquidity providers (LPs) deposit equal dollar values of two tokens to earn tran
         title: "Crypto in the Mainstream: The 2026 Reality",
         type: 'text',
         content: `### Wall Street Embraced Bitcoin
-The biggest story in crypto's short history happened in 2024: the SEC approved **spot Bitcoin ETFs (January 2024)** and **spot Ethereum ETFs (May 2024)**. Now anyone can buy Bitcoin through a normal brokerage account â€” no wallet, no private keys, no crypto exchange.
+The biggest story in crypto's short history happened in 2024: the SEC approved **spot Bitcoin ETFs (January 2024)** and **spot Ethereum ETFs (May 2024)**. Now anyone can buy Bitcoin through a normal brokerage account — no wallet, no private keys, no crypto exchange.
 
 * BlackRock's IBIT became the largest fund, holding ~$65 billion.
-* US spot Bitcoin ETFs collectively hold **~1.3 million BTC â€” roughly 6â€“7% of all Bitcoin that will ever exist**.
+* US spot Bitcoin ETFs collectively hold **~1.3 million BTC — roughly 6–7% of all Bitcoin that will ever exist**.
 * Morgan Stanley became the first major US bank to launch its own spot Bitcoin ETF (April 2026).
 
-> **What this means:** Bitcoin is no longer a niche internet experiment. Wall Street's biggest firms are now major holders, and ETF flows â€” not just retail speculation â€” drive its price cycles.
+> **What this means:** Bitcoin is no longer a niche internet experiment. Wall Street's biggest firms are now major holders, and ETF flows — not just retail speculation — drive its price cycles.
 
 ### Stablecoins Got Regulated
 Stablecoins are digital dollars pegged 1:1 to the US dollar. The market crossed **~$300 billion** in 2026, ~90% of it USDT (Tether) and USDC (Circle).
 
-* **US:** The **GENIUS Act** became law in July 2025 â€” the first federal US crypto law. It requires stablecoin issuers to hold 1:1 reserves and obtain licenses. Most rules take effect in 2027.
+* **US:** The **GENIUS Act** became law in July 2025 — the first federal US crypto law. It requires stablecoin issuers to hold 1:1 reserves and obtain licenses. Most rules take effect in 2027.
 * **EU:** The **MiCA** framework is fully live since December 2024, governing crypto assets and stablecoins across Europe.
-* **Use case:** stablecoins are the fastest-growing cross-border payment method â€” 24/7 settlement for cents, which is why Stripe paid $1.1 billion for Bridge (2024), a stablecoin payments infrastructure company.
+* **Use case:** stablecoins are the fastest-growing cross-border payment method — 24/7 settlement for cents, which is why Stripe paid $1.1 billion for Bridge (2024), a stablecoin payments infrastructure company.
 
 ### Real-World Assets (RWA) Tokenization
 The most durable, mainstream use of blockchain in 2026 is putting real assets on-chain:
-* **Tokenized US Treasuries alone passed $8.7 billion** â€” money-market funds like BlackRock's BUIDL and Franklin Templeton's offering.
+* **Tokenized US Treasuries alone passed $8.7 billion** — money-market funds like BlackRock's BUIDL and Franklin Templeton's offering.
 * The broader RWA market (private credit, real estate, treasuries) roughly **tripled year-over-year to ~$30 billion**.
-* Analysts project $100B+ by the end of 2026 â€” led by Wall Street itself (BlackRock, JPMorgan, Goldman, Fidelity).
+* Analysts project $100B+ by the end of 2026 — led by Wall Street itself (BlackRock, JPMorgan, Goldman, Fidelity).
 
-Tokenization lets institutional-grade assets be traded 24/7, in fractional shares, at lower cost. Many see this â€” not speculative meme coins â€” as crypto's real future.
+Tokenization lets institutional-grade assets be traded 24/7, in fractional shares, at lower cost. Many see this — not speculative meme coins — as crypto's real future.
 
 ### Central Bank Digital Currencies (CBDCs)
-A CBDC is a digital version of government money â€” fundamentally different from Bitcoin because a central bank controls it.
+A CBDC is a digital version of government money — fundamentally different from Bitcoin because a central bank controls it.
 * **The US has no digital dollar and Congress effectively blocked one** (June 2026), citing privacy and surveillance concerns.
 * **China's digital yuan (e-CNY)** is the furthest along among major economies, with hundreds of millions of users.
 * Other live CBDCs: Bahamas (Sand Dollar), Nigeria (eNaira), Jamaica, India (digital rupee), Russia (digital ruble).
@@ -1684,15 +1684,15 @@ A CBDC is a digital version of government money â€” fundamentally different
 Blockchain's environmental criticism is real but improving:
 * **Ethereum cut its energy use by ~99.9%** when it moved to Proof of Stake (The Merge, 2022). Staking ~39.7 million ETH now secures the network for a fraction of the energy of mining.
 * **Bitcoin mining now sources ~52% of its electricity from sustainable energy** (up from ~38% in 2022), increasingly using otherwise-wasted renewable power like hydro.
-* Ethereum staking pays a yield (~2.7â€“3.8%) â€” the network now behaves more like a dividend-paying asset than an energy hog.
+* Ethereum staking pays a yield (~2.7–3.8%) — the network now behaves more like a dividend-paying asset than an energy hog.
 
 ### Crypto and the Black Community: A Double-Edged Opportunity
 Crypto has become a notable wealth-building vehicle for Black Americans:
-* **18% of Black adults** have invested in, traded, or used cryptocurrency vs 13% of white adults (Pew, 2021) â€” one of the few asset classes where Black participation leads.
-* Black consumers are **more likely to own crypto than stocks or mutual funds** â€” the reverse of white consumers.
-* Apps like **Cash App** made Bitcoin buyable with no minimums and low fees â€” a key on-ramp for underbanked users.
+* **18% of Black adults** have invested in, traded, or used cryptocurrency vs 13% of white adults (Pew, 2021) — one of the few asset classes where Black participation leads.
+* Black consumers are **more likely to own crypto than stocks or mutual funds** — the reverse of white consumers.
+* Apps like **Cash App** made Bitcoin buyable with no minimums and low fees — a key on-ramp for underbanked users.
 
-**The caution:** Black crypto investors are more likely to expect 20%+ annual returns (27% vs 12% of white investors) â€” a sign of both enthusiasm and elevated risk. Crypto's volatility plus weaker consumer protections means the same wealth-building tool can deepen losses. The disciplined path: treat crypto as a small slice of a diversified portfolio, not a lottery ticket.`
+**The caution:** Black crypto investors are more likely to expect 20%+ annual returns (27% vs 12% of white investors) — a sign of both enthusiasm and elevated risk. Crypto's volatility plus weaker consumer protections means the same wealth-building tool can deepen losses. The disciplined path: treat crypto as a small slice of a diversified portfolio, not a lottery ticket.`
       },
       {
         id: 'm7-deepdive',
@@ -1749,7 +1749,7 @@ Modern fraud systems utilize deep learning neural networks to analyze thousands 
 ### Regulatory Sandboxes
 Many regulatory regions (like London's FCA or Singapore's MAS) provide a **Regulatory Sandbox**: a legal playground where fintech startups can test innovative financial concepts with real customers in a controlled environment under relaxed regulatory requirements, accelerating fast compliance.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **The Black Panther Party's Free Breakfast Program** and community-led mutual defense networks in Oakland (late 1960s). Because Black families were frequently targeted by predatory loan sharks, rent speculators, and fraudulent merchants, the Panthers established community security systems, free health clinics, and educational resources to defend neighborhood wealth.
 * **Books to Read:** *Scam Me If You Can: Simple Strategies to Outsmart Today's Rip-off Artists* by Frank Abagnale. The legendary former con artist details modern identity protection, ledger security, and cyber defense mechanisms.
 * **Movies & Documentaries:** *Catch Me If You Can* (2002) " A thrilling cinematic study of check fraud, security engineering, and how identity verification systems evolved to stop high-stakes systemic exploitation.`
@@ -1911,13 +1911,13 @@ Fintech products scale on highly structured revenue levers:
 In consumer fintech, Customer Acquisition Cost (CAC) is extremely high due to competitive advertising and compliance checks.
 * **CAC:** The marketing and onboarding spend required to win one customer.
 * **LTV (Lifetime Value):** The total net revenue generated by the customer over their account lifecycle.
-* **The Magic Ratio:** To remain sustainable, high-performing fintech models target an **LTV:CAC ratio of â€°Â¥3.0**. If LTV is too low, heavy CAC will drain investor cash reserves, which has historically caused neobank collapses.
+* **The Magic Ratio:** To remain sustainable, high-performing fintech models target an **LTV:CAC ratio of ‰¥3.0**. If LTV is too low, heavy CAC will drain investor cash reserves, which has historically caused neobank collapses.
 
 ### Case Study: 10-K Walkthroughs (Affirm & SoFi)
 * **Affirm (Lending Tech):** Their 10-K filings reveal revenues are split between merchant network fees (MDR), interest income on retained loans, and servicing fees.
 * **SoFi (Full Bank):** By obtaining a full banking charter, SoFi drastically reduced their capital costs. Instead of paying outside banks to secure warehouse lines of credit, they use their consumer deposits to directly fund loans, boosting Net Interest Margin.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Jesse Binga** (1865"1950), who migrated to Chicago and established **Binga State Bank** in 1908. He successfully navigated the commercial unit economics of banking, buying real estate and offering mortgages to Black families during the Great Migration. He proved that high-performance, community-aligned commercial banking models could be highly profitable while serving as a shield against discriminatory economic forces.
 * **Books to Read:** *The Color of Money: Black Banks and the Racial Wealth Gap* by Mehrsa Baradaran. This essential book outlines the economic math behind Black-owned banks and why structural barriers prevented them from scaling to compete with larger commercial conglomerates.
 * **Movies & Documentaries:** *The Big Short* (2015) " An educational and entertaining film that unpacks the complex financial monetization structures, loan packagings, and interest margins that drove the 2008 subprime mortgage crisis.`
@@ -2081,7 +2081,7 @@ Fintech startups face a highly fragmented federal and state oversight framework:
 * **Full Bank Charter:** Highly prestigious and capital efficient. Grants the direct right to hold interest-bearing deposits. Requires immense regulatory checks, high minimum capital reserves, and ongoing compliance reporting.
 * **Sponsor Bank Partnership:** Faster and cheaper. The fintech acts as an agent (program manager) of a chartered partner bank. This allows the startup to scale fast, but introduces "third-party risk" and complex split-revenue structures.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Senator Edward Brooke** (1919"2015), the first popularly elected African American senator. As a leading legislative and regulatory reform advocate, Brooke co-authored the **Fair Housing Act of 1968**. He championed rigorous consumer protection standards and credit transparency rules that laid the groundwork for the modern regulatory agencies (like the CFPB) protecting consumers from unfair lending practices.
 * **Books to Read:** *Broke: How Everyday People Survive in a Cash-Strapped Economy* by Amanda Clydesdale (together with *Capitalism and Freedom* by Milton Friedman). Unpacks how state and federal regulations shape small-dollar credit, checking account rules, and consumer protections.
 * **Movies & Documentaries:** *13th* (2016) " Directed by Ava DuVernay, this documentary offers a powerful analysis of the intersection of race, justice, and the systemic legal frameworks that historically restricted Black American socioeconomic mobility.`
@@ -2257,7 +2257,7 @@ When a customer deposits \$100 cash into their mobile checking account, the bank
 Because Assets and Liabilities both increased by \$100, the foundational accounting equation holds perfectly balanced:
 $$\text{Assets} = \text{Liabilities} + \text{Equity}$$
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Richard Allen** (1760"1831), co-founder of the **Free African Society** and founder of the African Methodist Episcopal (AME) Church. Allen meticulously kept ledger accounts, recording every donation, membership fee, and mutual benefit payout to ensure total financial transparency. This absolute bookkeeping rigor protected the community's cooperative funds from external legal challenges.
 * **Books to Read:** *Double Entry: How the Merchants of Venice Created Modern Finance* by Jane Gleeson-White. This book details the history of how Luca Pacioli documented the double-entry accounting method in 1494, laying the mathematical foundation of modern capitalism.
 * **Movies & Documentaries:** *The Accountant* (2016) " An action-drama focusing on forensic accounting, showing how checking ledgers, balancing cash assets, and tracking un-reconciled transactions can expose complex systems.`
@@ -2379,10 +2379,10 @@ By requiring every transaction to have an equal and opposite entry (a debit and 
 ### Modern Ledgers in 2026
 Double-entry logic is more relevant than ever in the age of instant payments and digital assets:
 
-* **Stablecoin reserves:** The US **GENIUS Act** (2025) requires stablecoin issuers to hold 1:1 reserves. Auditors verify this with double-entry reconciliation â€” every token outstanding must match a real reserve asset on the balance sheet. Blockchain ledgers make this *provably* auditable.
-* **Real-time reconciliation:** FedNow, RTP, and instant P2P rails settle in seconds â€” which means the old "reconcile at end of day" model is obsolete. Modern fintech ledgers reconcile continuously, matching internal accounts against sponsor-bank settlement files in real time.
-* **Idempotency + double-entry together:** New payment rails are retried automatically on network glitches. Idempotency keys ensure a retry doesn't create a second charge â€” and double-entry ensures that whatever the rail settles, debits still equal credits. The two systems together make instant money movement safe.
-* **Tokenized assets:** Real-world asset tokenization (Treasuries, money-market funds on-chain, ~$30B market in 2026) moves double-entry ledgers onto shared infrastructure â€” where every tokenized dollar still must trace back to a real-world asset through balanced ledger entries.`
+* **Stablecoin reserves:** The US **GENIUS Act** (2025) requires stablecoin issuers to hold 1:1 reserves. Auditors verify this with double-entry reconciliation — every token outstanding must match a real reserve asset on the balance sheet. Blockchain ledgers make this *provably* auditable.
+* **Real-time reconciliation:** FedNow, RTP, and instant P2P rails settle in seconds — which means the old "reconcile at end of day" model is obsolete. Modern fintech ledgers reconcile continuously, matching internal accounts against sponsor-bank settlement files in real time.
+* **Idempotency + double-entry together:** New payment rails are retried automatically on network glitches. Idempotency keys ensure a retry doesn't create a second charge — and double-entry ensures that whatever the rail settles, debits still equal credits. The two systems together make instant money movement safe.
+* **Tokenized assets:** Real-world asset tokenization (Treasuries, money-market funds on-chain, ~$30B market in 2026) moves double-entry ledgers onto shared infrastructure — where every tokenized dollar still must trace back to a real-world asset through balanced ledger entries.`
       }
     ]
   },
@@ -2435,7 +2435,7 @@ To complete the FinTech Foundations curriculum, you will design and stress-test 
 4. **The Regulatory & Algorithmic Compliance Pillar:**
    * Integrate automated KYC/AML identity verification and ECOA fair lending model audits.
 
-### Ã°Å¸"Å¡ Historical Deep Dive: People, Moments, Books & Movies
+### ðŸ"š Historical Deep Dive: People, Moments, Books & Movies
 * **People & Moments:** **Tope Awotona** (born 1981), founder and CEO of **Calendly**. Awotona, who grew up in Nigeria and migrated to the United States, bootstrapped Calendly into a multi-billion dollar scheduling software giant, demonstrating the power of modern software equity, recurring ownership, and solving a universal workflow friction.
 * **Books to Read:** *The Lean Startup: How Today's Entrepreneurs Use Continuous Innovation to Create Radically Successful Businesses* by Eric Ries (together with *Build: An Unorthodox Guide to Making Things Worth Making* by Tony Fadell). These guides demonstrate how to build, test, and scale modern technological apps.
 * **Movies & Documentaries:** *Something Ventured* (2011) " An excellent documentary showing the rise of Silicon Valley venture capital and the birth of revolutionary technology companies like Intel, Apple, and Cisco.`
@@ -3013,7 +3013,7 @@ PSD2 created two new regulated entity types:
 ### Strong Customer Authentication (SCA)
 PSD2 requires Strong Customer Authentication for all electronic payments:
 - **Two-Factor Authentication:** At least two of: something you know (password), something you have (phone), something you are (fingerprint).
-- **Dynamic Linking:** The authentication code must be specifically linked to the transaction amount and payee. This prevents man-in-the-middle attacks where a fraudster intercepts a â€šÂ¬100 payment authorization and changes it to â€šÂ¬1,000.
+- **Dynamic Linking:** The authentication code must be specifically linked to the transaction amount and payee. This prevents man-in-the-middle attacks where a fraudster intercepts a ‚¬100 payment authorization and changes it to ‚¬1,000.
 
 ### Impact on the Market
 PSD2 has transformed European fintech:
@@ -3145,7 +3145,7 @@ The Open Banking movement represents a fundamental shift in who controls financi
 
 This shift has profound implications. When a bank holds your transaction history, it is not just a record of purchases " it is a detailed map of your life: where you live, what you earn, who you pay, what you value, when you struggle, and when you thrive.
 
-The battle over who controls this data " and who can use it to make decisions about your financial life " is the defining policy question of the next decade of fintech. The answer will determine whether the next generation of financial services expands access and opportunity for everyone, or concentrates power in the hands of the platforms that best exploit theÃ£Æ’â€¡Ã£Æ’Â¼Ã£â€šÂ¿  economy.`
+The battle over who controls this data " and who can use it to make decisions about your financial life " is the defining policy question of the next decade of fintech. The answer will determine whether the next generation of financial services expands access and opportunity for everyone, or concentrates power in the hands of the platforms that best exploit theãƒ‡ãƒ¼ã‚¿  economy.`
       }
     ]
   }
