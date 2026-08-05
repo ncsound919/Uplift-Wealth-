@@ -51,7 +51,18 @@ Your personal credit opens doors. Business credit opens **warehouses.**
 - Get a DUNS number (Dun & Bradstreet) — free at dnb.com
 - Open a business credit card (Amex Blue Business, Capital One Spark)
 - Vendor credit: Net-30 accounts with Uline, Grainger, Quill
-- Business credit uses your EIN, not your SSN — protects personal score`
+- Business credit uses your EIN, not your SSN — protects personal score
+
+## What Your Score Really Is (and Isn't)
+
+Many people believe a credit score is a report card on how much money they have. It isn't. Your score is a **borrowing-and-repayment history** — a number lenders use to judge how reliably you'll pay them back.
+
+- It does **not** reflect your bank balance, spending habits, or salary.
+- It **does** track every account you've held and whether you repaid on time — phone bills, cards, car finance, mortgages, even joint accounts.
+- Different agencies score differently (some use a 0-999 range, others 300-850). The habits that raise your score are the same everywhere.
+- **Defaults stay on your record for years** — bankruptcies and similar marks typically stick around six years. Protecting your history today protects your future rates.
+
+> **Sourced From the Overlay Library:** This section draws on **"How to Manage Money — What They Don't Teach Us in School"** (credit-score chapter), written in our own words.`
   },
   {
     id: 'investing',
@@ -84,6 +95,20 @@ If your employer offers a 401(k) match, contribute enough to get the full match.
 - Once retirement accounts are maxed, invest in a regular brokerage
 - Focus on total-market index funds: VTI (total US) + VXUS (total international) + BND (bonds)
 - The **3-fund portfolio** — all you ever need
+
+## Commodities: The Inflation Hedge
+
+Beyond stocks and bonds sit **commodities** — basic goods like oil, metals, and food. They are among the oldest investments in history and a classic diversifier.
+
+- **Why they matter:** prices rise when demand outpaces supply, so commodities often hold up during inflation and geopolitical stress.
+- **Gold & metals** are the favourite store-of-value in uncertain times; base metals like copper and aluminium track industrial demand.
+- **Crude oil** reacts to geopolitics — war, sanctions, and supply cuts move it sharply.
+- **How to invest:** physical bars/coins (gold), or more easily, ETFs, mutual funds, and commodity-company stocks.
+- **The warning:** commodities are volatile. Avoid leveraged or futures products until you deeply understand them — they magnify losses exactly as fast as gains.
+
+## Sourced From the Overlay Library
+
+> This chapter synthesises lessons from **"How to Manage Money — What They Don't Teach Us in School"** (compound growth, commodities, tax-advantaged accounts). Written in our own words from the ideas in that book.
 
 ## Key Terms
 
@@ -145,6 +170,19 @@ Real estate builds wealth through **four mechanisms**:
 Monthly rent must be **at least 1% of purchase price.** A $200K house must rent for $2,000/mo. If it doesn't, keep looking.
 
 > **Reality check:** This is harder in high-cost cities (NY, SF) and easier in the Midwest and South. Consider investing out-of-state before you give up on real estate.
+
+## First-Time Homebuyers: The Deposit Game
+
+Not everyone starts with investment properties — most start with a **home.** The same leverage rules apply:
+
+- **Deposit = interest rate:** A larger down payment lowers your loan-to-value ratio, which typically unlocks cheaper borrowing. Aim for **20%** — it also removes private mortgage insurance.
+- **Know the true cost:** Fees, surveys, taxes, repairs, and moving costs add up fast. Budget for the *total*, not just the asking price.
+- **Credit matters:** A strong credit score is what gets you approved and at the best rate. Check yours before you even look at listings.
+- **Protect the purchase:** Keep three times the monthly mortgage payment in reserve for repairs, vacancy, or lost income — the property version of an emergency fund.
+
+## Sourced From the Overlay Library
+
+> This chapter synthesises lessons from **"How to Manage Money — What They Don't Teach Us in School"** (first-home buying, deposits, and mortgages). Written in our own words from the ideas in that book.
 
 ## Key Metrics
 
@@ -333,6 +371,19 @@ Hustle income is easy to leak. Route it before you spend it:
 - **Opportunity cost:** Not all hustles are equal. A $15/hr gig and a $50/hr skill-building hustle both take 10 hours — the skill compound. Choose hustles that teach you something.
 - **Lifestyle creep:** Every dollar of hustle income that goes to a new subscription is a dollar that didn't build wealth. Keep your lifestyle flat for one year.
 
+## AI & Digital Income: The New Leverage
+
+AI tools have changed the hustle math. One person can now produce what used to take a team — and package knowledge into products that keep earning after the work is done.
+
+- **AI skills are the career lever:** Demand is exploding for people who can steer AI tools — prompt engineering, workflow automation, AI-assisted content and research. A specialist who reliably gets high-quality output is paid a premium for the efficiency they bring.
+- **Position around a problem, not a label:** A generic "AI expert" gets lost. A prompt engineer for a specific industry (legal, healthcare, e-commerce) wins work because they understand the domain.
+- **Digital products scale:** Courses, templates, and content systems have near-zero marginal cost. Pick a narrow audience, automate the production, and sell the outcome.
+- **Portfolio beats certificates:** A handful of real AI-assisted projects proves value far better than a credential.
+
+## Sourced From the Overlay Library
+
+> This chapter synthesises lessons from **"AI Hustles — The Definitive Guide to Earning Passive Income with AI"**, **"Earn $300,000+ Per Year As an AI Prompt Engineer"**, and **"How to Manage Money — What They Don't Teach Us in School"** (side-hustle fundamentals). Written in our own words from the ideas in those books.
+
 > **Black Wall Street Wisdom:** Greenwood entrepreneurs didn't wait for permission — they built barber shops, grocery stores, and banks to serve their own community first. Your hustle starts the same way: solve a problem for people you know, get paid, then reinvest.`
   },
   {
@@ -390,6 +441,14 @@ Once you hit your target months, **you are done saving for emergencies.** Stop d
 5. Taxable brokerage
 
 **One nuance:** if you change jobs, start a business, or add a dependent, re-run the numbers. The fund is not a one-time goal — it's a living number.
+
+## Clear High-Interest Debt Before You Build the Fund
+
+There is one exception to "savings first": **urgent high-interest debt.** Money in a savings account earns maybe 4%, while a credit card balance can cost 20-29%. Every month you carry that balance, the interest compounding against you outstrips anything a HYSA pays. For expensive debt, **pay it down first** — the guaranteed "return" from not paying 25% interest beats any savings yield. Lower-cost debt (a mortgage, student loans) can wait; the emergency fund protects you from *new* high-interest debt in the first place.
+
+## Sourced From the Overlay Library
+
+> This chapter synthesises lessons from **"How to Manage Money — What They Don't Teach Us in School"** (savings & emergency-fund foundations) and **"Earn $300,000+ Per Year As an AI Prompt Engineer"** (stable income habits). Written in our own words from the ideas in those books.
 
 > **Black Wall Street Wisdom:** Greenwood's mutual aid societies collected small weekly dues from members and paid out for sickness, death, and hard times — a community emergency fund. Build yours the same way: small, consistent, automatic, and always there when it matters.`
   }
