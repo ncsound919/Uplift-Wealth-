@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://overlay-wealth.onrender.com
+      url: https://uplift-wealth.onrender.com
     steps:
       - name: Trigger Render Deploy Hook
         run: |
@@ -35,7 +35,7 @@ jobs:
       - name: Wait for /api/health (max 5 min)
         run: |
           for i in $(seq 1 30); do
-            if curl -fsS -o /dev/null "https://overlay-wealth.onrender.com/api/health"; then
+            if curl -fsS -o /dev/null "https://uplift-wealth.onrender.com/api/health"; then
               echo "health OK"
               exit 0
             fi
@@ -46,5 +46,5 @@ jobs:
 
       - name: Verify site endpoints
         run: |
-          curl -fsS -o /dev/null -w "root: %{http_code}\n" https://overlay-wealth.onrender.com/
-          curl -fsS -o /dev/null -w "sitemap: %{http_code}\n" https://overlay-wealth.onrender.com/sitemap.xml
+          curl -fsS -o /dev/null -w "root: %{http_code}\n" https://uplift-wealth.onrender.com/
+          curl -fsS -o /dev/null -w "sitemap: %{http_code}\n" https://uplift-wealth.onrender.com/sitemap.xml
