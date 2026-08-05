@@ -35,15 +35,16 @@ const mockModules: Module[] = [
 describe('Dashboard', () => {
   it('renders the main title', () => {
     render(
-      <Dashboard modules={mockModules} completedModules={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
+      <Dashboard modules={mockModules} completedModules={[]} completedLessons={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
         xp={0} streak={0} badges={[]} completedLessonsCount={0} />
     );
-    expect(screen.getByText('Master Modern Money & Financial Tech')).toBeInTheDocument();
+    expect(screen.getByText(/Build the Wealth/)).toBeInTheDocument();
+    expect(screen.getByText(/Your Family Deserves/)).toBeInTheDocument();
   });
 
   it('renders module count in subtext', () => {
     render(
-      <Dashboard modules={mockModules} completedModules={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
+      <Dashboard modules={mockModules} completedModules={[]} completedLessons={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
         xp={0} streak={0} badges={[]} completedLessonsCount={0} />
     );
     expect(screen.getByText(/step-by-step guide/)).toBeInTheDocument();
@@ -51,7 +52,7 @@ describe('Dashboard', () => {
 
   it('renders the curriculum roadmap heading', () => {
     render(
-      <Dashboard modules={mockModules} completedModules={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
+      <Dashboard modules={mockModules} completedModules={[]} completedLessons={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
         xp={0} streak={0} badges={[]} completedLessonsCount={0} />
     );
     expect(screen.getByText('Curriculum Blueprint Roadmap')).toBeInTheDocument();

@@ -39,14 +39,10 @@ import { Module, courseModules, CourseLevel } from './data/courseData';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   GraduationCap, PanelLeftClose, PanelLeftOpen, 
-  Flame, 
   Trophy, 
-  Award, 
   Sparkles, 
   RefreshCw, 
   Layers, 
-  BookOpen,
-  Network,
   Menu,
   X,
   Moon,
@@ -63,8 +59,6 @@ import {
   ShieldCheck,
   ExternalLink,
   MapPin,
-  Rocket,
-  TrendingUp,
   Briefcase,
   BarChart3,
   Settings,
@@ -204,6 +198,12 @@ export default function App() {
       setActiveView('dots_article');
       setActiveModuleId(null);
       setActiveDirectGame(null);
+    } else if (path === '/games') {
+      setActiveView('games');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+      setIsBuildingModule(false);
+      setEditingModule(null);
     } else if (path === '/builder') {
       setIsBuildingModule(true);
       setActiveModuleId(null);
@@ -484,7 +484,7 @@ export default function App() {
             <GraduationCap className="w-3.5 h-3.5" />
           </div>
           <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">
-            FinTech<span className="text-blue-600">Foundations</span>
+            Overlay<span className="text-blue-600">Wealth</span>
           </span>
         </div>
         <button
@@ -508,9 +508,9 @@ export default function App() {
           {/* Logo Brand Header */}
           <div className="hidden md:flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className={`flex items-center ${isSidebarCollapsed ? 'hidden' : ''}`}>
-              <img src="/uplift-logo-192.png" alt="Uplift Wealth" className="w-7 h-7 rounded-lg object-contain mr-2 shadow-sm" />
+              <img src="/overlay-logo-192.png" alt="Overlay Wealth" className="w-7 h-7 rounded-lg object-contain mr-2 shadow-sm" />
               <div>
-                <h1 className="text-sm font-black font-display tracking-tight text-slate-900 dark:text-white leading-none">Uplift</h1>
+                <h1 className="text-sm font-black font-display tracking-tight text-slate-900 dark:text-white leading-none">Overlay</h1>
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Wealth</span>
               </div>
             </div>
@@ -520,7 +520,7 @@ export default function App() {
           </div>
           {isSidebarCollapsed && (
             <div className="hidden md:flex flex-col items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-              <img src="/uplift-logo-192.png" alt="Uplift Wealth" className="w-7 h-7 rounded-lg object-contain shadow-sm" />
+              <img src="/overlay-logo-192.png" alt="Overlay Wealth" className="w-7 h-7 rounded-lg object-contain shadow-sm" />
             </div>
           )}
 
@@ -597,73 +597,7 @@ export default function App() {
                 <span>Learning Pathways</span>
               </button>
 
-              {/* 3. Lecture Library */}
-              <button
-                onClick={() => {
-                  setActiveView('knowledge');
-                  setActiveModuleId(null);
-                  setIsBuildingModule(false);
-                  setEditingModule(null);
-                  setActiveDirectGame(null);
-                  setIsMobileMenuOpen(false);
-                  navigate('/knowledge');
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-                  activeView === 'knowledge'
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>Lecture Library</span>
-              </button>
-
-              {/* 4. Architecture of Extraction */}
-              <button
-                onClick={() => {
-                  setActiveView('architecture');
-                  setActiveModuleId(null);
-                  setIsBuildingModule(false);
-                  setEditingModule(null);
-                  setActiveDirectGame(null);
-                  setIsMobileMenuOpen(false);
-                  navigate('/architecture');
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-                  activeView === 'architecture'
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>History of Black American Finance</span>
-              </button>
-
-              {/* 5. Connecting the Dots */}
-              <button
-                onClick={() => {
-                  setActiveView('dots_article');
-                  setActiveModuleId(null);
-                  setIsBuildingModule(false);
-                  setEditingModule(null);
-                  setActiveDirectGame(null);
-                  setIsMobileMenuOpen(false);
-                  navigate('/article');
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-                  activeView === 'dots_article'
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                <Network className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                <span>Connecting The Dots</span>
-              </button>
-
-              {/* 6. Finance Dictionary */}
+              {/* 3. Finance Dictionary */}
               <button
                 onClick={() => {
                   setActiveView('glossary');
@@ -685,7 +619,7 @@ export default function App() {
                 <span>Finance Dictionary</span>
               </button>
 
-              {/* 7. Fintech Business Builder */}
+              {/* 4. Fintech Business Builder */}
               <button
                 onClick={() => {
                   setActiveView('business_builder');
@@ -707,51 +641,7 @@ export default function App() {
                 <span>Business Builder</span>
               </button>
 
-              {/* 7b. Wealth Building */}
-              <button
-                onClick={() => {
-                  setActiveView('wealth_building');
-                  setActiveModuleId(null);
-                  setIsBuildingModule(false);
-                  setEditingModule(null);
-                  setActiveDirectGame(null);
-                  setIsMobileMenuOpen(false);
-                  navigate('/wealth-building');
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-                  activeView === 'wealth_building' || activeView === 'wealth_credit' || activeView === 'wealth_investing' || activeView === 'wealth_real_estate' || activeView === 'wealth_business' || activeView === 'wealth_group_economics' || activeView === 'wealth_side_hustles' || activeView === 'wealth_emergency_fund'
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                <TrendingUp className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                <span>Wealth Building</span>
-              </button>
-
-              {/* 8. Fintech Starter Map */}
-              <button
-                onClick={() => {
-                  setActiveView('fintech_map');
-                  setActiveModuleId(null);
-                  setIsBuildingModule(false);
-                  setEditingModule(null);
-                  setActiveDirectGame(null);
-                  setIsMobileMenuOpen(false);
-                  navigate('/map');
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-                  activeView === 'fintech_map'
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                )}
-              >
-                <Rocket className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                <span>Fintech Starter Map</span>
-              </button>
-
-              {/* 8. Support */}
+              {/* 5. Support */}
               <button
                 onClick={() => {
                   setActiveView('donation');
@@ -1149,6 +1039,7 @@ export default function App() {
               <Dashboard 
                 modules={filteredModules} 
                 completedModules={completedModules}
+                completedLessons={completedLessons}
                 onSelectModule={(id) => {
                   if (id === 'glossary') {
                     setActiveView('glossary');
@@ -1174,6 +1065,9 @@ export default function App() {
                 onEditCustomModule={(module) => setEditingModule(module)}
                 onDeleteCustomModule={handleDeleteCustomModule}
               />
+              <div className="mt-16 border-t border-slate-200 dark:border-slate-800 pt-12">
+                <WealthBuilding />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

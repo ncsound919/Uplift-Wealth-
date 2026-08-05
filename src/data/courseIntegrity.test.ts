@@ -32,7 +32,18 @@ describe('courseModules integrity', () => {
   it('every lesson has a valid type', () => {
     for (const mod of courseModules) {
       for (const lesson of mod.lessons) {
-        expect(['text', 'video', 'quiz', 'game']).toContain(lesson.type);
+        expect(['text', 'video', 'quiz', 'game', 'lecture', 'article']).toContain(lesson.type);
+      }
+    }
+  });
+
+  it('lecture lessons use the module lecture class', () => {
+    for (const mod of courseModules) {
+      for (const lesson of mod.lessons) {
+        if (lesson.type === 'lecture') {
+          const cls = LECTURE_CLASSES.find(c => c.moduleId === mod.id);
+          expect(cls).toBeDefined();
+        }
       }
     }
   });

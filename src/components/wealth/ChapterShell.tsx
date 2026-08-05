@@ -38,7 +38,7 @@ export function ChapterShell({ chapter, tool }: Props) {
 
       <div className="prose prose-slate dark:prose-invert max-w-none">
         <Markdown
-          remarkPlugins={[remarkMath]}
+          remarkPlugins={[[remarkMath, { singleDollarTextMath: false }]]}
           rehypePlugins={[[rehypeKatex, { strict: false }], rehypeGlossaryHighlight]}
           components={{
             a: ({ href, children }) => (
@@ -52,10 +52,10 @@ export function ChapterShell({ chapter, tool }: Props) {
                 {children}
               </blockquote>
             ),
-            span: ({ node, children }) => {
+            span: ({ node, children, ...rest }) => {
               const termId = (node as any)?.properties?.dataGlossary as string | undefined;
               if (termId) return <GlossaryTermSpan termId={termId}>{children}</GlossaryTermSpan>;
-              return <span>{children}</span>;
+              return <span {...rest}>{children}</span>;
             },
           }}
         >

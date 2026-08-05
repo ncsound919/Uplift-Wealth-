@@ -7,6 +7,7 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-serif-accent: 'Instrument Serif', Georgia, serif;
 
   /* Custom slate ramp steps used throughout the app */
   --color-slate-150: #e9eef4;
@@ -26,7 +27,81 @@
 
   /* Extra-subtle elevation used on buttons and cards */
   --shadow-3xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  --animate-aurora: aurora 18s ease-in-out infinite;
+  --animate-aurora-2: aurora 22s ease-in-out infinite reverse;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-shimmer: shimmer 3.5s linear infinite;
+
+  @keyframes aurora {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(50px, -40px) scale(1.15); }
+    66% { transform: translate(-40px, 30px) scale(0.95); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 }
+
+/* Premium lettering */
+.text-gradient-emerald-gold {
+  background: linear-gradient(100deg, #10b981 0%, #f5c451 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.font-serif-accent {
+  font-family: var(--font-serif-accent);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.text-shimmer {
+  background: linear-gradient(110deg, #0f172a 40%, #f5c451 50%, #10b981 55%, #0f172a 60%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3.5s linear infinite;
+}
+
+.dark .text-shimmer {
+  background: linear-gradient(110deg, #f1f5f9 40%, #f5c451 50%, #10b981 55%, #f1f5f9 60%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 3.5s linear infinite;
+}
+
+.glass-premium {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.dark .glass-premium {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.perspective-1200 { perspective: 1200px; }
+.preserve-3d { transform-style: preserve-3d; }
 
 @layer base {
   html {

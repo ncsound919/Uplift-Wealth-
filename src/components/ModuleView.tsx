@@ -15,11 +15,15 @@ import {
   Sparkles,
   Target,
   GraduationCap,
-  PlayCircle
+  PlayCircle,
+  FileText,
+  Code,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 import { Module } from '../data/courseData';
-import { LECTURE_CLASSES } from '../data/lectureLibrary';
+import { LECTURE_CLASSES, LectureClass } from '../data/lectureLibrary';
 import { resolveIcon } from '../utils/iconResolver';
 const DiagramMermaid = lazy(() => import('./DiagramMermaid').then(m => ({ default: m.DiagramMermaid })));
 import { Quiz } from './Quiz';
@@ -29,6 +33,8 @@ import { UnderwritingGame } from './UnderwritingGame';
 import { ParametricGame } from './ParametricGame';
 import { FraudGame } from './FraudGame';
 import { YouTubeVideoPlayer } from './YouTubeVideoPlayer';
+import { ArchitectureOfExtraction } from './ArchitectureOfExtraction';
+import { ConnectingTheDotsArticle } from './ConnectingTheDotsArticle';
 
 interface ModuleViewProps {
   module: Module;
@@ -47,6 +53,143 @@ interface GlossaryTerm {
 
 function getLessonData(moduleId: string) {
   return LECTURE_CLASSES.find(c => c.moduleId === moduleId);
+}
+
+// Compact inline lecture deck for folding the Lecture Library into module lessons.
+function LectureDeck({ lecture }: { lecture: LectureClass }) {
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [view, setView] = useState<'slides' | 'outcomes' | 'concepts' | 'project'>('slides');
+  const slide = lecture.slides[slideIndex];
+
+  const prev = () => setSlideIndex(i => Math.max(0, i - 1));
+  const next = () => setSlideIndex(i => Math.min(lecture.slides.length - 1, i + 1));
+
+  const tabs: { id: typeof view; label: string }[] = [
+    { id: 'slides', label: 'Slides' },
+    { id: 'outcomes', label: 'Outcomes' },
+    { id: 'concepts', label: 'Concepts' },
+    { id: 'project', label: 'Project' },
+  ];
+
+  return (
+    <div className="space-y-5 min-h-[620px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            <GraduationCap className="h-4 w-4" /> Masterclass Lecture
+          </div>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white md:text-3xl">{lecture.title}</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{lecture.subtitle}</p>
+        </div>
+      </div>
+
+      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setView(t.id)}
+            className={cn(
+              "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition cursor-pointer",
+              view === t.id ? "bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white" : "text-slate-500 dark:text-slate-400"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'slides' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Slide {slideIndex + 1} / {lecture.slides.length}</span>
+              <div className="flex gap-2">
+                <button onClick={prev} disabled={slideIndex === 0} className="rounded-lg border border-slate-300 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Previous slide">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button onClick={next} disabled={slideIndex === lecture.slides.length - 1} className="rounded-lg border border-slate-300 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Next slide">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">{slide.title}</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{slide.subtitle}</p>
+            <ul className="mt-4 space-y-2.5">
+              {slide.bullets.map((b, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                  {b}
+                </li>
+              ))}
+            </ul>
+            {slide.codeSnippet && (
+              <div className="mt-4 rounded-xl bg-slate-950 p-4 text-slate-100 overflow-x-auto">
+                <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400"><Code className="h-3.5 w-3.5" /> Example</div>
+                <pre className="text-xs leading-5">{slide.codeSnippet}</pre>
+              </div>
+            )}
+            {slide.exampleCard && (
+              <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40">
+                <div className="text-xs font-bold uppercase tracking-widest text-blue-700 dark:text-blue-300">{slide.exampleCard.title}</div>
+                <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{slide.exampleCard.description}</p>
+                <div className="mt-2 rounded-lg bg-white p-3 text-xs font-medium text-slate-700 dark:bg-slate-900 dark:text-slate-200">{slide.exampleCard.example}</div>
+                <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">{slide.exampleCard.explanation}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {view === 'outcomes' && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"><Target className="h-4 w-4" /> Learning Outcomes</h3>
+          <ul className="mt-4 space-y-3">
+            {lecture.learningOutcomes.map((lo, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />{lo}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {view === 'concepts' && (
+        <div className="space-y-3">
+          {lecture.keyConcepts.map((kc, i) => (
+            <div key={i} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+              <h4 className="font-semibold text-slate-950 dark:text-white">{kc.term}</h4>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{kc.definition}</p>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400"><span className="font-bold uppercase tracking-widest">Practical: </span>{kc.practicalUse}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {view === 'project' && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400"><FileText className="h-4 w-4" /> Applied Project</h3>
+          <h4 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{lecture.appliedProjectHandout.title}</h4>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{lecture.appliedProjectHandout.description}</p>
+          <div className="mt-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+            <span className="font-bold uppercase tracking-widest text-xs text-slate-500 block mb-1">Reusable Output</span>
+            {lecture.appliedProjectHandout.reusableOutput}
+          </div>
+          <div className="mt-3 space-y-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Checklist</span>
+            {lecture.appliedProjectHandout.checklist.map((c, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{c}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 rounded-xl border border-slate-200 p-4 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            <span className="font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">Technical Spec</span>
+            <p className="mt-1">{lecture.appliedProjectHandout.technicalSpec}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function LessonCheckpoint({ onConfirm }: { onConfirm: () => void }) {
@@ -124,7 +267,7 @@ const handleDownloadDocs = (mod: Module) => {
       });
     } else if (lesson.type === 'game') {
       markdown += `*Interactive Simulation: ${lesson.title}*\n`;
-      markdown += `Launch this simulation on the Uplift Wealth platform.\n\n`;
+      markdown += `Launch this simulation on the Overlay Wealth platform.\n\n`;
     }
     markdown += `---\n\n`;
   });
@@ -138,7 +281,7 @@ const handleDownloadDocs = (mod: Module) => {
     markdown += `> **Did You Know?** ${mod.didYouKnow}\n\n`;
   }
 
-  markdown += `\n---\n*Generated by Uplift Wealth — Study Guide*\n`;
+  markdown += `\n---\n*Generated by Overlay Wealth — Study Guide*\n`;
 
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -252,6 +395,8 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete }: Mod
       case 'quiz': return <CheckCircle2 className="h-4 w-4" />;
       case 'game': return <Gamepad2 className="h-4 w-4" />;
       case 'video': return <PlayCircle className="h-4 w-4" />;
+      case 'lecture': return <GraduationCap className="h-4 w-4" />;
+      case 'article': return <FileText className="h-4 w-4" />;
       default: return <BookOpen className="h-4 w-4" />;
     }
   };
@@ -375,6 +520,155 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete }: Mod
               className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentLesson.type === 'lecture') {
+      const lecture = lectureClass;
+      return (
+        <div className="space-y-6 min-h-[620px]">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              {renderLessonIcon(currentLesson.type)}
+              Masterclass Lecture
+            </span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {currentLessonIndex + 1} of {module.lessons.length}
+            </span>
+          </div>
+          {lecture ? (
+            <LectureDeck lecture={lecture} />
+          ) : (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Lecture content is not yet available for this module.</p>
+          )}
+          <div className="mt-10 flex items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800">
+            <button type="button" onClick={handlePrev} disabled={currentLessonIndex === 0}
+              className={`inline-flex items-center rounded-xl border px-5 py-3 text-sm font-medium transition ${currentLessonIndex === 0
+                ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-600'
+                : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+            </button>
+            <button type="button" onClick={handleNext}
+              className="inline-flex items-center rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+            >
+              Mark Complete
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentLesson.type === 'article') {
+      if (currentLesson.featureId === 'black_finance_history') {
+        return (
+          <div className="space-y-6 min-h-[620px]">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                {renderLessonIcon(currentLesson.type)}
+                History of Black American Finance
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {currentLessonIndex + 1} of {module.lessons.length}
+              </span>
+            </div>
+            <ArchitectureOfExtraction />
+            <div className="mt-10 flex items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800">
+              <button type="button" onClick={handlePrev} disabled={currentLessonIndex === 0}
+                className={`inline-flex items-center rounded-xl border px-5 py-3 text-sm font-medium transition ${currentLessonIndex === 0
+                  ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-600'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+                }`}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+              </button>
+              <button type="button" onClick={handleNext}
+                className="inline-flex items-center rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+              >
+                Mark Complete
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (currentLesson.featureId === 'connecting_the_dots') {
+        return (
+          <div className="space-y-6 min-h-[620px]">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                {renderLessonIcon(currentLesson.type)}
+                Connecting The Dots
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {currentLessonIndex + 1} of {module.lessons.length}
+              </span>
+            </div>
+            <ConnectingTheDotsArticle />
+            <div className="mt-10 flex items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800">
+              <button type="button" onClick={handlePrev} disabled={currentLessonIndex === 0}
+                className={`inline-flex items-center rounded-xl border px-5 py-3 text-sm font-medium transition ${currentLessonIndex === 0
+                  ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-600'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+                }`}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+              </button>
+              <button type="button" onClick={handleNext}
+                className="inline-flex items-center rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+              >
+                Mark Complete
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-6 min-h-[620px]">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              {renderLessonIcon(currentLesson.type)}
+              Feature Article
+            </span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+              {currentLessonIndex + 1} of {module.lessons.length}
+            </span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white md:text-3xl">
+              {currentLesson.title}
+            </h2>
+          </div>
+          <div className="prose prose-slate max-w-none text-base leading-7 dark:prose-invert">
+            <Markdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+            >
+              {currentLesson.content || ''}
+            </Markdown>
+          </div>
+          <div className="mt-10 flex items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-800">
+            <button type="button" onClick={handlePrev} disabled={currentLessonIndex === 0}
+              className={`inline-flex items-center rounded-xl border px-5 py-3 text-sm font-medium transition ${currentLessonIndex === 0
+                ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-600'
+                : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+            </button>
+            <button type="button" onClick={handleNext}
+              className="inline-flex items-center rounded-xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+            >
+              Mark Complete
+              <ArrowRight className="ml-2 h-4 w-4" />
             </button>
           </div>
         </div>

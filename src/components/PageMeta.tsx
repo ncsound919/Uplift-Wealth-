@@ -12,11 +12,11 @@ export function PageMeta({
   title,
   description = 'Free interactive fintech education platform with 15 modules, trading simulators, and gamified learning.',
   canonical,
-  ogImage = '/brand-wealth.jpg',
+  ogImage = '/overlay-wealth.png',
   ogType = 'website',
 }: PageMetaProps) {
-  const fullTitle = `${title} — Uplift Wealth`;
-  const baseUrl = 'https://fintechfoundations.edu';
+  const fullTitle = `${title} — Overlay Wealth`;
+  const baseUrl = 'https://overlay365.org';
 
   return (
     <Helmet>

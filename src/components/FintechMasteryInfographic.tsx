@@ -376,6 +376,32 @@ export function FintechMasteryInfographic({
 
               {/* Direct Class Shortcuts (Primary Action) */}
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 space-y-1.5">
+                {/* Mastery progress */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-slate-400 dark:text-slate-500">Mastery</span>
+                    <span className={cn(
+                      "font-mono",
+                      isPhaseFullyDone ? "text-emerald-500" : isPhaseInProgress ? "text-amber-400" : "text-slate-400"
+                    )}>
+                      {finishedShortcutCount}/{step.shortcuts.length} modules
+                    </span>
+                  </div>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        isPhaseFullyDone
+                          ? "bg-gradient-to-r from-emerald-400 to-teal-400"
+                          : isPhaseInProgress
+                            ? "bg-gradient-to-r from-amber-400 to-orange-400"
+                            : "bg-slate-300 dark:bg-slate-600"
+                      )}
+                      style={{ width: `${step.shortcuts.length > 0 ? (finishedShortcutCount / step.shortcuts.length) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   <span>Start Class Directly:</span>
                   <button 

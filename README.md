@@ -1,6 +1,6 @@
 <div align="center">
 
-# FinTech Foundations
+# Overlay Wealth
 
 **Interactive financial education platform — from beginner to expert.**
 
@@ -12,7 +12,7 @@
 
 ## What Is This?
 
-FinTech Foundations is a full-stack fintech education platform that teaches modern financial technology through 15 modules spanning beginner to expert levels. Each module combines text lessons, interactive quizzes, simulations, and games.
+Overlay Wealth is a full-stack fintech education platform that teaches modern financial technology through 15 modules spanning beginner to expert levels. Each module combines text lessons, interactive quizzes, simulations, and games.
 
 ### Platform Highlights
 
@@ -49,7 +49,7 @@ Visit `http://localhost:3000` — the app includes a fully functional Express ba
 The repo ships with a `Dockerfile`, `.dockerignore`, and `render.yaml` blueprint.
 
 1. Push the repo to GitHub.
-2. In the Render dashboard: **New → Blueprint** → select the repo. Render provisions the `uplift-wealth` web service from `render.yaml`.
+2. In the Render dashboard: **New → Blueprint** → select the repo. Render provisions the `overlay-wealth` web service from `render.yaml`.
 3. In the service's **Environment** tab, set secrets:
    - `GEMINI_API_KEY` (Module Builder)
    - `ALPHA_VANTAGE_API_KEY` (real stock quotes; simulator falls back if omitted)

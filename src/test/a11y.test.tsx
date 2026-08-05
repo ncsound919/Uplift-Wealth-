@@ -72,6 +72,7 @@ describe('a11y', () => {
       <Dashboard
         modules={[]}
         completedModules={[]}
+        completedLessons={[]}
         onSelectModule={() => {}}
         activeLevel="beginner"
         onSelectLevel={() => {}}

@@ -110,7 +110,7 @@ export function buildBlueprint(answers: QuickStartAnswers): BusinessBlueprint {
     foundersCount: team === 'team' ? 'Co-founding partnership' : 'Solo founder (bootstrap)',
     selectedApis: apisFor(type, funding),
     marketingChannel: marketingFor(type),
-    founderName: '',
+    founderName: 'Your Name',
     founderState: state,
     fundingStrategy: fundingStrategyFor(funding),
     equitySplit: equityFor(team),
@@ -157,7 +157,7 @@ function cohortFor(type: BusinessType): string {
 function monetizationFor(type: BusinessType, choice: MonetizationType | null): string {
   const resolved = choice ?? (type === 'fintech' ? 'subscription' : type === 'food' || type === 'retail' ? 'margin' : 'service');
   switch (resolved) {
-    case 'subscription': return 'Subscription model (recurring software software license fee)';
+    case 'subscription': return 'Subscription model (recurring software license fee)';
     case 'transaction': return 'Transactional fee (small percentage + flat cost per transaction)';
     case 'margin': return 'Product margin (markup on goods sold)';
     case 'service': return 'Service fee (hourly or per-project pricing)';

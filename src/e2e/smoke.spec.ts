@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Uplift Wealth', () => {
+test.describe('Overlay Wealth', () => {
   test('homepage loads with branding', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText(/FinTech/i).first()).toBeVisible();
+    await expect(page.getByText(/Overlay/i).first()).toBeVisible();
   });
 
   test('sidebar navigation switches views', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(/Lecture Library/i).click();
-    await expect(page.getByText(/Lecture Library/i)).toBeVisible();
+    await page.getByText(/Finance Dictionary/i).click();
+    await expect(page.getByText(/Finance Dictionary/i)).toBeVisible();
   });
 
   test('dark mode toggle works', async ({ page }) => {
@@ -28,9 +28,9 @@ test.describe('Uplift Wealth', () => {
     await expect(page.getByText(/Stock Market Simulator/i)).toBeVisible();
   });
 
-  test('wealth building section accessible', async ({ page }) => {
+  test('wealth building section accessible on learning pathways', async ({ page }) => {
     await page.goto('/');
-    await page.getByText(/Wealth Building/i).click();
+    await expect(page.getByText(/Wealth Building/i)).toBeVisible();
     await expect(page.getByText(/Credit Mastery/i)).toBeVisible();
   });
 });

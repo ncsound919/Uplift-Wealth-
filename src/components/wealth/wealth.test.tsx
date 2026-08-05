@@ -208,6 +208,15 @@ describe('ChapterShell', () => {
     expect(screen.getByText('Real Estate')).toBeInTheDocument();
     expect(screen.getByText(/22 min read/i)).toBeInTheDocument();
   });
+
+  it('does not mangle dollar amounts as math and still highlights glossary terms', () => {
+    const chapter = wealthChapters[0]; // Credit Mastery contains "$500 of a $5,000"
+    render(<MemoryRouter><ChapterShell chapter={chapter} tool={<div>tool</div>} /></MemoryRouter>);
+    // Currency should render as plain text, not KaTeX math-italic fragments.
+    expect(screen.getByText(/\$500 of a \$5,000 limit = 10%\./)).toBeInTheDocument();
+    // Glossary highlighting still works alongside the currency fix.
+    expect(screen.getAllByRole('button', { name: /dictionary definition available/i }).length).toBeGreaterThanOrEqual(1);
+  });
 });
 
 describe('tool interactions', () => {

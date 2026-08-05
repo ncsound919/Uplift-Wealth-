@@ -136,7 +136,7 @@ export function FintechBusinessBuilder({
   const [selectedCohort, setSelectedCohort] = useState<string>('Gig workers & Freelancers');
   const [reachUsers, setReachUsers] = useState<number>(10000); // Target User Reach
   
-  const [monetization, setMonetization] = useState<string>('Subscription model (recurring software software license fee)');
+  const [monetization, setMonetization] = useState<string>('Subscription model (recurring software license fee)');
   const [monthlyFee, setMonthlyFee] = useState<number>(12); // Average price per user / transaction
   const [txVolume, setTxVolume] = useState<number>(150000); // Estimated monthly transaction volume in dollars (if transaction based)
 
@@ -515,6 +515,7 @@ export function FintechBusinessBuilder({
     { id: 'services', name: 'Services & Trades', desc: 'Cleaning, repair, beauty, or handyman services', cagr: 'Grow' },
     { id: 'consulting', name: 'Consulting & Coaching', desc: 'Advice, training, or professional services', cagr: 'Grow' },
     { id: 'real_estate', name: 'Real Estate', desc: 'Rental property, flipping, or property management', cagr: 'Grow' },
+    { id: 'other', name: 'General Business', desc: 'Any other type of business', cagr: 'Grow' },
     { id: 'Other', name: 'Other Route', desc: 'Type in your own business specialty', cagr: 'N/A' }
   ];
 
@@ -538,7 +539,7 @@ export function FintechBusinessBuilder({
   ];
 
   const MONETIZATION_MODELS = [
-    { label: 'Software Subscription (SaaS)', val: 'Subscription model (recurring software software license fee)', desc: 'Consistent ARR with low churn dependency' },
+    { label: 'Software Subscription (SaaS)', val: 'Subscription model (recurring software license fee)', desc: 'Consistent ARR with low churn dependency' },
     { label: 'Transactional Take-Rate (bps)', val: 'Transactional fee (small percentage + flat cost per transaction)', desc: 'Scales exponentially with card volume processing' },
     { label: 'Interest Arbitrage (Spread)', val: 'Net Interest Margin (earning interest on cash balances)', desc: 'Earn 3-5% yield on sweep ledger deposits' },
     { label: 'Advising Asset Under Management (AUM)', val: 'AUM split fee (percentage of assets actively managed)', desc: 'Aligned directly with consumer capital expansion' }
@@ -1880,13 +1881,14 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
           <button
             onClick={() => {
               setCurrentStep(1);
+              setBusinessType('fintech');
               setLane('Digital Banking');
               setCustomLane('');
               setProblem('High transaction friction and slow settlement corridors.');
               setCustomProblem('');
               setSelectedCohort('Gig workers & Freelancers');
               setReachUsers(10000);
-              setMonetization('Subscription model (recurring software software license fee)');
+              setMonetization('Subscription model (recurring software license fee)');
               setMonthlyFee(12);
               setTxVolume(150000);
               setBusinessName('');

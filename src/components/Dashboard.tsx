@@ -29,12 +29,14 @@ import {
   Building2,
   Users,
   TrendingUp,
-  Landmark
+  Landmark,
+  ArrowRight
 } from 'lucide-react';
 
 interface DashboardProps {
   modules: Module[];
   completedModules: string[];
+  completedLessons: string[];
   onSelectModule: (moduleId: string) => void;
   activeLevel: CourseLevel;
   onSelectLevel: (level: CourseLevel) => void;
@@ -71,6 +73,7 @@ const BADGES: BadgeInfo[] = [
 export function Dashboard({ 
   modules, 
   completedModules, 
+  completedLessons,
   onSelectModule, 
   activeLevel, 
   onSelectLevel,
@@ -101,15 +104,60 @@ export function Dashboard({
     <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-12">
       
       {/* Title Header */}
-      <div className="text-center pt-8 pb-4 space-y-4">
-        <h1 className="text-4xl md:text-6xl font-display font-black text-slate-900 dark:text-white tracking-tight">
-          Master Modern Money & Financial Tech
-        </h1>
-        
-        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
-          An easy, step-by-step guide to how modern money works: from digital payments and bank apps to stocks, crypto, and starting your own app.
-        </p>
+      <div className="relative text-center pt-10 pb-6 space-y-5">
+        {/* Ambient glows */}
+        <div className="pointer-events-none absolute left-1/4 top-0 h-72 w-72 rounded-full bg-emerald-500/10 blur-[120px] animate-aurora" />
+        <div className="pointer-events-none absolute right-1/4 top-8 h-72 w-72 rounded-full bg-indigo-500/10 blur-[120px] animate-aurora-2" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-amber-400/8 blur-[110px]" />
+
+        <div className="relative">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black text-slate-900 dark:text-white tracking-tight leading-[1.05]">
+            Build the Wealth <span className="font-serif-accent italic text-gradient-emerald-gold">Your Family Deserves</span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
+            An easy, step-by-step guide to how modern money works: from digital payments and bank apps to stocks, crypto, and starting your own app.
+          </p>
+        </div>
       </div>
+
+      {/* Continue / Next best action */}
+      {(() => {
+        const nextModule = modules.find((m) => !completedModules.includes(m.id));
+        const levelDone = !nextModule;
+        const streakMsg = streak >= 2 ? `${streak}-Day Streak` : 'Daily Goal';
+        const Icon = nextModule ? nextModule.icon : Award;
+        const levelLabel = activeLevel.charAt(0).toUpperCase() + activeLevel.slice(1);
+        return (
+          <motion.button
+            type="button"
+            onClick={() => onSelectModule(levelDone ? 'glossary' : nextModule!.id)}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            whileHover={{ y: -3 }}
+            className="group relative mx-auto flex w-full max-w-3xl items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 to-indigo-500" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-indigo-500 text-white shadow-md">
+              <Icon size={22} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-indigo-500">
+                {levelDone ? `${levelLabel} Path Complete` : streakMsg}
+              </div>
+              <div className="truncate font-display text-lg font-bold text-slate-900 dark:text-white">
+                {levelDone ? 'Explore the Finance Dictionary' : `Next: ${nextModule!.title}`}
+              </div>
+              <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                {levelDone
+                  ? 'Switch to the next level or brush up on terms in the dictionary.'
+                  : `${nextModule!.lessons.length} lessons · ${completedModules.length} modules done`}
+              </div>
+            </div>
+            <ArrowRight size={18} className="shrink-0 text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-indigo-500 dark:text-slate-600" />
+          </motion.button>
+        );
+      })()}
 
 
       {/* Blueprint Roadmap (Serves as Formal Class Directory) */}

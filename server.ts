@@ -853,7 +853,7 @@ app.get('/api/admin/audit-logs', authenticate, requireRole(['admin', 'institutio
 
 // 6.10 DYNAMIC SITEMAP (SEO)
 app.get('/api/sitemap.xml', (req: Request, res: Response) => {
-  const baseUrl = process.env.APP_URL || 'https://fintechfoundations.edu';
+  const baseUrl = process.env.APP_URL || 'https://overlay365.org';
   const today = new Date().toISOString().split('T')[0];
 
   const staticRoutes = [

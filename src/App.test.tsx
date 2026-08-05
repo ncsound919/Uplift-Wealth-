@@ -233,20 +233,20 @@ describe('App', () => {
 
   it('renders the sidebar with branding', async () => {
     await renderApp();
-    const fintechs = screen.getAllByText(/FinTech/i);
-    expect(fintechs.length).toBeGreaterThanOrEqual(1);
+    const brands = screen.getAllByText(/Overlay/i);
+    expect(brands.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders the mobile header', async () => {
     await renderApp();
-    const foundations = screen.getAllByText(/Foundations/i);
-    expect(foundations.length).toBeGreaterThanOrEqual(1);
+    const wealth = screen.getAllByText(/Wealth/i);
+    expect(wealth.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows sidebar navigation links', async () => {
     await renderApp();
     expect(screen.getByText(/Learning Pathways/i)).toBeInTheDocument();
-    expect(screen.getByText(/Lecture Library/i)).toBeInTheDocument();
+    expect(screen.getByText(/Finance Dictionary/i)).toBeInTheDocument();
   });
 
   it('shows sign in button when no user', async () => {
@@ -285,15 +285,13 @@ describe('App', () => {
     expect(games.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('navigates to knowledge view on sidebar click', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Lecture Library/i));
+  it('navigates to knowledge view via direct route', async () => {
+    await renderAt('/knowledge');
     await waitFor(() => expect(screen.getByTestId('knowledge-mock')).toBeInTheDocument());
   });
 
-  it('navigates to architecture view', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/History of Black American Finance/i));
+  it('navigates to architecture view via direct route', async () => {
+    await renderAt('/architecture');
     await waitFor(() => expect(screen.getByTestId('architecture-mock')).toBeInTheDocument());
   });
 
@@ -337,9 +335,8 @@ describe('App', () => {
     expect(sidebar.className).toContain('md:translate-x-0');
   });
 
-  it('navigates to map view', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Fintech Starter Map/i));
+  it('navigates to map view via direct route', async () => {
+    await renderAt('/map');
     await waitFor(() => expect(screen.getByTestId('map-mock')).toBeInTheDocument());
   });
 
@@ -396,9 +393,8 @@ const getGamesButton = () => {
     await waitFor(() => expect(screen.getByText(/Sign In/i)).toBeInTheDocument());
   });
 
-  it('opens connecting the dots article', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Connecting The Dots/i));
+  it('opens connecting the dots article via direct route', async () => {
+    await renderAt('/article');
     await waitFor(() => expect(screen.getByTestId('dots-mock')).toBeInTheDocument());
   });
 
@@ -428,15 +424,14 @@ const getGamesButton = () => {
     expect(screen.getByText(/Light Mode/i)).toBeInTheDocument();
   });
 
-  it('shows wealth building link in sidebar', async () => {
+  it('shows wealth building section on learning pathways', async () => {
     await renderApp();
-    const wealth = screen.getByText(/Wealth Building/i);
+    const wealth = screen.getByTestId('wealth-mock');
     expect(wealth).toBeInTheDocument();
   });
 
-  it('navigates to wealth building hub', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Wealth Building/i));
+  it('navigates to wealth building hub via direct route', async () => {
+    await renderAt('/wealth-building');
     await waitFor(() => expect(screen.getByTestId('wealth-mock')).toBeInTheDocument());
   });
 
@@ -880,18 +875,16 @@ const getGamesButton = () => {
 
   // ─── Fintech Starter Map Callbacks ──────────────────────────────────
 
-  it('navigates to sim and builder via fintech starter map', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Fintech Starter Map/i));
+  it('navigates to sim via fintech starter map (direct route)', async () => {
+    await renderAt('/map');
     await waitFor(() => expect(screen.getByTestId('map-mock')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('map-to-sim'));
     await waitFor(() => expect(screen.getByText(/Return to Syllabus/i)).toBeInTheDocument());
   });
 
-  it('navigates to business builder via fintech starter map', async () => {
-    await renderApp();
-    fireEvent.click(screen.getByText(/Fintech Starter Map/i));
+  it('navigates to business builder via fintech starter map (direct route)', async () => {
+    await renderAt('/map');
     await waitFor(() => expect(screen.getByTestId('map-mock')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('map-to-builder'));

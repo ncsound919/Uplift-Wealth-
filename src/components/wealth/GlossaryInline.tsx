@@ -1,4 +1,4 @@
-import { visit } from 'unist-util-visit';
+import { visitParents } from 'unist-util-visit-parents';
 import { useState } from 'react';
 import { BookOpen, ExternalLink } from 'lucide-react';
 import { FINANCE_GLOSSARY_TERMS, type GlossaryTerm } from '../FinanceGlossary';
@@ -45,12 +45,18 @@ const MATCH_REGEX = new RegExp('\\b(' + MATCH_KEYS.map(escapeRegExp).join('|') +
  */
 export function rehypeGlossaryHighlight() {
   return (tree: any) => {
-    visit(tree, 'text', (node, index, parent) => {
+    visitParents(tree, 'text', (node, ancestors) => {
+      const parent = ancestors[ancestors.length - 1];
       if (!parent || parent.type !== 'element') return;
-      // Never rewrite inside links or inline code, or inside spans we just
+      // Never rewrite inside links, inline code, or KaTeX math output (the
+      // highlight could corrupt math-rendered DOM), or inside spans we just
       // inserted (avoids double-wrapping during traversal).
       if (parent.tagName === 'a' || parent.tagName === 'code') return;
       if (parent.properties && parent.properties.dataGlossary) return;
+      for (const anc of ancestors) {
+        const cls = String(anc.properties?.className || '');
+        if (anc.type === 'element' && /katex/.test(cls)) return;
+      }
 
       const value = node.value as string;
       if (!value || value.trim().length < 2) return;
@@ -85,6 +91,8 @@ export function rehypeGlossaryHighlight() {
       }
 
       // Replace the single text node with the split children.
+      const index = parent.children.indexOf(node);
+      if (index === -1) return;
       parent.children.splice(index, 1, ...parts);
     });
   };

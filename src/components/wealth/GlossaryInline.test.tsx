@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Markdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { rehypeGlossaryHighlight, GlossaryTermSpan } from './GlossaryInline';
 import { FINANCE_GLOSSARY_TERMS } from '../FinanceGlossary';
 
@@ -62,5 +64,36 @@ describe('GlossaryInline', () => {
     renderBody('Your FICO Score matters.');
     const matches = screen.getAllByRole('button', { name: /FICO Score.*dictionary/i });
     expect(matches).toHaveLength(1);
+  });
+
+  it('does not highlight terms inside KaTeX math output', () => {
+    render(
+      <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[[rehypeKatex, { strict: false }], rehypeGlossaryHighlight]} components={{
+        span: ({ node, children }: any) => {
+          const termId = node?.properties?.dataGlossary as string | undefined;
+          if (termId) return <GlossaryTermSpan termId={termId}>{children}</GlossaryTermSpan>;
+          return <span {...{ node }}>{children}</span>;
+        },
+      }}>
+        {`$FICO + Interest$ is math, not plain text.`}
+      </Markdown>
+    );
+    // No glossary highlight should be produced inside the math span.
+    expect(screen.queryAllByRole('button', { name: /dictionary definition available/i })).toHaveLength(0);
+  });
+
+  it('does not render glossary highlights inside single-dollar math even when math is enabled', () => {
+    render(
+      <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[[rehypeKatex, { strict: false }], rehypeGlossaryHighlight]} components={{
+        span: ({ node, children }: any) => {
+          const termId = node?.properties?.dataGlossary as string | undefined;
+          if (termId) return <GlossaryTermSpan termId={termId}>{children}</GlossaryTermSpan>;
+          return <span>{children}</span>;
+        },
+      }}>
+        {`Score = $FICO$`}
+      </Markdown>
+    );
+    expect(screen.queryAllByRole('button', { name: /dictionary definition available/i })).toHaveLength(0);
   });
 });

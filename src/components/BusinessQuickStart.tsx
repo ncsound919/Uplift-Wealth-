@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Check, SkipForward, ChevronRight, ArrowRight, Wand2 } from 'lucide-react';
+import { Check, SkipForward, ChevronRight, ArrowRight, Wand2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import {
   buildBlueprint,
@@ -55,6 +55,16 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
   const [nameInput, setNameInput] = useState<string>('');
   const [revealStage, setRevealStage] = useState<number>(0);
   const [revealDone, setRevealDone] = useState<boolean>(false);
+  const revealIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Clean up the reveal interval if the component unmounts mid-reveal.
+  useEffect(() => {
+    return () => {
+      if (revealIntervalRef.current !== null) {
+        clearInterval(revealIntervalRef.current);
+      }
+    };
+  }, []);
 
   const setAnswer = (patch: Partial<Answer>) => {
     setAnswers(prev => ({ ...prev, ...patch }));
@@ -78,9 +88,11 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
       setRevealStage(i);
       if (i >= REVEAL_STAGES.length) {
         clearInterval(interval);
+        revealIntervalRef.current = null;
         setRevealDone(true);
       }
     }, 650);
+    revealIntervalRef.current = interval;
   };
 
   const handleComplete = () => {
@@ -331,11 +343,15 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
                   <span className="block text-xs font-black text-slate-900 dark:text-white">{label}</span>
                   {active && (
                     <span className="block text-[11px] text-slate-500 mt-0.5">
-                      {stage.field === 'businessType' ? (answers.businessType || '—') :
-                       stage.field === 'customers' ? (answers.customers || '—') :
-                       stage.field === 'monetization' ? (answers.monetization || '—') :
-                       stage.field === 'funding' ? (answers.funding === 'raise' ? 'Raising investor money' : 'Bootstrapping') :
-                       (answers.state || '—')}
+                      {stage.field === 'businessType'
+                        ? (BUSINESS_TYPE_OPTIONS.find(o => o.id === answers.businessType)?.label || '—')
+                        : stage.field === 'customers'
+                        ? (answers.customers || '—')
+                        : stage.field === 'monetization'
+                        ? (MONETIZATION_OPTIONS.find(o => o.id === answers.monetization)?.label || '—')
+                        : stage.field === 'funding'
+                        ? (answers.funding === 'raise' ? 'Raising investor money' : 'Bootstrapping')
+                        : (answers.state || '—')}
                     </span>
                   )}
                 </div>

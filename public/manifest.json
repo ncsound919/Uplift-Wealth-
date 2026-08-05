@@ -1,6 +1,6 @@
 {
-  "name": "FinTech Foundations",
-  "short_name": "FinTechFoundations",
+  "name": "Overlay Wealth",
+  "short_name": "Overlay Wealth",
   "description": "Free interactive fintech education platform with 15 modules, trading simulators, and gamified learning.",
   "start_url": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/favicon-192.png",
+      "src": "/overlay-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon-512.png",
+      "src": "/overlay-logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

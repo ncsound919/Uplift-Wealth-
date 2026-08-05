@@ -55,4 +55,25 @@ describe('businessBlueprint', () => {
     expect(BUSINESS_TYPE_OPTIONS.length).toBeGreaterThanOrEqual(6);
     expect(BUSINESS_TYPE_OPTIONS.map(o => o.id)).toContain('fintech');
   });
+
+  it('defaults founderName to a usable placeholder', () => {
+    const bp = buildBlueprint({ businessType: 'retail', customers: null, problem: null, monetization: null, team: null, businessName: null, funding: null, state: null });
+    expect(bp.founderName.trim().length).toBeGreaterThan(0);
+  });
+
+  it('never emits the doubled "software software" subscription typo', () => {
+    const bp = buildBlueprint({ businessType: 'fintech', customers: null, problem: null, monetization: 'subscription', team: null, businessName: null, funding: null, state: null });
+    expect(bp.monetization).not.toMatch(/software software/);
+    expect(bp.monetization).toContain('Subscription');
+  });
+
+  it('maps "Something Else" to a selectable General Business lane', () => {
+    const bp = buildBlueprint({ businessType: 'other', customers: null, problem: null, monetization: null, team: null, businessName: null, funding: null, state: null });
+    expect(bp.lane).toBe('General Business');
+  });
+
+  it('uses subscription monetization by default for fintech', () => {
+    const bp = buildBlueprint({ businessType: 'fintech', customers: null, problem: null, monetization: null, team: null, businessName: null, funding: null, state: null });
+    expect(bp.monetization).toContain('Subscription');
+  });
 });

@@ -40,16 +40,18 @@ describe('AuthModal', () => {
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
   });
 
-  it('shows email input with default value', () => {
+  it('shows email input with placeholder when no default', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    const emailInput = screen.getByDisplayValue('ncsound919@gmail.com');
+    const emailInput = screen.getByPlaceholderText('name@example.com');
     expect(emailInput).toBeInTheDocument();
+    expect(emailInput).toHaveValue('');
   });
 
-  it('shows password input', () => {
+  it('shows password input (empty by default)', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    const passwordInput = screen.getByDisplayValue('password123');
+    const passwordInput = screen.getByPlaceholderText('••••••••');
     expect(passwordInput).toBeInTheDocument();
+    expect(passwordInput).toHaveValue('');
   });
 
   it('shows Sign In button in login mode', () => {
@@ -75,10 +77,12 @@ describe('AuthModal', () => {
     expect(screen.getByPlaceholderText('Your Full Name')).toBeInTheDocument();
   });
 
-  it('shows name default value in signup mode', () => {
+  it('shows name input empty by default in signup mode', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     fireEvent.click(screen.getByText('Sign Up'));
-    expect(screen.getByDisplayValue('FinTech Scholar')).toBeInTheDocument();
+    const nameInput = screen.getByPlaceholderText('Your Full Name');
+    expect(nameInput).toBeInTheDocument();
+    expect(nameInput).toHaveValue('');
   });
 
   it('toggles back to login mode from signup', () => {
@@ -99,6 +103,8 @@ describe('AuthModal', () => {
   it('calls loginWithEmail on form submit', async () => {
     mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'Test' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => {
       expect(mockLoginWithEmail).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123', undefined);
@@ -108,6 +114,8 @@ describe('AuthModal', () => {
   it('calls onSuccess after successful login', async () => {
     mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'Test User' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => {
       expect(mockOnSuccess).toHaveBeenCalledWith({ id: 'u1', name: 'Test User' });
@@ -117,6 +125,8 @@ describe('AuthModal', () => {
   it('calls onClose after successful login', async () => {
     mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'Test User' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => {
       expect(mockOnClose).toHaveBeenCalled();
@@ -128,7 +138,7 @@ describe('AuthModal', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     fireEvent.click(screen.getByText(/Continue with Google/));
     await waitFor(() => {
-      expect(mockLoginWithGoogle).toHaveBeenCalledWith('ncsound919@gmail.com');
+      expect(mockLoginWithGoogle).toHaveBeenCalled();
     });
   });
 
@@ -144,6 +154,8 @@ describe('AuthModal', () => {
   it('shows error message on login failure', async () => {
     mockLoginWithEmail.mockRejectedValue(new Error('Invalid credentials'));
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
   });
@@ -151,6 +163,8 @@ describe('AuthModal', () => {
   it('shows default error message when no message provided', async () => {
     mockLoginWithEmail.mockRejectedValue(new Error());
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     expect(await screen.findByText('Authentication failed. Please try again.')).toBeInTheDocument();
   });
@@ -166,6 +180,9 @@ describe('AuthModal', () => {
     mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'FinTech Scholar' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     fireEvent.click(screen.getByText('Sign Up'));
+    fireEvent.change(screen.getByPlaceholderText('Your Full Name'), { target: { value: 'FinTech Scholar' } });
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => {
       expect(mockLoginWithEmail).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123', 'FinTech Scholar');
@@ -175,6 +192,8 @@ describe('AuthModal', () => {
   it('shows authenticating text while loading', async () => {
     mockLoginWithEmail.mockImplementation(() => new Promise(() => {}));
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     expect(await screen.findByText('Authenticating...')).toBeInTheDocument();
   });
@@ -212,14 +231,14 @@ describe('AuthModal', () => {
 
   it('updates the email field', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    const emailInput = screen.getByDisplayValue('ncsound919@gmail.com');
+    const emailInput = screen.getByPlaceholderText('name@example.com');
     fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
     expect(screen.getByDisplayValue('new@example.com')).toBeInTheDocument();
   });
 
   it('updates the password field', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    const passwordInput = screen.getByDisplayValue('password123');
+    const passwordInput = screen.getByPlaceholderText('••••••••');
     fireEvent.change(passwordInput, { target: { value: 'hunter2' } });
     expect(screen.getByDisplayValue('hunter2')).toBeInTheDocument();
   });
