@@ -952,10 +952,11 @@ export function FinanceGlossary() {
                 return (
                   <motion.div
                     key={item.id}
+                    id={`term-${item.id}`}
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-indigo-500/50 hover:shadow-[0_4px_24px_rgba(99,102,241,0.06)] dark:hover:shadow-[0_4px_24px_rgba(99,102,241,0.12)] transition-all flex flex-col justify-between space-y-4 group relative"
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-indigo-500/50 hover:shadow-[0_4px_24px_rgba(99,102,241,0.06)] dark:hover:shadow-[0_4px_24px_rgba(99,102,241,0.12)] transition-all flex flex-col justify-between space-y-4 group relative scroll-mt-24"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-3">

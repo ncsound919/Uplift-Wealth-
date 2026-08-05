@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import { WealthChapter } from '../../data/wealthChapters';
 import { useChapterCompletion } from '../../hooks/useChapterCompletion';
 import { MarkCompleteButton } from './MarkCompleteButton';
+import { rehypeGlossaryHighlight, GlossaryTermSpan } from './GlossaryInline';
 
 interface Props {
   chapter: WealthChapter;
@@ -38,7 +39,7 @@ export function ChapterShell({ chapter, tool }: Props) {
       <div className="prose prose-slate dark:prose-invert max-w-none">
         <Markdown
           remarkPlugins={[remarkMath]}
-          rehypePlugins={[[rehypeKatex, { strict: false }]]}
+          rehypePlugins={[[rehypeKatex, { strict: false }], rehypeGlossaryHighlight]}
           components={{
             a: ({ href, children }) => (
               <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300">
@@ -51,6 +52,11 @@ export function ChapterShell({ chapter, tool }: Props) {
                 {children}
               </blockquote>
             ),
+            span: ({ node, children }) => {
+              const termId = (node as any)?.properties?.dataGlossary as string | undefined;
+              if (termId) return <GlossaryTermSpan termId={termId}>{children}</GlossaryTermSpan>;
+              return <span>{children}</span>;
+            },
           }}
         >
           {chapter.body}

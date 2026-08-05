@@ -37,9 +37,13 @@ import {
   Scale,
   Calendar,
   AlertTriangle,
-  UserCheck
+  UserCheck,
+  Rocket
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { FintechStarterMap } from './FintechStarterMap';
+import { BusinessQuickStart } from './BusinessQuickStart';
+import type { BusinessBlueprint } from '../lib/businessBlueprint';
 
 // State portal metadata for quick legal lookup and comparative scoring
 const STATE_PORTALS: Record<string, { 
@@ -119,6 +123,8 @@ export function FintechBusinessBuilder({
   badges = []
 }: FintechBusinessBuilderProps = {}) {
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [mode, setMode] = useState<'builder' | 'map' | 'quickstart'>('builder');
+  const [businessType, setBusinessType] = useState<'fintech' | 'retail' | 'food' | 'services' | 'consulting' | 'real_estate' | 'other'>('fintech');
   
   // Pipeline State Store
   const [lane, setLane] = useState<string>('Digital Banking');
@@ -283,12 +289,12 @@ export function FintechBusinessBuilder({
 
   // Milestone mapping (12 steps grouped into 6 clear progress phases)
   const MILESTONES = [
-    { title: 'The Blueprint', range: [1, 2, 3] },
-    { title: 'Financials', range: [4, 5] },
-    { title: 'Identity', range: [6] },
-    { title: 'Corporate Shell', range: [7, 8, 9] },
-    { title: 'Tech & GTM', range: [10, 11] },
-    { title: 'Dossier & Sim', range: [12] }
+    { title: 'The Basics', range: [1, 2, 3] },
+    { title: 'Your Money', range: [4, 5] },
+    { title: 'Name & Brand', range: [6] },
+    { title: 'Legal Setup', range: [7, 8, 9] },
+    { title: 'Tools & Growth', range: [10, 11] },
+    { title: 'Your Plan', range: [12] }
   ];
 
   const currentMilestoneIndex = useMemo(() => {
@@ -312,18 +318,18 @@ export function FintechBusinessBuilder({
 
   const getStepTitle = (step: number) => {
     const titles = [
-      'Sector Design',
-      'Friction Target',
-      'Beachhead Sizing',
-      'Pricing Configuration',
-      'Revenue Strategy',
-      'Corporate Identity',
-      'Shell Selection',
-      'Jurisdiction Picker',
-      'Headquarters Setup',
-      'API Core Rails',
-      'GTM & Vesting Split',
-      'Dossier Summary'
+      'Your Business Type',
+      'The Problem',
+      'Your Customers',
+      'Your Pricing',
+      'How You Make Money',
+      'Name & Brand',
+      'Business Structure',
+      'Where to Register',
+      'Business Address',
+      'Your Tech Tools',
+      'Growth & Team',
+      'Your Plan'
     ];
     return titles[step - 1] || 'Venture Progress';
   };
@@ -351,6 +357,32 @@ export function FintechBusinessBuilder({
     setBusinessName(name);
   };
 
+  // Apply a QuickStart blueprint to seed the full Step-by-Step builder state.
+  const applyBlueprint = (bp: BusinessBlueprint) => {
+    setBusinessType(bp.businessType);
+    setLane(bp.lane);
+    setCustomLane('');
+    setProblem(bp.problem);
+    setCustomProblem('');
+    setSelectedCohort(bp.selectedCohort);
+    setReachUsers(bp.reachUsers);
+    setMonetization(bp.monetization);
+    setMonthlyFee(bp.monthlyFee);
+    setTxVolume(bp.txVolume);
+    setBusinessName(bp.businessName);
+    setBrandStyle(bp.brandStyle);
+    setStructure(bp.structure);
+    setFilingState(bp.filingState);
+    setHqType(bp.hqType);
+    setFoundersCount(bp.foundersCount);
+    setSelectedApis(bp.selectedApis);
+    setMarketingChannel(bp.marketingChannel);
+    setFounderName(bp.founderName);
+    setFounderState(bp.founderState);
+    setFundingStrategy(bp.fundingStrategy);
+    setEquitySplit(bp.equitySplit);
+  };
+
   // High fidelity stress-test simulation algorithm
   const runStressTest = () => {
     setIsSimulating(true);
@@ -373,19 +405,32 @@ export function FintechBusinessBuilder({
     let safeClosed = false;
     let complianceScore = 100;
 
-    // Phase 1: Security Audit Challenge
-    logs.push(`[00:08] CHALLENGE: FinCEN and state banking regulators launch sudden security audit...`);
-    if (selectedApis.includes('KYC Identity Decisioning') || selectedApis.includes('Anti-Fraud ML Engine')) {
-      logs.push(`[00:10] SUCCESS: Active KYC/Fraud prevention rails verified all customer profiles. Audit PASSED!`);
-      complianceScore = 100;
-      auditPassed = true;
+    // Phase 1: Security Audit Challenge (fintech) / Operations Check (general)
+    if (businessType === 'fintech') {
+      logs.push(`[00:08] CHALLENGE: FinCEN and state banking regulators launch sudden security audit...`);
+      if (selectedApis.includes('KYC Identity Decisioning') || selectedApis.includes('Anti-Fraud ML Engine')) {
+        logs.push(`[00:10] SUCCESS: Active KYC/Fraud prevention rails verified all customer profiles. Audit PASSED!`);
+        complianceScore = 100;
+        auditPassed = true;
+      } else {
+        logs.push(`[00:10] FAIL: No active compliance or anti-money-laundering API rails detected! Spoof users flagged.`);
+        logs.push(`[00:11] WARNING: Regulators issue $25,000 provisional administrative penalty. Cease-and-desist warning!`);
+        userSuccess = false;
+        complianceScore = 35;
+        auditPassed = false;
+        finalUsers = Math.round(finalUsers * 0.4); // Lose 60% of users due to account freezes
+      }
     } else {
-      logs.push(`[00:10] FAIL: No active compliance or anti-money-laundering API rails detected! Spoof users flagged.`);
-      logs.push(`[00:11] WARNING: Regulators issue $25,000 provisional administrative penalty. Cease-and-desist warning!`);
-      userSuccess = false;
-      complianceScore = 35;
-      auditPassed = false;
-      finalUsers = Math.round(finalUsers * 0.4); // Lose 60% of users due to account freezes
+      logs.push(`[00:08] CHALLENGE: Local licensing and business operations spot-check launched...`);
+      if (selectedApis.length > 0) {
+        logs.push(`[00:10] SUCCESS: Operations stack verified — invoicing, payments, and scheduling ready. PASSED!`);
+        complianceScore = 100;
+        auditPassed = true;
+      } else {
+        logs.push(`[00:10] WARNING: No operations tools selected. Manual record-keeping required.`);
+        complianceScore = 65;
+        auditPassed = true;
+      }
     }
 
     // Phase 2: Funding Pitch Challenge
@@ -463,6 +508,18 @@ export function FintechBusinessBuilder({
     { id: 'Other', name: 'Other Route', desc: 'Type in your own customized fintech vertical', cagr: 'N/A' }
   ];
 
+  // Generic business lanes shown when the user picks a non-fintech business type.
+  const GENERAL_LANES = [
+    { id: 'retail', name: 'Retail & E-Commerce', desc: 'Online store, shop, or brand selling products', cagr: 'Grow' },
+    { id: 'food', name: 'Food & Restaurants', desc: 'Restaurant, food truck, catering, or meal service', cagr: 'Grow' },
+    { id: 'services', name: 'Services & Trades', desc: 'Cleaning, repair, beauty, or handyman services', cagr: 'Grow' },
+    { id: 'consulting', name: 'Consulting & Coaching', desc: 'Advice, training, or professional services', cagr: 'Grow' },
+    { id: 'real_estate', name: 'Real Estate', desc: 'Rental property, flipping, or property management', cagr: 'Grow' },
+    { id: 'Other', name: 'Other Route', desc: 'Type in your own business specialty', cagr: 'N/A' }
+  ];
+
+  const activeLanes = businessType === 'fintech' ? LANES : GENERAL_LANES;
+
   const PROBLEMS = [
     { text: '“SMEs & freelancers wait 5+ days to get paid globally.”', value: 'High transaction friction and slow settlement corridors.' },
     { text: '“Legacy credit checks exclude 40M+ credit-invisible citizens.”', value: 'Systemic exclusion from thin credit files and lack of alternative underwriting.' },
@@ -522,6 +579,17 @@ export function FintechBusinessBuilder({
     { id: 'Web3 Stablecoin Rails', name: 'Circle Mint SDK / Coinbase API', category: 'Crypto', desc: 'Interacts with USDC corridors for borderless settlements.' }
   ];
 
+  // Generic operations stack shown for non-fintech businesses.
+  const GENERAL_TOOLS = [
+    { id: 'Payments API Integration', name: 'Payments Processing', category: 'Sales', desc: 'Accept card, cash, or digital payments from customers.' },
+    { id: 'BaaS Ledger Aggregator', name: 'Bookkeeping & Invoicing', category: 'Finance', desc: 'Track income, expenses, and send professional invoices.' },
+    { id: 'KYC Identity Decisioning', name: 'Scheduling & Booking', category: 'Operations', desc: 'Let customers book appointments or orders online.' },
+    { id: 'Anti-Fraud ML Engine', name: 'Inventory & POS', category: 'Operations', desc: 'Manage stock, scan sales, and reorder automatically.' },
+    { id: 'Web3 Stablecoin Rails', name: 'Website & Online Store', category: 'Growth', desc: 'Showcase your business and sell online.' }
+  ];
+
+  const activeTools = businessType === 'fintech' ? TECHNICAL_APIS : GENERAL_TOOLS;
+
   const GROWTH_CHANNELS = [
     { id: 'Developer Relations & API documentation', label: 'DevRel & SDK Ecosystems', desc: 'Publish open-source wrappers. Unlocks organic word-of-mouth growth among builders.' },
     { id: 'Interactive Fin-Ed SEO & Calculators', label: 'Viral Web Widgets & SEO', desc: 'Embed free calculators (e.g. tax refund estimators). Drives zero-cost, high-intent traffic.' },
@@ -550,10 +618,10 @@ export function FintechBusinessBuilder({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">FinTech Assembly Line</h1>
+              <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Business Builder</h1>
               <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-mono font-black tracking-widest uppercase">STRESS-TEST VERIFIED</span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Model dynamic unit economics, structure corporate legal sheets, and pass real-time sandbox regulatory audits.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Launch any business — answer a few questions and get a complete launch plan with legal docs, pricing, and growth steps.</p>
           </div>
         </div>
 
@@ -578,6 +646,60 @@ export function FintechBusinessBuilder({
         </div>
       </div>
 
+      {/* MODE TOGGLE: QuickStart vs Step-by-Step vs Starter Map */}
+      <div className="relative z-10 flex flex-wrap items-center gap-2 mb-6">
+        <button
+          onClick={() => setMode('quickstart')}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+            mode === 'quickstart'
+              ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
+          )}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          QuickStart
+        </button>
+        <button
+          onClick={() => setMode('builder')}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+            mode === 'builder'
+              ? "bg-slate-950 dark:bg-white text-white dark:text-slate-950 border-slate-950 dark:border-white shadow-sm"
+              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
+          )}
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+          Step-by-Step
+        </button>
+        <button
+          onClick={() => setMode('map')}
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+            mode === 'map'
+              ? "bg-slate-950 dark:bg-white text-white dark:text-slate-950 border-slate-950 dark:border-white shadow-sm"
+              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
+          )}
+        >
+          <Rocket className="w-3.5 h-3.5" />
+          Starter Map
+        </button>
+      </div>
+
+      {mode === 'map' ? (
+        <div className="relative z-10 bg-white dark:bg-slate-950/60 p-4 md:p-5 rounded-2xl border border-slate-200 dark:border-slate-850 shadow-xs">
+          <FintechStarterMap
+            onNavigateToBusinessBuilder={() => setMode('builder')}
+          />
+        </div>
+      ) : mode === 'quickstart' ? (
+        <BusinessQuickStart onComplete={(blueprint) => {
+          applyBlueprint(blueprint);
+          setMode('builder');
+          setCurrentStep(12);
+        }} />
+      ) : (
+      <>
       {/* ROADMAP PROGRESS BAR */}
       <div className="relative z-10 w-full mb-8 overflow-x-auto pb-2 scrollbar-none">
         <div className="flex items-center min-w-[650px] justify-between relative px-4">
@@ -654,12 +776,12 @@ export function FintechBusinessBuilder({
               {currentStep === 1 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 1 • Sector Design</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Choose Your Fintech Vertical</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">This choice defines your primary regulatory jurisdiction, settlement guidelines, and default compliance overhead.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 1 of 12 • The Basics</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">What type of business are you building?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Pick a category or choose Other to describe it yourself. This shapes the setup steps that follow.</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    {LANES.map(l => (
+                    {activeLanes.map(l => (
                       <button
                         key={l.id}
                         onClick={() => { setLane(l.id === 'Other' ? 'Other' : l.name); if (l.id !== 'Other') setCustomLane(''); }}
@@ -698,9 +820,9 @@ export function FintechBusinessBuilder({
               {currentStep === 2 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 1 • Sector Design</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Identify the Structural Friction</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Great software products resolve specific bottlenecks. What is the friction your code targets?</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 2 of 12 • The Basics</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">What problem does it solve?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Great businesses solve a real pain point. Pick the closest one or describe your own.</p>
                   </div>
                   <div className="space-y-2.5 pt-2">
                     {PROBLEMS.map((p, idx) => (
@@ -742,9 +864,9 @@ export function FintechBusinessBuilder({
               {currentStep === 3 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 1 • Sector Design</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Demographic Demographic</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Select your beachhead customer base and slide to specify your market sizing metrics.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 3 of 12 • The Basics</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Who are your customers?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Choose your starting customer base and estimate how many people you can realistically reach.</p>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
@@ -798,9 +920,9 @@ export function FintechBusinessBuilder({
               {currentStep === 4 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 2 • Economic Pricing</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Configure Your Pricing Engine</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Move the metrics below. The telemetry model uses these inputs to render dynamic projected Year-1 Gross Revenue metrics.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 4 of 12 • Your Money</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">What will you charge?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Set a price per customer (or per transaction) and we'll estimate your first-year revenue.</p>
                   </div>
 
                   <div className="space-y-4 bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-850">
@@ -861,9 +983,9 @@ export function FintechBusinessBuilder({
               {currentStep === 5 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 2 • Economic Pricing</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Revenue Strategy & Capital Sourcing</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Determine how you capture cash, and choose your capital funding roadmap.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 5 of 12 • Your Money</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">How will you make money?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Choose how customers pay you, then pick how you'll fund the early days.</p>
                   </div>
                   
                   <div className="space-y-4">
@@ -916,9 +1038,9 @@ export function FintechBusinessBuilder({
               {currentStep === 6 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 3 • Brand Matrix</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Corporate Identity & Founder Sourcing</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Establish your company name, and input your real or mock founder parameters to pre-fill customized articles.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 6 of 12 • Name & Brand</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">What should it be called?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Pick a name and enter the founder's details so we can personalize your legal documents.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1025,9 +1147,9 @@ export function FintechBusinessBuilder({
               {currentStep === 7 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 4 • Corporate Shell</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Select Corporate Shell Structure</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Legal entities shield your personal assets from software claims and transaction chargeback defaults.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 7 of 12 • Legal Setup</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">How should your business be structured?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">The legal structure decides how you pay taxes and whether your personal assets are protected.</p>
                   </div>
 
                   <div className="space-y-3 pt-1">
@@ -1067,9 +1189,9 @@ export function FintechBusinessBuilder({
               {currentStep === 8 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 4 • Corporate Shell</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Select State Jurisdiction</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">States feature varying filing speeds, franchise tax levels, and court histories. Compare states below.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 8 of 12 • Legal Setup</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Where should you register?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">States differ in filing fees and taxes. Most businesses register in their home state — Delaware is popular for startups raising venture money.</p>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
@@ -1128,9 +1250,9 @@ export function FintechBusinessBuilder({
               {currentStep === 9 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 4 • Corporate Shell</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Set Corporate Headquarters Location</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">State registries are open-database public searchable sheets. We strongly advise renting virtual office systems to keep home addresses secure.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 9 of 12 • Legal Setup</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Where will the business have its address?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Your business address becomes public record. A virtual office keeps your home address private.</p>
                   </div>
 
                   <div className="space-y-3 pt-1">
@@ -1162,13 +1284,13 @@ export function FintechBusinessBuilder({
               {currentStep === 10 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 5 • Technical Rails</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">Assemble Core Technical SDK Modules</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Toggle the API SDK integrations your codebase requires to transfer money and secure KYC validations compliantly.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 10 of 12 • Tools & Growth</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">What tools will power your business?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Pick the services your business runs on — payments, banking, security, and more.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                    {TECHNICAL_APIS.map(api => {
+                    {activeTools.map(api => {
                       const selected = selectedApis.includes(api.id);
                       return (
                         <button
@@ -1238,9 +1360,9 @@ export function FintechBusinessBuilder({
               {currentStep === 11 && (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Phase 5 • Technical Rails</span>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">GTM Engine & Co-founder Splicing</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Settle customer acquisition structures, team size limits, and vesting templates.</p>
+                    <span className="text-xs font-mono font-bold text-blue-500 uppercase tracking-widest block">Step 11 of 12 • Tools & Growth</span>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">How will you grow — and who's on the team?</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">Choose how you'll reach customers, how many founders there are, and how ownership is split.</p>
                   </div>
 
                   <div className="space-y-4">
@@ -1382,15 +1504,23 @@ export function FintechBusinessBuilder({
                           <div>
                             <strong className="block text-slate-900 dark:text-white text-xs font-black uppercase">Executive Pitch Summary</strong>
                             <p className="text-xs mt-0.5">
-                              {businessName || 'Your Fintech'} is a modern {finalLane} venture spearheaded by founder <strong>{founderName}</strong>. Based in {founderState}, we target the acute pain of <strong>{selectedCohort}</strong>, specifically addressing <strong>{finalProblem}</strong>. We leverage secure SDK connectors like {selectedApis.slice(0, 2).join(' & ')} to drive transaction rails, capturing value via a {monetization}.
+                              {businessType === 'fintech' ? (
+                                <>
+                                  {businessName || 'Your Fintech'} is a modern {finalLane} venture spearheaded by founder <strong>{founderName}</strong>. Based in {founderState}, we target the acute pain of <strong>{selectedCohort}</strong>, specifically addressing <strong>{finalProblem}</strong>. We leverage secure SDK connectors like {selectedApis.slice(0, 2).join(' & ')} to drive transaction rails, capturing value via a {monetization}.
+                                </>
+                              ) : (
+                                <>
+                                  {businessName || 'Your Business'} is a {finalLane} business founded to serve <strong>{selectedCohort}</strong>, specifically addressing <strong>{finalProblem}</strong>. Based in {founderState}, we use practical tools like {selectedApis.slice(0, 2).join(' & ')} to run operations smoothly, earning revenue through {monetization}.
+                                </>
+                              )}
                             </p>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                             <div className="p-2.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850">
-                              <span className="text-xs font-bold text-slate-400 block uppercase">TAM / Market Sizing (Beachhead SOM)</span>
+                              <span className="text-xs font-bold text-slate-400 block uppercase">Market Opportunity (TAM)</span>
                               <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 block mt-0.5">${(reachUsers * monthlyFee * 12 * 6.5).toLocaleString()}</span>
-                              <span className="text-xs text-slate-400 block mt-0.5">SOM Base: {reachUsers.toLocaleString()} target users</span>
+                              <span className="text-xs text-slate-400 block mt-0.5">Base: {reachUsers.toLocaleString()} target customers</span>
                             </div>
                             <div className="p-2.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850">
                               <span className="text-xs font-bold text-slate-400 block uppercase">Year-1 Revenue Projections</span>
@@ -1523,7 +1653,9 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
                     {activeTab === 'compliance' && (
                       <div className="space-y-4">
                         <div className="border-b border-slate-250 dark:border-slate-800 pb-2 flex justify-between items-center">
-                          <span className="font-mono text-xs font-black text-slate-400 uppercase">2026 STARTUP COMPLIANCE & FINCEN CALENDAR</span>
+                          <span className="font-mono text-xs font-black text-slate-400 uppercase">
+                            {businessType === 'fintech' ? '2026 STARTUP COMPLIANCE & FINCEN CALENDAR' : '2026 STARTUP COMPLIANCE & LICENSING CHECKLIST'}
+                          </span>
                           <span className="text-xs font-mono text-rose-500 bg-rose-100 dark:bg-rose-950/50 px-1.5 py-0.5 rounded uppercase font-bold">Mandatory</span>
                         </div>
 
@@ -1551,6 +1683,18 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
                             </a>
                           </div>
                         </div>
+
+                        {businessType !== 'fintech' && (
+                          <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-150 dark:border-amber-900/50 rounded-xl space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                              <strong className="text-xs text-amber-700 dark:text-amber-400 font-black">Local Business Licenses & Permits</strong>
+                            </div>
+                            <p className="text-xs text-slate-650 dark:text-slate-300 leading-normal font-sans">
+                              Depending on your business type, your city or county may require a <strong>general business license</strong>, and your industry may need extra permits (food handling, contractor's license, seller's permit for retail). Check with your local city clerk's office — most are quick and inexpensive to obtain.
+                            </p>
+                          </div>
+                        )}
 
                         {/* State specific deadlines */}
                         <div className="p-3 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-250 dark:border-slate-850 space-y-2">
@@ -1672,7 +1816,11 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
             
             <span className="text-xs font-mono font-black text-indigo-300 tracking-widest uppercase block">Live Elevator Pitch</span>
             <p className="text-xs text-slate-200 leading-relaxed italic">
-              &ldquo;{businessName || 'Our Fintech'} is custom engineering a secure, modern <strong>{finalLane}</strong> platform specifically optimized for <strong>{selectedCohort}</strong>. Led by CEO <strong>{founderName}</strong>, we solve <strong>{finalProblem}</strong> using {selectedApis.length > 0 ? selectedApis.slice(0,2).map(x => x.split(' ')[0]).join(' & ') : 'fintech API modules'} and monetization from a <strong>{monetization.split(' ')[0]}</strong>.&rdquo;
+              {businessType === 'fintech' ? (
+                <>&ldquo;{businessName || 'Our Fintech'} is custom engineering a secure, modern <strong>{finalLane}</strong> platform specifically optimized for <strong>{selectedCohort}</strong>. Led by CEO <strong>{founderName}</strong>, we solve <strong>{finalProblem}</strong> using {selectedApis.length > 0 ? selectedApis.slice(0,2).map(x => x.split(' ')[0]).join(' & ') : 'fintech API modules'} and monetization from a <strong>{monetization.split(' ')[0]}</strong>.&rdquo;</>
+              ) : (
+                <>&ldquo;{businessName || 'Our Business'} is building a <strong>{finalLane}</strong> company for <strong>{selectedCohort}</strong>. Led by <strong>{founderName}</strong>, we solve <strong>{finalProblem}</strong> using {selectedApis.length > 0 ? selectedApis.slice(0,2).map(x => x.split(' ')[0]).join(' & ') : 'everyday business tools'} and make money through <strong>{monetization.split(' ')[0]}</strong>.&rdquo;</>
+              )}
             </p>
             <div className="flex items-center justify-between text-xs text-indigo-200 font-mono pt-1">
               <span>LTV/CAC: 4.1x</span>
@@ -1757,10 +1905,12 @@ Sole proprietorships do not require state-level franchise fees but lack asset sh
             className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reset Assembly Line</span>
+            <span>Reset Builder</span>
           </button>
         )}
       </div>
+      </>
+      )}
 
       {/* DYNAMIC SANDBOX STRESS TEST SIMULATOR MODAL */}
       {showSimModal && (
