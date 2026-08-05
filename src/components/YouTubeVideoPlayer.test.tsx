@@ -88,7 +88,7 @@ describe('YouTubeVideoPlayer', () => {
       const { container } = render(<YouTubeVideoPlayer videoId="5-O4jQ_aBWA" title="Test Video" />);
       const iframe = container.querySelector('iframe');
       expect(iframe).toBeInTheDocument();
-      expect(iframe?.getAttribute('src')).toContain('youtube.com/embed/5-O4jQ_aBWA');
+      expect(iframe?.getAttribute('src')).toContain('youtube-nocookie.com/embed/5-O4jQ_aBWA');
     });
 
     it('displays the video title in the header', () => {

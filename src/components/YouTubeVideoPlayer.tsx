@@ -78,15 +78,11 @@ export function YouTubeVideoPlayer({
     const params = new URLSearchParams({
       autoplay: '0',
       rel: '0',
-      modestbranding: '1',
-      playsinline: '1'
+      playsinline: '1',
+      enablejsapi: '0'
     });
 
-    if (typeof window !== 'undefined') {
-      params.set('origin', window.location.origin);
-    }
-
-    return `https://www.youtube.com/embed/${cleanId}?${params.toString()}`;
+    return `https://www.youtube-nocookie.com/embed/${cleanId}?${params.toString()}`;
   }, [cleanId]);
 
   const directWatchUrl = cleanId
