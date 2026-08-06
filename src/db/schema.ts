@@ -111,3 +111,13 @@ export const cohorts = pgTable('cohorts', {
   memberIds: jsonb('member_ids').$type<string[]>().notNull().default([]),
   inviteCode: text('invite_code').notNull(),
 });
+
+export const notifications = pgTable('notifications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  type: text('type').notNull().default('system'),
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  read: boolean('read').notNull().default(false),
+  createdAt: text('created_at').notNull(),
+});

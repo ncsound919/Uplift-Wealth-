@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { createCohort, joinCohort, leaveCohort, deleteCohort, listMyCohorts, cohortLeaderboard, getCohort } from './cohortOps';
 import type { DatabaseSchema } from './types';
 
@@ -22,6 +22,7 @@ function makeDb(): DatabaseSchema {
     comments: [],
     reports: [],
     cohorts: [],
+  notifications: [],
   };
 }
 

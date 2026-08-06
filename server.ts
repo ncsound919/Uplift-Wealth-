@@ -40,7 +40,7 @@ import {
   deleteCohort,
   cohortLeaderboard,
 } from "./src/db/cohortOps";
-import { sendWelcomeEmail, sendWaitlistConfirmEmail } from "./src/lib/email";
+import { sendWelcomeEmail, sendWaitlistConfirmEmail, sendEmail, escapeHtml } from "./src/lib/email";
 import type { DatabaseSchema } from "./src/db/types";
 
 dotenv.config({ quiet: true });
@@ -113,7 +113,8 @@ const initialDb: DatabaseSchema = {
   threads: [],
   comments: [],
   reports: [],
-  cohorts: []
+  cohorts: [],
+  notifications: []
 };
 
 let db: DatabaseSchema = { ...initialDb };
@@ -168,6 +169,7 @@ function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
     comments: raw.comments ?? [],
     reports: raw.reports ?? [],
     cohorts: raw.cohorts ?? [],
+    notifications: raw.notifications ?? [],
   };
 }
 
@@ -227,6 +229,10 @@ function initDatabase() {
           cohorts: [
             ...(db.cohorts ?? []).filter(c => !(pg.cohorts ?? []).some(p => p.id === c.id)),
             ...(pg.cohorts ?? []),
+          ],
+          notifications: [
+            ...(db.notifications ?? []).filter(n => !(pg.notifications ?? []).some(p => p.id === n.id)),
+            ...(pg.notifications ?? []),
           ],
         };
         saveDatabase();
@@ -668,7 +674,10 @@ app.get('/api/docs', (req, res) => {
       { path: "/api/threads/:id/comments", method: "POST", description: "Reply to a thread" },
       { path: "/api/threads/:id/upvote", method: "POST", description: "Upvote / un-upvote a thread" },
       { path: "/api/comments/:id/upvote", method: "POST", description: "Upvote / un-upvote a comment" },
-      { path: "/api/reports", method: "POST", description: "Report a thread or comment for moderation" }
+      { path: "/api/reports", method: "POST", description: "Report a thread or comment for moderation" },
+      { path: "/api/cohorts", method: "GET|POST", description: "List / create learning cohorts" },
+      { path: "/api/notifications", method: "GET", description: "List current user notifications" },
+      { path: "/api/notifications/read-all", method: "POST", description: "Mark all notifications read" }
     ]
   });
 });
@@ -1050,6 +1059,17 @@ app.post('/api/threads/:id/comments', authenticate, (req: AuthenticatedRequest, 
   try {
     const comment = addComment(db, { threadId: req.params.id, userId: req.user!.id, body });
     saveDatabase();
+    // Notify the thread author (and mention other commenters) about the reply.
+    const thread = db.threads.find((t) => t.id === req.params.id);
+    if (thread) {
+      const commenterName = db.users[req.user!.id]?.name || 'Someone';
+      const targets = new Set([thread.userId, ...db.comments.filter((c) => c.threadId === thread.id).map((c) => c.userId)]);
+      for (const target of targets) {
+        if (target !== req.user!.id) {
+          notify(target, 'reply', `${commenterName} replied to your discussion`, `"${thread.title}"`);
+        }
+      }
+    }
     res.status(201).json({ success: true, comment });
   } catch (err) {
     opError(res, err);
@@ -1171,6 +1191,60 @@ app.delete('/api/cohorts/:id', authenticate, (req: AuthenticatedRequest, res: Re
   } catch (err) {
     opError(res, err);
   }
+});
+
+// 6.7.8 NOTIFICATIONS (in-app + optional email)
+function notify(userId: string, type: 'reply' | 'cohort' | 'streak' | 'system', title: string, message: string) {
+  if (!userId || !db.notifications) return;
+  db.notifications.push({
+    id: `not-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    userId,
+    type,
+    title,
+    message,
+    read: false,
+    createdAt: new Date().toISOString(),
+  });
+  saveDatabase();
+  const user = db.users[userId];
+  if (user?.email) {
+    void sendEmail({
+      to: user.email,
+      subject: title,
+      html: `<p>${escapeHtml(message)}</p>`,
+    }).catch(() => {});
+  }
+}
+
+app.get('/api/notifications', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id;
+  const items = (db.notifications ?? [])
+    .filter((n) => n.userId === userId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 50);
+  res.json({ notifications: items, unreadCount: items.filter((n) => !n.read).length });
+});
+
+app.post('/api/notifications/read-all', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id;
+  let changed = 0;
+  for (const n of db.notifications ?? []) {
+    if (n.userId === userId && !n.read) {
+      n.read = true;
+      changed++;
+    }
+  }
+  if (changed > 0) saveDatabase();
+  res.json({ success: true, changed });
+});
+
+app.post('/api/notifications/:id/read', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id;
+  const notification = (db.notifications ?? []).find((n) => n.id === req.params.id && n.userId === userId);
+  if (!notification) return res.status(404).json({ error: 'Notification not found.' });
+  notification.read = true;
+  saveDatabase();
+  res.json({ success: true, notification });
 });
 
 // 6.8 MARKET DATA PROXY WITH CACHING & SIMULATION (Alpha Vantage)

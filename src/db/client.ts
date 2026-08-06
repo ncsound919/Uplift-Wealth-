@@ -133,6 +133,15 @@ export async function ensureTables(): Promise<void> {
         member_ids jsonb DEFAULT '[]'::jsonb NOT NULL,
         invite_code text NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS notifications (
+        id text PRIMARY KEY NOT NULL,
+        user_id text NOT NULL,
+        type text DEFAULT 'system' NOT NULL,
+        title text NOT NULL,
+        message text NOT NULL,
+        read boolean DEFAULT false NOT NULL,
+        created_at text NOT NULL
+      );
     `);
   } finally {
     client.release();

@@ -28,6 +28,7 @@ function makeDb(): DatabaseSchema {
     comments: [],
     reports: [],
   cohorts: [],
+  notifications: [],
   };
 }
 

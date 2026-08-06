@@ -106,6 +106,18 @@ export interface Cohort {
   inviteCode: string;
 }
 
+export type NotificationType = 'reply' | 'cohort' | 'streak' | 'system';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface DatabaseSchema {
   users: Record<string, StoredUser>;
   progress: Record<string, StoredProgress>;
@@ -117,4 +129,5 @@ export interface DatabaseSchema {
   comments: Comment[];
   reports: Report[];
   cohorts: Cohort[];
+  notifications: Notification[];
 }

@@ -50,6 +50,13 @@
       "when": 1786028099991,
       "tag": "0006_damp_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786028730384,
+      "tag": "0007_square_sprite",
+      "breakpoints": true
     }
   ]
 }

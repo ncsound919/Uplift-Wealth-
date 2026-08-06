@@ -480,6 +480,19 @@ class ApiClient {
   public deleteCohort(id: string) {
     return this.request<{ success: boolean; deleted: boolean }>(`/api/cohorts/${encodeURIComponent(id)}`, { method: 'DELETE' });
   }
+
+  // Notifications
+  public getNotifications() {
+    return this.request<{ notifications: NotificationView[]; unreadCount: number }>('/api/notifications');
+  }
+
+  public markAllNotificationsRead() {
+    return this.request<{ success: boolean; changed: number }>('/api/notifications/read-all', { method: 'POST' });
+  }
+
+  public markNotificationRead(id: string) {
+    return this.request<{ success: boolean; notification: NotificationView }>(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' });
+  }
 }
 
 export interface ThreadView {
@@ -535,6 +548,16 @@ export interface CohortMember {
   xp: number;
   completedModules: number;
   completedLessons: number;
+}
+
+export interface NotificationView {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
 }
 
 export const apiClient = new ApiClient();

@@ -24,6 +24,7 @@ function makeDb(overrides: Partial<DatabaseSchema> = {}): DatabaseSchema {
     comments: [],
     reports: [],
   cohorts: [],
+  notifications: [],
     ...overrides,
   };
 }

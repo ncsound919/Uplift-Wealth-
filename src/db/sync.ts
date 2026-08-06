@@ -5,7 +5,7 @@
  * accepts a `DbQueryRunner` so the logic is unit-testable with a fake runner
  * and runs against a real `pg` pool in production.
  */
-import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry, Thread, Comment, Report, Cohort } from './types';
+import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry, Thread, Comment, Report, Cohort, Notification } from './types';
 import type { DbQueryRunner } from './client';
 
 function json(value: unknown): string {
@@ -137,6 +137,16 @@ export async function syncCohort(runner: DbQueryRunner, c: Cohort): Promise<void
   );
 }
 
+export async function syncNotification(runner: DbQueryRunner, n: Notification): Promise<void> {
+  await runner.query(
+    `INSERT INTO notifications (id, user_id, type, title, message, read, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (id) DO UPDATE SET
+       read = EXCLUDED.read`,
+    [n.id, n.userId, n.type, n.title, n.message, n.read, n.createdAt]
+  );
+}
+
 /** Writes the entire in-memory store to PostgreSQL (backfill / boot sync). */
 export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Promise<void> {
   for (const u of Object.values(db.users)) {
@@ -170,6 +180,9 @@ export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Pro
   }
   for (const c of db.cohorts ?? []) {
     await syncCohort(runner, c);
+  }
+  for (const n of db.notifications ?? []) {
+    await syncNotification(runner, n);
   }
 }
 
@@ -273,6 +286,16 @@ interface CohortRow {
   invite_code: string;
 }
 
+interface NotificationRow {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 /** Reads the full store back out of PostgreSQL into the in-memory shape. */
 export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema> {
   const userRows = await runner.query<UserRow>('SELECT * FROM users');
@@ -285,6 +308,7 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
   const commentRows = await runner.query<CommentRow>('SELECT * FROM comments');
   const reportRows = await runner.query<ReportRow>('SELECT * FROM reports');
   const cohortRows = await runner.query<CohortRow>('SELECT * FROM cohorts');
+  const notificationRows = await runner.query<NotificationRow>('SELECT * FROM notifications');
 
   const users: DatabaseSchema['users'] = {};
   for (const r of userRows) {
@@ -393,5 +417,15 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
     inviteCode: r.invite_code,
   }));
 
-  return { users, progress, sandboxes, donations, auditLogs, waitlist, threads, comments, reports, cohorts };
+  const notifications: DatabaseSchema['notifications'] = notificationRows.map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    type: r.type as Notification['type'],
+    title: r.title,
+    message: r.message,
+    read: r.read ?? false,
+    createdAt: r.created_at,
+  }));
+
+  return { users, progress, sandboxes, donations, auditLogs, waitlist, threads, comments, reports, cohorts, notifications };
 }
