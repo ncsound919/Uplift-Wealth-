@@ -13,6 +13,23 @@ Pick one managed provider:
   a Postgres instance in Render, copy its internal connection string.
 - **Neon / Supabase**: create a project, copy the pooled `DATABASE_URL`.
 
+### Recommended: Supabase (free tier, no 30-day expiry)
+
+Render's free Postgres is **deleted after 30 days** — avoid it. Supabase free
+**pauses after ~7 days of inactivity and auto-resumes** on the next request; it
+is never deleted. Because the app is on Vercel serverless, use the **transaction
+pooler** connection string (port `6543`) to avoid connection exhaustion:
+
+1. [Create a Supabase project](https://supabase.com/dashboard) (free, no card).
+2. **Project Settings → Database → Connection string → Transaction pooler** (port 6543).
+   Copy the `postgresql://postgres.<ref>...:6543/postgres` URL into `DATABASE_URL`.
+3. Keep it awake with a free uptime monitor (UptimeRobot / Cronitor / Better
+   Stack) pinging `https://<vercel-host>/api/health` every **5 minutes**. That
+   single synthetic ping prevents the 7-day pause (no need to rely on real
+   traffic) and gives you downtime alerts for free.
+4. First boot auto-runs migrations (`src/db/migrations/*`); run `npm run db:seed`
+   once against the project to load the demo user.
+
 Then:
 1. Set `DATABASE_URL` on the web service (Render secret) to the internal URL.
 2. Set `DATABASE_POOL_SIZE=10` (or match plan).
