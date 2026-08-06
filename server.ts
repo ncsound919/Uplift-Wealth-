@@ -1787,4 +1787,11 @@ async function startServer() {
   });
 }
 
-startServer();
+// Serverless export (Vercel). Vercel sets VERCEL=1 and calls the exported app
+// as a serverless handler; long-running hosts (Render/Docker/local) run
+// startServer() instead, which serves the built client and listens.
+export default app;
+
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
