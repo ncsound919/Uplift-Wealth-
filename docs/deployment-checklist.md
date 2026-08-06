@@ -53,6 +53,45 @@ Set these env vars on the host (Render dashboard — never commit):
   - `curl https://overlay-wealth.onrender.com/api/health` → `{"status":"ok",...}`
   - Register a test account and confirm it appears in Postgres.
 
+### Deploy to Vercel (CLI, `vercel` 51+ installed)
+
+The app supports Vercel serverless hosting (built client served statically,
+`/api/*` routed to the Express function, SPA rewrites for everything else):
+
+```bash
+npx vercel link                      # one-time: link to your project
+npx vercel env add DATABASE_URL production
+npx vercel env add JWT_ACCESS_SECRET production
+npx vercel env add JWT_REFRESH_SECRET production
+npx vercel env add STRIPE_SECRET_KEY production
+npx vercel env add STRIPE_WEBHOOK_SECRET production
+npx vercel env add STRIPE_PRICE_PREMIUM production
+npx vercel env add STRIPE_PRICE_INSTITUTIONAL production
+npx vercel env add EMAIL_API_KEY production
+npx vercel env add SENTRY_DSN production
+npx vercel env add VITE_POSTHOG_KEY production
+npx vercel deploy --prod             # build + deploy
+```
+
+> Vercel runs `npm run build` (builds the client + bundles the server). The
+> serverless function only serves `/api/*`; static assets and SPA routing come
+> from `vercel.json`. The migrations run on first boot because `DATABASE_URL`
+> is set (the runtime migration runner handles it).
+
+### Stripe provisioning (CLI)
+
+Create the Premium ($10/mo) + Institutional ($99/mo) prices and the webhook
+endpoint without touching the dashboard:
+
+```bash
+set STRIPE_SECRET_KEY=sk_test_xxx   # PowerShell; or export STRIPE_SECRET_KEY=...
+npm run stripe:provision            # prints STRIPE_PRICE_PREMIUM, STRIPE_PRICE_INSTITUTIONAL, STRIPE_WEBHOOK_SECRET
+```
+
+Run it again with `--webhook https://your-host/api/billing/webhook` to create
+the webhook endpoint (it prints the signing secret). Paste the printed values
+into `vercel env add` / Render secrets.
+
 ## 4. Durable storage check
 
 - Postgres (step 1) is the durable store — progress/accounts no longer live only
