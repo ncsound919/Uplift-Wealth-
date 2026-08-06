@@ -92,6 +92,14 @@ Run it again with `--webhook https://your-host/api/billing/webhook` to create
 the webhook endpoint (it prints the signing secret). Paste the printed values
 into `vercel env add` / Render secrets.
 
+**Provisioned 2026-08-06 (live account):**
+- `STRIPE_PRICE_PREMIUM=price_1U1VQOQrfNRBru0zLztq45JM` ($10/mo)
+- `STRIPE_PRICE_INSTITUTIONAL=price_1U1VQOQrfNRBru0zxmmPWKla` ($99/mo)
+- Webhook endpoint: `https://overlay-wealth.onrender.com/api/billing/webhook`
+  (signing secret was printed when created — set `STRIPE_WEBHOOK_SECRET` to it;
+  if you deploy on Vercel instead, update the endpoint URL in the Stripe dashboard
+  or re-run `npm run stripe:provision -- --webhook https://<host>/api/billing/webhook`.)
+
 ## 4. Durable storage check
 
 - Postgres (step 1) is the durable store — progress/accounts no longer live only
