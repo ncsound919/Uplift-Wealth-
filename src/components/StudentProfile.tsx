@@ -2,8 +2,10 @@ import { Module } from '../data/courseData';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { getJSON, storageKeys } from '../lib/storage';
+import { useState } from 'react';
+import { apiClient } from '../lib/apiClient';
 import {
-  Clock, CheckCircle2, Gamepad2, Flame, Award, Trophy, Sparkles, TrendingUp
+  Clock, CheckCircle2, Gamepad2, Flame, Award, Trophy, Sparkles, TrendingUp, Globe
 } from 'lucide-react';
 
 interface StockSimMetrics {
@@ -62,6 +64,18 @@ export function StudentProfile(props: Props) {
 
   const stockSimMetrics = getJSON<StockSimMetrics | null>(storageKeys.stockSimMetrics, null);
 
+  const [profilePublic, setProfilePublic] = useState(() => apiClient.getStoredUser()?.profilePublic ?? false);
+  const [privacySaved, setPrivacySaved] = useState(false);
+  const togglePrivacy = async () => {
+    const next = !profilePublic;
+    setProfilePublic(next);
+    setPrivacySaved(false);
+    try {
+      await apiClient.updateProfile({ profilePublic: next });
+      setPrivacySaved(true);
+    } catch { /* keep local state */ }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-fade-in p-2">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 justify-between">
@@ -90,6 +104,34 @@ export function StudentProfile(props: Props) {
             <span className="block text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{xp}</span>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Globe className="w-4 h-4 text-emerald-500" />
+          <div>
+            <span className="block text-sm font-bold text-slate-900 dark:text-white">Public profile</span>
+            <span className="block text-[11px] text-slate-400">
+              {profilePublic ? 'Anyone with the link can view your progress' : 'Your profile is private (default)'}
+              {privacySaved && <span className="text-emerald-500"> · saved</span>}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={togglePrivacy}
+          aria-pressed={profilePublic}
+          className={cn(
+            'relative w-12 h-6 rounded-full transition-colors cursor-pointer shrink-0',
+            profilePublic ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+          )}
+          aria-label="Toggle public profile"
+        >
+          <span className={cn(
+            'absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all',
+            profilePublic ? 'left-6' : 'left-0.5'
+          )} />
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

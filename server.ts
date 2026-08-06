@@ -674,7 +674,7 @@ app.get('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Resp
 
 app.put('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
-  const { name, track, role, avatar } = req.body;
+  const { name, track, role, avatar, profilePublic } = req.body;
 
   const current = db.users[userId] || {
     id: userId,
@@ -690,12 +690,33 @@ app.put('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Resp
   if (track && typeof track === 'string' && ['beginner', 'intermediate', 'advanced', 'all'].includes(track)) current.track = track;
   if (role && ['student', 'builder', 'institution', 'admin'].includes(role)) current.role = role;
   if (avatar && typeof avatar === 'string' && avatar.length < 2048) current.avatar = avatar;
+  if (typeof profilePublic === 'boolean') current.profilePublic = profilePublic;
 
   current.lastActive = new Date().toISOString();
   db.users[userId] = current;
   saveDatabase();
 
   res.json(current);
+});
+
+// 6.3.1 PUBLIC PROFILE (opt-in). Returns only non-sensitive public data;
+// private profiles are indistinguishable from missing ones (404).
+app.get('/api/profile/:userId', (req: Request, res: Response) => {
+  const user = db.users[req.params.userId];
+  if (!user || !user.profilePublic) {
+    return res.status(404).json({ error: 'Profile not found.' });
+  }
+  const progress = db.progress[user.id];
+  res.json({
+    id: user.id,
+    name: user.name,
+    badges: user.badges ?? [],
+    streakDays: user.streakDays ?? 0,
+    track: user.track,
+    xp: progress?.xp ?? 0,
+    completedModules: progress?.completedModules ?? [],
+    completedLessonsCount: progress?.completedLessons?.length ?? 0,
+  });
 });
 
 // 6.4 COURSE PROGRESS ENDPOINTS

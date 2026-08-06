@@ -18,6 +18,8 @@ export interface StoredUser {
   passwordHash?: string;
   /** Bumped on logout to revoke all outstanding refresh tokens. */
   tokenVersion?: number;
+  /** Opt-in: makes the profile viewable at /profile/:userId. Default private. */
+  profilePublic?: boolean;
 }
 
 export interface StoredProgress {

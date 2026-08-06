@@ -13,6 +13,7 @@ export interface UserProfile {
   badges: string[];
   streakDays: number;
   lastActive: string;
+  profilePublic?: boolean;
 }
 
 export interface ProgressState {
@@ -169,9 +170,15 @@ class ApiClient {
         track: profile.track || 'all',
         badges: profile.badges || ['pioneer_scholar'],
         streakDays: profile.streakDays || 1,
-        lastActive: new Date().toISOString()
+        lastActive: new Date().toISOString(),
+        profilePublic: profile.profilePublic ?? false
       };
     }
+  }
+
+  /** Public profile for another user. Throws (404) when the profile is private. */
+  public async getPublicProfile(userId: string): Promise<PublicProfile> {
+    return this.request<PublicProfile>(`/api/profile/${encodeURIComponent(userId)}`);
   }
 
   // Progress
@@ -465,6 +472,17 @@ export interface CommentView {
   createdAt: string;
   authorName: string;
   upvotes: number;
+}
+
+export interface PublicProfile {
+  id: string;
+  name: string;
+  badges: string[];
+  streakDays: number;
+  track: string;
+  xp: number;
+  completedModules: string[];
+  completedLessonsCount: number;
 }
 
 export const apiClient = new ApiClient();

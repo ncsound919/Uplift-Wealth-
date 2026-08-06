@@ -16,8 +16,8 @@ function json(value: unknown): string {
 
 export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<void> {
   await runner.query(
-    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version)
-     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11)
+    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version, profile_public)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12)
      ON CONFLICT (id) DO UPDATE SET
        name = EXCLUDED.name,
        role = EXCLUDED.role,
@@ -28,8 +28,9 @@ export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<vo
        last_active = EXCLUDED.last_active,
        email = EXCLUDED.email,
        password_hash = EXCLUDED.password_hash,
-       token_version = EXCLUDED.token_version`,
-    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0]
+       token_version = EXCLUDED.token_version,
+       profile_public = EXCLUDED.profile_public`,
+    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0, u.profilePublic ?? false]
   );
 }
 
@@ -170,6 +171,7 @@ interface UserRow {
   email: string | null;
   password_hash: string | null;
   token_version?: number;
+  profile_public?: boolean;
 }
 
 interface ProgressRow {
@@ -270,6 +272,7 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
       email: r.email ?? undefined,
       passwordHash: r.password_hash ?? undefined,
       tokenVersion: r.token_version ?? 0,
+      profilePublic: r.profile_public ?? false,
     };
   }
 

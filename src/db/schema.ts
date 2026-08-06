@@ -4,7 +4,7 @@
  * Mirrors the in-memory `DatabaseSchema` (src/db/types.ts) 1:1 so the
  * dual-write migration can round-trip data without loss.
  */
-import { pgTable, text, integer, jsonb, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, jsonb, numeric, boolean } from 'drizzle-orm/pg-core';
 
 export interface CertificateRow {
   moduleId: string;
@@ -24,6 +24,7 @@ export const users = pgTable('users', {
   email: text('email'),
   passwordHash: text('password_hash'),
   tokenVersion: integer('token_version').notNull().default(0),
+  profilePublic: boolean('profile_public').notNull().default(false),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

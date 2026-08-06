@@ -32,6 +32,7 @@ const SideHustles = lazy(() => import('./components/wealth/SideHustles').then(m 
 const EmergencyFund = lazy(() => import('./components/wealth/EmergencyFund').then(m => ({ default: m.EmergencyFund })));
 const NotFound = lazy(() => import('./components/NotFound').then(m => ({ default: m.NotFound })));
 const StudentProfile = lazy(() => import('./components/StudentProfile').then(m => ({ default: m.StudentProfile })));
+const PublicProfile = lazy(() => import('./components/PublicProfile').then(m => ({ default: m.PublicProfile })));
 const GamesHub = lazy(() => import('./components/GamesHub').then(m => ({ default: m.GamesHub })));
 const StandaloneGameView = lazy(() => import('./components/StandaloneGameView').then(m => ({ default: m.StandaloneGameView })));
 
@@ -83,7 +84,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Sidebar Views and settings states
-  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -195,6 +196,10 @@ export default function App() {
       setActiveModuleId(null);
     } else if (path === '/profile') {
       setActiveView('profile');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path.startsWith('/profile/')) {
+      setActiveView('public_profile');
       setActiveModuleId(null);
       setActiveDirectGame(null);
     } else if (path === '/knowledge') {
@@ -868,6 +873,17 @@ export default function App() {
             >
               <PageMeta title={activeDirectGame === 'trading' ? 'Stock Market Simulator' : activeDirectGame === 'underwriting' ? 'Alternative Lending Sim' : activeDirectGame === 'parametric' ? 'Parametric Insurance Sim' : activeDirectGame === 'fraud' ? 'Compliance Screener' : 'FinTech Pop Quiz'} description="Interactive educational game." ogType="game" />
               <StandaloneGameView activeDirectGame={activeDirectGame} onAddXp={(amount, reason) => addXp(amount, reason)} onBackToDashboard={() => { setActiveView('dashboard'); setActiveDirectGame(null); navigate('/'); }} />
+            </motion.div>
+          ) : activeView === 'public_profile' ? (
+            <motion.div
+              key="public-profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="Scholar Profile" />
+              <PublicProfile />
             </motion.div>
           ) : activeView === 'profile' ? (
             <motion.div
