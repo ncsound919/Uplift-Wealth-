@@ -30,6 +30,16 @@ import {
   deleteThread,
   deleteComment,
 } from "./src/db/threadOps";
+import {
+  listMyCohorts,
+  getCohort,
+  createCohort,
+  joinCohort,
+  joinCohortByCode,
+  leaveCohort,
+  deleteCohort,
+  cohortLeaderboard,
+} from "./src/db/cohortOps";
 import { sendWelcomeEmail, sendWaitlistConfirmEmail } from "./src/lib/email";
 import type { DatabaseSchema } from "./src/db/types";
 
@@ -102,7 +112,8 @@ const initialDb: DatabaseSchema = {
   waitlist: [],
   threads: [],
   comments: [],
-  reports: []
+  reports: [],
+  cohorts: []
 };
 
 let db: DatabaseSchema = { ...initialDb };
@@ -156,6 +167,7 @@ function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
     threads: raw.threads ?? [],
     comments: raw.comments ?? [],
     reports: raw.reports ?? [],
+    cohorts: raw.cohorts ?? [],
   };
 }
 
@@ -211,6 +223,10 @@ function initDatabase() {
           reports: [
             ...(db.reports ?? []).filter(r => !(pg.reports ?? []).some(p => p.id === r.id)),
             ...(pg.reports ?? []),
+          ],
+          cohorts: [
+            ...(db.cohorts ?? []).filter(c => !(pg.cohorts ?? []).some(p => p.id === c.id)),
+            ...(pg.cohorts ?? []),
           ],
         };
         saveDatabase();
@@ -1087,6 +1103,69 @@ app.delete('/api/threads/:id', authenticate, (req: AuthenticatedRequest, res: Re
 app.delete('/api/comments/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = deleteComment(db, { commentId: req.params.id, callerId: req.user!.id, callerRole: req.user!.role });
+    saveDatabase();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+// 6.7.7 COHORTS (group learning circles)
+app.get('/api/cohorts', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  res.json({ cohorts: listMyCohorts(db, req.user!.id) });
+});
+
+app.post('/api/cohorts', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { name, type, description } = req.body || {};
+  try {
+    const cohort = createCohort(db, { ownerId: req.user!.id, name, type, description });
+    saveDatabase();
+    res.status(201).json({ success: true, cohort });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.post('/api/cohorts/join', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { code } = req.body || {};
+  try {
+    const cohort = joinCohortByCode(db, typeof code === 'string' ? code : '', req.user!.id);
+    saveDatabase();
+    res.json({ success: true, cohort });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.get('/api/cohorts/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const result = cohortLeaderboard(db, req.params.id, req.user!.id);
+  if (!result.cohort) return res.status(404).json({ error: 'Cohort not found.' });
+  res.json(result);
+});
+
+app.post('/api/cohorts/:id/join', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const cohort = joinCohort(db, req.params.id, req.user!.id);
+    saveDatabase();
+    res.json({ success: true, cohort });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.post('/api/cohorts/:id/leave', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const cohort = leaveCohort(db, req.params.id, req.user!.id);
+    saveDatabase();
+    res.json({ success: true, cohort });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.delete('/api/cohorts/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = deleteCohort(db, req.params.id, req.user!.id, req.user!.role);
     saveDatabase();
     res.json({ success: true, ...result });
   } catch (err) {

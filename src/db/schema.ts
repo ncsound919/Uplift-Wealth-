@@ -100,3 +100,14 @@ export const reports = pgTable('reports', {
   reason: text('reason'),
   createdAt: text('created_at').notNull(),
 });
+
+export const cohorts = pgTable('cohorts', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  type: text('type').notNull().default('general'),
+  description: text('description'),
+  ownerId: text('owner_id').notNull(),
+  createdAt: text('created_at').notNull(),
+  memberIds: jsonb('member_ids').$type<string[]>().notNull().default([]),
+  inviteCode: text('invite_code').notNull(),
+});

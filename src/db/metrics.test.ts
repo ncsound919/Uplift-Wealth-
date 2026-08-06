@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import { computeMetrics } from './metrics';
 import type { DatabaseSchema } from './types';
 
@@ -23,6 +23,7 @@ function makeDb(overrides: Partial<DatabaseSchema> = {}): DatabaseSchema {
     threads: [],
     comments: [],
     reports: [],
+  cohorts: [],
     ...overrides,
   };
 }

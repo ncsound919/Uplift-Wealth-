@@ -33,6 +33,7 @@ const EmergencyFund = lazy(() => import('./components/wealth/EmergencyFund').the
 const NotFound = lazy(() => import('./components/NotFound').then(m => ({ default: m.NotFound })));
 const StudentProfile = lazy(() => import('./components/StudentProfile').then(m => ({ default: m.StudentProfile })));
 const PublicProfile = lazy(() => import('./components/PublicProfile').then(m => ({ default: m.PublicProfile })));
+const CohortView = lazy(() => import('./components/CohortView').then(m => ({ default: m.CohortView })));
 const GamesHub = lazy(() => import('./components/GamesHub').then(m => ({ default: m.GamesHub })));
 const StandaloneGameView = lazy(() => import('./components/StandaloneGameView').then(m => ({ default: m.StandaloneGameView })));
 
@@ -64,7 +65,8 @@ import {
   BarChart3,
   Settings,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Users
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { capture, identify, resetAnalytics } from './lib/analytics';
@@ -84,7 +86,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Sidebar Views and settings states
-  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'cohorts' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -200,6 +202,10 @@ export default function App() {
       setActiveDirectGame(null);
     } else if (path.startsWith('/profile/')) {
       setActiveView('public_profile');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path === '/cohorts') {
+      setActiveView('cohorts');
       setActiveModuleId(null);
       setActiveDirectGame(null);
     } else if (path === '/knowledge') {
@@ -636,6 +642,28 @@ export default function App() {
                 <span>My Student Profile</span>
               </button>
 
+              {/* Cohorts */}
+              <button
+                onClick={() => {
+                  setActiveView('cohorts');
+                  setActiveModuleId(null);
+                  setIsBuildingModule(false);
+                  setEditingModule(null);
+                  setActiveDirectGame(null);
+                  setIsMobileMenuOpen(false);
+                  navigate('/cohorts');
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  activeView === 'cohorts'
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                )}
+              >
+                <Users className="w-4 h-4" />
+                <span>Learning Cohorts</span>
+              </button>
+
               {/* 2. Learning Pathways */}
               <button
                 onClick={() => {
@@ -884,6 +912,17 @@ export default function App() {
             >
               <PageMeta title="Scholar Profile" />
               <PublicProfile />
+            </motion.div>
+          ) : activeView === 'cohorts' ? (
+            <motion.div
+              key="cohorts"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="Learning Cohorts" canonical="/cohorts" />
+              <CohortView currentUserId={currentUser?.id} />
             </motion.div>
           ) : activeView === 'profile' ? (
             <motion.div

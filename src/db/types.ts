@@ -93,6 +93,19 @@ export interface Report {
   createdAt: string;
 }
 
+export type CohortType = 'general' | 'church' | 'hbcu' | 'family' | 'club';
+
+export interface Cohort {
+  id: string;
+  name: string;
+  type: CohortType;
+  description?: string;
+  ownerId: string;
+  createdAt: string;
+  memberIds: string[];
+  inviteCode: string;
+}
+
 export interface DatabaseSchema {
   users: Record<string, StoredUser>;
   progress: Record<string, StoredProgress>;
@@ -103,4 +116,5 @@ export interface DatabaseSchema {
   threads: Thread[];
   comments: Comment[];
   reports: Report[];
+  cohorts: Cohort[];
 }

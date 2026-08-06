@@ -123,6 +123,16 @@ export async function ensureTables(): Promise<void> {
         reason text,
         created_at text NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS cohorts (
+        id text PRIMARY KEY NOT NULL,
+        name text NOT NULL,
+        type text DEFAULT 'general' NOT NULL,
+        description text,
+        owner_id text NOT NULL,
+        created_at text NOT NULL,
+        member_ids jsonb DEFAULT '[]'::jsonb NOT NULL,
+        invite_code text NOT NULL
+      );
     `);
   } finally {
     client.release();

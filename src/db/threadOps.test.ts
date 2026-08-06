@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import {
   listThreads,
   getThread,
@@ -27,6 +27,7 @@ function makeDb(): DatabaseSchema {
     threads: [],
     comments: [],
     reports: [],
+  cohorts: [],
   };
 }
 

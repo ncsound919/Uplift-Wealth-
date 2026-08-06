@@ -449,6 +449,37 @@ class ApiClient {
   public deleteComment(commentId: string) {
     return this.request<{ success: boolean; deleted: boolean }>(`/api/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE' });
   }
+
+  // Cohorts
+  public listMyCohorts() {
+    return this.request<{ cohorts: CohortView[] }>('/api/cohorts');
+  }
+
+  public createCohort(payload: { name: string; type?: string; description?: string }) {
+    return this.request<{ success: boolean; cohort: CohortView }>('/api/cohorts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public getCohort(id: string) {
+    return this.request<{ cohort: CohortView; members: CohortMember[] }>(`/api/cohorts/${encodeURIComponent(id)}`);
+  }
+
+  public joinCohortByCode(code: string) {
+    return this.request<{ success: boolean; cohort: CohortView }>('/api/cohorts/join', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  public leaveCohort(id: string) {
+    return this.request<{ success: boolean; cohort: CohortView }>(`/api/cohorts/${encodeURIComponent(id)}/leave`, { method: 'POST' });
+  }
+
+  public deleteCohort(id: string) {
+    return this.request<{ success: boolean; deleted: boolean }>(`/api/cohorts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  }
 }
 
 export interface ThreadView {
@@ -483,6 +514,27 @@ export interface PublicProfile {
   xp: number;
   completedModules: string[];
   completedLessonsCount: number;
+}
+
+export interface CohortView {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  ownerId: string;
+  createdAt: string;
+  memberIds: string[];
+  inviteCode: string;
+  ownerName: string;
+  memberCount: number;
+}
+
+export interface CohortMember {
+  id: string;
+  name: string;
+  xp: number;
+  completedModules: number;
+  completedLessons: number;
 }
 
 export const apiClient = new ApiClient();
