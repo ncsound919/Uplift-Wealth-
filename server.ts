@@ -18,6 +18,8 @@ import {
 import { isDbConfigured, ensureTables, query } from "./src/db/client";
 import { syncFullDb, loadFullDb } from "./src/db/sync";
 import { runMigrations } from "./src/db/migrate";
+import { computeMetrics } from "./src/db/metrics";
+import { sendWelcomeEmail, sendWaitlistConfirmEmail } from "./src/lib/email";
 import type { DatabaseSchema } from "./src/db/types";
 
 dotenv.config({ quiet: true });
@@ -78,7 +80,8 @@ const initialDb: DatabaseSchema = {
       timestamp: new Date().toISOString()
     }
   ],
-  auditLogs: []
+  auditLogs: [],
+  waitlist: []
 };
 
 let db: DatabaseSchema = { ...initialDb };
@@ -119,6 +122,19 @@ function syncToPostgres() {
   }, PG_SYNC_INTERVAL_MS);
 }
 
+/** Fills in any collections missing from an older store.json so new fields
+ *  (e.g. `waitlist`) never break handlers on a pre-existing file. */
+function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
+  return {
+    users: raw.users ?? {},
+    progress: raw.progress ?? {},
+    sandboxes: raw.sandboxes ?? {},
+    donations: raw.donations ?? [],
+    auditLogs: raw.auditLogs ?? [],
+    waitlist: raw.waitlist ?? [],
+  };
+}
+
 function initDatabase() {
   try {
     if (!fs.existsSync(DATA_DIR)) {
@@ -126,7 +142,7 @@ function initDatabase() {
     }
     if (fs.existsSync(DB_FILE)) {
       const raw = fs.readFileSync(DB_FILE, 'utf-8');
-      db = JSON.parse(raw);
+      db = normalizeDb(JSON.parse(raw));
     } else {
       saveDatabase();
     }
@@ -144,9 +160,6 @@ function initDatabase() {
         await ensureTables();
         const pg = await loadFullDb(query);
 
-        const localDonationIds = new Set(db.donations.map(d => d.id));
-        const localLogIds = new Set(db.auditLogs.map(l => l.id));
-
         db = {
           users: { ...db.users, ...pg.users },
           progress: { ...db.progress, ...pg.progress },
@@ -158,6 +171,10 @@ function initDatabase() {
           auditLogs: [
             ...db.auditLogs.filter(l => !pg.auditLogs.some(p => p.id === l.id)),
             ...pg.auditLogs,
+          ],
+          waitlist: [
+            ...(db.waitlist ?? []).filter(w => !(pg.waitlist ?? []).some(p => p.email === w.email)),
+            ...(pg.waitlist ?? []),
           ],
         };
         saveDatabase();
@@ -451,6 +468,10 @@ app.post('/api/auth/register', rateLimiter(5, 60000), async (req: Request, res: 
   };
   saveDatabase();
 
+  // Fire-and-forget welcome email (no-op without EMAIL_API_KEY).
+  const registeredName = name ? String(name).trim() : cleanEmail.split('@')[0];
+  void sendWelcomeEmail(cleanEmail, registeredName).catch(() => {});
+
   const token = signAccessToken({ id, role: 'student' });
   setRefreshCookie(res, signRefreshToken({ id, role: 'student' }));
   res.status(201).json({ success: true, token, user: { ...db.users[id], email: cleanEmail } });
@@ -581,7 +602,8 @@ app.get('/api/docs', (req, res) => {
       { path: "/api/donations/stats", method: "GET", description: "Community impact pledges & grant metrics" },
       { path: "/api/donation-intent", method: "POST", description: "Register funding pledge intent" },
       { path: "/api/alphavantage/quote/:symbol", method: "GET", description: "Real-time stock market quote proxy" },
-      { path: "/api/admin/audit-logs", method: "GET", description: "System compliance audit trail (Admin only)" }
+      { path: "/api/admin/audit-logs", method: "GET", description: "System compliance audit trail (Admin only)" },
+      { path: "/api/admin/metrics", method: "GET", description: "Aggregate platform metrics (Admin/Institution only)" }
     ]
   });
 });
@@ -881,6 +903,25 @@ app.post('/api/donation-intent', authenticate, (req: AuthenticatedRequest, res: 
   res.json({ success: true, donation, message: "Thank you for supporting open-access HBCU fintech education!" });
 });
 
+// 6.7.5 WAITLIST (email capture)
+app.post('/api/waitlist', rateLimiter(10, 60000), (req: Request, res: Response) => {
+  const { email, source } = req.body || {};
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'A valid email is required.' });
+  }
+  const cleanEmail = email.toLowerCase().trim();
+  const already = (db.waitlist ?? []).find((w) => w.email === cleanEmail);
+  if (!already) {
+    db.waitlist.push({ email: cleanEmail, source: source || 'website', createdAt: new Date().toISOString() });
+    saveDatabase();
+  }
+
+  // Fire-and-forget confirmation (no-op without EMAIL_API_KEY).
+  void sendWaitlistConfirmEmail(cleanEmail).catch(() => {});
+
+  res.json({ success: true, duplicate: !!already });
+});
+
 // 6.8 MARKET DATA PROXY WITH CACHING & SIMULATION (Alpha Vantage)
 app.get('/api/alphavantage/query', async (req, res) => {
   const func = (req.query.function as string || '').toUpperCase();
@@ -1035,6 +1076,11 @@ app.get('/api/admin/audit-logs', authenticate, requireRole(['admin', 'institutio
     totalLogs: db.auditLogs.length,
     logs: db.auditLogs.slice(0, limit)
   });
+});
+
+// 6.9 PLATFORM METRICS (Admin/Institution only)
+app.get('/api/admin/metrics', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  res.json(computeMetrics(db));
 });
 
 // 6.10 DYNAMIC SITEMAP (SEO)

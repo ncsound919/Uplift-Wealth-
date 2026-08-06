@@ -63,3 +63,9 @@ export const auditLogs = pgTable('audit_logs', {
   userId: text('user_id'),
   action: text('action').notNull(),
 });
+
+export const waitlistEmails = pgTable('waitlist_emails', {
+  email: text('email').primaryKey(),
+  source: text('source'),
+  createdAt: text('created_at').notNull(),
+});

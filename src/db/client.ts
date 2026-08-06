@@ -90,6 +90,11 @@ export async function ensureTables(): Promise<void> {
         user_id text,
         action text NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS waitlist_emails (
+        email text PRIMARY KEY NOT NULL,
+        source text,
+        created_at text NOT NULL
+      );
     `);
   } finally {
     client.release();

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, lazy, Suspense } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -28,6 +28,7 @@ import { resolveIcon } from '../utils/iconResolver';
 const DiagramMermaid = lazy(() => import('./DiagramMermaid').then(m => ({ default: m.DiagramMermaid })));
 import { Quiz } from './Quiz';
 import { cn } from '../lib/utils';
+import { capture } from '../lib/analytics';
 import { TradingGame } from './TradingGame';
 import { UnderwritingGame } from './UnderwritingGame';
 import { ParametricGame } from './ParametricGame';
@@ -336,6 +337,12 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete }: Mod
   const currentLesson = module.lessons[currentLessonIndex];
   const isLastLesson = currentLessonIndex === module.lessons.length - 1;
   const lectureClass = getLessonData(module.id);
+
+  useEffect(() => {
+    if (currentLesson) {
+      capture('lesson_start', { moduleId: module.id, lessonId: currentLesson.id });
+    }
+  }, [currentLesson?.id, module.id]);
 
   const currentGlossary = useMemo(
     () => getLessonGlossary(currentLesson.id, module.id, currentLessonIndex, module.lessons.length),

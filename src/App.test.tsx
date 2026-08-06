@@ -34,7 +34,7 @@ vi.mock('./lib/apiClient', () => ({
   apiClient: apiClientMock,
 }));
 
-vi.mock('./lib/analytics', () => ({ capture: vi.fn() }));
+vi.mock('./lib/analytics', () => ({ capture: vi.fn(), identify: vi.fn(), resetAnalytics: vi.fn() }));
 
 vi.mock('./data/courseData', () => ({
   courseModules: [

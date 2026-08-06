@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { ArrowLeft } from 'lucide-react';
 import { LoadingFallback } from './LoadingFallback';
+import { capture } from '../lib/analytics';
 
 const TradingGame = lazy(() => import('./TradingGame').then(m => ({ default: m.TradingGame })));
 const UnderwritingGame = lazy(() => import('./UnderwritingGame').then(m => ({ default: m.UnderwritingGame })));
@@ -18,12 +19,19 @@ interface Props {
 export function StandaloneGameView({ activeDirectGame, onAddXp, onBackToDashboard }: Props) {
   const handleStandaloneGameComplete = () => {
     onAddXp(150);
+    capture('game_complete', { gameType: activeDirectGame || 'unknown' });
     confetti({
       particleCount: 150,
       spread: 80,
       origin: { y: 0.5 }
     });
   };
+
+  useEffect(() => {
+    if (activeDirectGame) {
+      capture('game_start', { gameType: activeDirectGame });
+    }
+  }, [activeDirectGame]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 p-2">

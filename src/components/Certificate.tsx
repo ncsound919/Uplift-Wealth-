@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { GraduationCap, Award, Calendar, ShieldCheck } from 'lucide-react';
+import { capture } from '../lib/analytics';
 
 interface CertificateProps {
   userName: string;
@@ -8,13 +9,15 @@ interface CertificateProps {
   completedDate: string;
   certId: string;
   score?: number;
+  moduleId?: string;
   onClose: () => void;
 }
 
-export function Certificate({ userName, moduleTitle, completedDate, certId, score, onClose }: CertificateProps) {
+export function Certificate({ userName, moduleTitle, completedDate, certId, score, moduleId, onClose }: CertificateProps) {
   const certRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = useCallback(() => {
+    capture('certificate_download', { moduleId: moduleId || 'module' });
     const printWindow = window.open('', '_blank');
     if (!printWindow || !certRef.current) return;
 

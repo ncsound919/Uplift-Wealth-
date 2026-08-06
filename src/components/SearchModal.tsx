@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, BookOpen, GraduationCap, Microscope, Layers } from 'lucide-react';
 import { search, SearchResult, getTypeLabel, getTypeColor } from '../lib/searchIndex';
+import { capture } from '../lib/analytics';
 import { useNavigate } from 'react-router';
 
 const typeIcons: Record<SearchResult['type'], typeof BookOpen> = {
@@ -53,9 +54,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   }, []);
 
   const handleSelect = useCallback((result: SearchResult) => {
+    capture('search', { query, resultsCount: results.length });
     navigate(result.route);
     onClose();
-  }, [navigate, onClose]);
+  }, [navigate, onClose, query, results]);
 
   const handleKeyNav = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {

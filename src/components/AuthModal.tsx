@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, LogIn, UserPlus, Sparkles, CheckCircle2, ShieldCheck, X } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
+import { capture } from '../lib/analytics';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultEmail = '' }: Aut
         ? await apiClient.register(email, password, name)
         : await apiClient.loginWithEmail(email, password);
       if (res.user) {
+        if (mode === 'signup') capture('sign_up', {});
         onSuccess(res.user);
         onClose();
       }

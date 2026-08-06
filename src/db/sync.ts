@@ -5,7 +5,7 @@
  * accepts a `DbQueryRunner` so the logic is unit-testable with a fake runner
  * and runs against a real `pg` pool in production.
  */
-import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog } from './types';
+import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry } from './types';
 import type { DbQueryRunner } from './client';
 
 function json(value: unknown): string {
@@ -82,6 +82,17 @@ export async function syncAuditLog(runner: DbQueryRunner, log: AuditLog): Promis
   );
 }
 
+export async function syncWaitlist(runner: DbQueryRunner, w: WaitlistEntry): Promise<void> {
+  await runner.query(
+    `INSERT INTO waitlist_emails (email, source, created_at)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (email) DO UPDATE SET
+       source = EXCLUDED.source,
+       created_at = EXCLUDED.created_at`,
+    [w.email, w.source ?? null, w.createdAt]
+  );
+}
+
 /** Writes the entire in-memory store to PostgreSQL (backfill / boot sync). */
 export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Promise<void> {
   for (const u of Object.values(db.users)) {
@@ -100,6 +111,9 @@ export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Pro
   }
   for (const log of db.auditLogs) {
     await syncAuditLog(runner, log);
+  }
+  for (const w of db.waitlist ?? []) {
+    await syncWaitlist(runner, w);
   }
 }
 
@@ -155,6 +169,12 @@ interface AuditLogRow {
   action: string;
 }
 
+interface WaitlistRow {
+  email: string;
+  source: string | null;
+  created_at: string;
+}
+
 /** Reads the full store back out of PostgreSQL into the in-memory shape. */
 export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema> {
   const userRows = await runner.query<UserRow>('SELECT * FROM users');
@@ -162,6 +182,7 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
   const sandboxRows = await runner.query<SandboxRow>('SELECT * FROM sandboxes');
   const donationRows = await runner.query<DonationRow>('SELECT * FROM donations');
   const logRows = await runner.query<AuditLogRow>('SELECT * FROM audit_logs');
+  const waitlistRows = await runner.query<WaitlistRow>('SELECT * FROM waitlist_emails');
 
   const users: DatabaseSchema['users'] = {};
   for (const r of userRows) {
@@ -222,5 +243,11 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
     action: r.action,
   }));
 
-  return { users, progress, sandboxes, donations, auditLogs };
+  const waitlist: DatabaseSchema['waitlist'] = waitlistRows.map((r) => ({
+    email: r.email,
+    source: r.source ?? undefined,
+    createdAt: r.created_at,
+  }));
+
+  return { users, progress, sandboxes, donations, auditLogs, waitlist };
 }

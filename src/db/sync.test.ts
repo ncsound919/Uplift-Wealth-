@@ -43,6 +43,7 @@ const baseDb: DatabaseSchema = {
   },
   donations: [{ id: 'd1', userId: 'u1', amount: 50, tierLabel: 'Community', timestamp: 't3' }],
   auditLogs: [{ id: 'l1', timestamp: 't4', ip: '1.2.3.4', method: 'GET', path: '/api/health', action: 'GET /api/health' }],
+  waitlist: [],
 };
 
 describe('sync: upserts', () => {
@@ -128,6 +129,6 @@ describe('sync: full database', () => {
   it('loadFullDb handles empty tables', async () => {
     const { runner } = recordingRunner();
     const db = await loadFullDb(runner);
-    expect(db).toEqual({ users: {}, progress: {}, sandboxes: {}, donations: [], auditLogs: [] });
+    expect(db).toEqual({ users: {}, progress: {}, sandboxes: {}, donations: [], auditLogs: [], waitlist: [] });
   });
 });

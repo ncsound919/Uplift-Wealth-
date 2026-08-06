@@ -66,7 +66,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { capture } from './lib/analytics';
+import { capture, identify, resetAnalytics } from './lib/analytics';
 import confetti from 'canvas-confetti';
 import { apiClient, UserProfile } from './lib/apiClient';
 
@@ -419,6 +419,8 @@ export default function App() {
         console.warn('[API Client Sync Error]:', err);
       });
 
+      capture('lesson_complete', { moduleId: activeModuleId || 'module-1', lessonId, timeSpent: gameTimeRef.current });
+
       // Reward XP based on lesson types
       let points = 50;
       let reason = 'Completing Material';
@@ -471,6 +473,7 @@ export default function App() {
         });
       }
       setTimeout(() => setCertModuleId(moduleId), 500);
+      capture('module_complete', { moduleId });
       scheduleStatsSync();
     }
   };
@@ -583,7 +586,7 @@ export default function App() {
             {currentUser ? (
               <button
                 type="button"
-                onClick={() => { apiClient.logout(); setCurrentUser(null); }}
+                onClick={() => { apiClient.logout(); setCurrentUser(null); resetAnalytics(); }}
                 className="text-xs font-bold text-slate-400 hover:text-rose-500 flex items-center gap-1 cursor-pointer transition-colors"
                 title="Sign Out"
               >
@@ -1134,6 +1137,8 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={(user) => {
           setCurrentUser(user);
+          identify(user.id, { name: user.name, email: user.email });
+          capture('sign_in', { method: 'account' });
         }}
       />
 
@@ -1152,6 +1157,7 @@ export default function App() {
               const completed = completedLessons.filter(id => lessonIds.includes(id));
               return Math.round((completed.length / lessonIds.length) * 100);
             })()}
+            moduleId={certModuleId}
             onClose={() => setCertModuleId(null)}
           />
         );

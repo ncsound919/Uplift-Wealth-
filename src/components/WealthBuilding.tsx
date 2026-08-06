@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router';
 import { wealthChapters } from '../data/wealthChapters';
 import { useChapterCompletion } from '../hooks/useChapterCompletion';
 import { CompoundGrowthVisualizer } from './wealth/tools/CompoundGrowthVisualizer';
-import { TrendingUp, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { WaitlistForm } from './WaitlistForm';
+import { TrendingUp, RotateCcw, CheckCircle2, Sparkles } from 'lucide-react';
 
 export function WealthBuilding() {
   const navigate = useNavigate();
@@ -19,6 +20,19 @@ export function WealthBuilding() {
         <p className="text-slate-500 dark:text-slate-400 text-sm max-w-2xl">
           {wealthChapters.length} paths to wealth — building credit, investing, real estate, business, hustles, and group economics on your terms.
         </p>
+      </div>
+
+      <div className="bg-gradient-to-r from-emerald-50 to-amber-50 dark:from-emerald-950/30 dark:to-amber-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            <Sparkles className="w-3.5 h-3.5" />
+            New wealth tools & community cohorts
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md">
+            Join the list — we'll email you when new chapters, calculators, and group-economics cohorts launch.
+          </p>
+        </div>
+        <WaitlistForm source="wealth-hub" compact />
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">

@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { BarChart3, Flag, FlaskConical, RefreshCw, ShieldCheck, Users, Eye, EyeOff } from 'lucide-react';
+import { BarChart3, Flag, FlaskConical, RefreshCw, ShieldCheck, Users, Eye, EyeOff, Trophy, Clock } from 'lucide-react';
 import { PageMeta } from './PageMeta';
 import { getAllFlags, overrideFlag, clearOverride, clearAllOverrides, isFlagEnabled } from '../lib/featureFlags';
 import { ACTIVE_EXPERIMENTS, getVariant } from '../lib/experiments';
 import { cn } from '../lib/utils';
+import type { PlatformMetrics } from '../db/metrics';
 
 const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 
 export function AdminDashboard() {
   const [flags, setFlags] = useState(getAllFlags);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [metrics, setMetrics] = useState<PlatformMetrics | null>(null);
+  const [metricsError, setMetricsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const token = localStorage.getItem('hacu_auth_token') || '';
+    fetch('/api/admin/metrics', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((data) => {
+        if (!cancelled) {
+          setMetrics(data as PlatformMetrics);
+          setMetricsError(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setMetricsError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleToggle = (flag: (typeof flags)[0]) => {
     if (flag.overridden) {
@@ -46,6 +68,60 @@ export function AdminDashboard() {
             <Eye className="w-4 h-4" />
             <span>PostHog Connected</span>
           </div>
+        )}
+      </div>
+
+      {/* Platform Metrics */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-black text-sm text-slate-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-emerald-500" />
+            Platform Metrics
+          </h3>
+          {metricsError && !metrics && (
+            <span className="text-[11px] text-slate-400">Unavailable (sign in as admin to see live data)</span>
+          )}
+        </div>
+        {metrics ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'Users', value: metrics.totalUsers, icon: Users },
+              { label: 'Lessons Completed', value: metrics.totalLessonsCompleted, icon: Trophy },
+              { label: 'Active Today', value: metrics.activeToday, icon: Clock },
+              { label: 'Active This Week', value: metrics.activeThisWeek, icon: Clock },
+              { label: 'Modules Completed', value: metrics.totalModulesCompleted, icon: Trophy },
+              { label: 'Quiz Attempts', value: metrics.totalQuizAttempts, icon: BarChart3 },
+              { label: 'Avg Quiz Score', value: `${metrics.avgQuizScore}%`, icon: BarChart3 },
+              { label: 'Donations', value: `$${metrics.totalDonationAmount.toLocaleString()}`, icon: Users },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <Icon className="w-3 h-3" />
+                    {s.label}
+                  </div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white mt-1">{s.value.toLocaleString?.() ?? s.value}</div>
+                </div>
+              );
+            })}
+            {metrics.topBadges.length > 0 && (
+              <div className="col-span-2 md:col-span-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Top Badges</span>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {metrics.topBadges.map((b) => (
+                    <span key={b.badge} className="px-2 py-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[11px] font-bold rounded-md">
+                      {b.badge} × {b.count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          !metricsError && (
+            <div className="text-xs text-slate-400 py-4 animate-pulse">Loading metrics…</div>
+          )
         )}
       </div>
 

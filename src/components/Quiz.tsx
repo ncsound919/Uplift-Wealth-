@@ -4,6 +4,7 @@ import { QuizQuestion } from '../data/courseData';
 import { CheckCircle2, XCircle, Trophy, ArrowRight, RefreshCw, BarChart3 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { apiClient } from '../lib/apiClient';
+import { capture } from '../lib/analytics';
 import { cn } from '../lib/utils';
 
 interface QuizProps {
@@ -55,6 +56,8 @@ export function Quiz({ questions, onComplete, moduleId = 'unknown', passThreshol
       apiClient.submitQuizScore(moduleId, finalScore, questions.length).catch((err) => {
         console.warn('[Quiz Score Submit Error]:', err);
       });
+
+      capture('quiz_attempt', { moduleId, score: finalScore, passed });
 
       if (passed) {
         confetti({ particleCount: 150, spread: 80, origin: { y: 0.4 }, colors: ['#2563eb', '#10b981', '#f59e0b'] });

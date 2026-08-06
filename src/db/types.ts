@@ -54,10 +54,17 @@ export interface AuditLog {
   action: string;
 }
 
+export interface WaitlistEntry {
+  email: string;
+  source?: string;
+  createdAt: string;
+}
+
 export interface DatabaseSchema {
   users: Record<string, StoredUser>;
   progress: Record<string, StoredProgress>;
   sandboxes: Record<string, Sandbox[]>;
   donations: Donation[];
   auditLogs: AuditLog[];
+  waitlist: WaitlistEntry[];
 }
