@@ -1,8 +1,8 @@
-# Overlay Wealth — Road to the Leading Black Financial Literacy Platform
+﻿# Overlay Wealth â€” Road to the Leading Black Financial Literacy Platform
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**North star:** Become the go-to financial literacy platform for Black communities — a trusted institution, not just an app. Trust → community → institutional revenue → reach, in that order.
+**North star:** Become the go-to financial literacy platform for Black communities â€” a trusted institution, not just an app. Trust â†’ community â†’ institutional revenue â†’ reach, in that order.
 
 **Strategy in one sentence:** Fix the trust layer first (real accounts, durable data, one brand), then build the moat competitors can't copy (community + Black financial educators), then monetize institutionally (classrooms, HBCUs, churches, grants), then scale reach (mobile, video, growth).
 
@@ -32,32 +32,32 @@ Evidence gathered from the codebase:
 
 ```
 Phase 0 (Trust & Durability)
-   ├── 0.1 Auth  ─────────────┐
-   ├── 0.2 Postgres ──────────┤
-   └── 0.4 Brand              │
-                              ▼
-   Phase 1 (Measure)  ── parallel ──►  Phase 2 (Community)
+   â”œâ”€â”€ 0.1 Auth  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+   â”œâ”€â”€ 0.2 Postgres â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+   â””â”€â”€ 0.4 Brand              â”‚
+                              â–¼
+   Phase 1 (Measure)  â”€â”€ parallel â”€â”€â–º  Phase 2 (Community)
    (analytics, email)                (needs auth 0.1 + DB 0.2)
-                                             │
-                                             ▼
+                                             â”‚
+                                             â–¼
                                       Phase 3 (Creators/CMS)
-                                             │
-                                             ▼
+                                             â”‚
+                                             â–¼
                                       Phase 4 (Institutional & Revenue)
-                                             │
-                                             ▼
+                                             â”‚
+                                             â–¼
                                       Phase 5 (Reach)
 ```
 
-**Parallel tracks after Phase 0:** Track A = Community (2) → Creators (3). Track B = Institutional (4). Track C = Reach (5). Track D = Measure (1). A/B/C all unlock with Phase 0; D runs alongside.
+**Parallel tracks after Phase 0:** Track A = Community (2) â†’ Creators (3). Track B = Institutional (4). Track C = Reach (5). Track D = Measure (1). A/B/C all unlock with Phase 0; D runs alongside.
 
-**Hard dependencies:** Phase 2, 4 need 0.1 + 0.2. Phase 4.2 needs 0.1 (accounts) + a payment provider. Phase 3 needs 0.2 (content versioning) + 2.x (profiles). Phase 5.1 needs 0.2 (offline→server sync).
+**Hard dependencies:** Phase 2, 4 need 0.1 + 0.2. Phase 4.2 needs 0.1 (accounts) + a payment provider. Phase 3 needs 0.2 (content versioning) + 2.x (profiles). Phase 5.1 needs 0.2 (offlineâ†’server sync).
 
 ---
 
 ## Guiding Principles (anti-pattern catalog)
 
-1. **Trust before features.** No new games/modules/content until real accounts + durable data ship. The community historically gets burned by financial products — the product must be bulletproof first.
+1. **Trust before features.** No new games/modules/content until real accounts + durable data ship. The community historically gets burned by financial products â€” the product must be bulletproof first.
 2. **One source of truth.** Progress lives on the server; `localStorage` is only an offline cache. Never two writable stores.
 3. **Community is the moat; content is the commodity.** Every leader in this space won on community + educators. Prioritize anything that gets 2+ humans talking over anything that adds another lesson.
 4. **Don't follow the old ROADMAP ordering.** i18n, A/B testing, and video production are explicitly deferred. They don't build trust, community, or revenue.
@@ -68,11 +68,11 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Phase 0 — Trust & Durability
+## Phase 0 â€” Trust & Durability
 
 **Goal:** A user's account, progress, and certificates are real and permanent. One brand, one story. Ship before anything else.
 
-### Task 0.1 — Real authentication (bcrypt + JWT)
+### Task 0.1 â€” Real authentication (bcrypt + JWT)
 **Files:** `server.ts`, `src/lib/apiClient.ts`, `src/components/AuthModal.tsx`, `src/lib/auth.ts` (new), `server.test.ts` (new/extend)
 
 - [ ] Add `bcryptjs` + `jsonwebtoken` deps
@@ -81,10 +81,10 @@ Phase 0 (Trust & Durability)
 - [ ] Update `AuthModal.tsx` to real email/password forms (keep Google OAuth stub if present)
 - [ ] Update `apiClient.ts`: drop the hardcoded `demo-jwt-token-...`; read access token, auto-refresh on 401
 - [ ] Migration path: preserve `localStorage` demo identity as a guest session so existing test data isn't orphaned
-- **Verify:** `npm run verify`; add integration tests covering register→login→refresh→logout and wrong-password rejection
+- **Verify:** `npm run verify`; add integration tests covering registerâ†’loginâ†’refreshâ†’logout and wrong-password rejection
 - **Exit:** No `jwt-token-` mock literals remain in `src` or `server.ts`; auth endpoints tested
 
-### Task 0.2 — Postgres migration (durable source of truth)
+### Task 0.2 â€” Postgres migration (durable source of truth)
 **Files:** `src/db/schema.ts` (new), `src/db/migrations/` (new), `src/db/seed.ts` (new), `server.ts`, `.env.example`, `render.yaml`
 
 - [ ] Add `drizzle-orm` + `drizzle-kit` + `pg`
@@ -96,7 +96,7 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`; integration tests hit PG via the existing API; `npm run test` green
 - **Exit:** `.data/store.json` no longer read in production path; a restart preserves a user's progress/certificates/donations
 
-### Task 0.3 — Progress durability & sync
+### Task 0.3 â€” Progress durability & sync
 **Files:** `src/lib/apiClient.ts`, `src/stores/*.ts`, `src/hooks/useChapterCompletion.ts`, `src/App.tsx`
 
 - [ ] Make server the source of truth for progress/XP/badges/streaks (currently localStorage-first)
@@ -106,10 +106,10 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`; test that a progress write survives reload and appears via API
 - **Exit:** Two users' progress is independent and server-persisted; clearing browser storage does not lose server-synced progress
 
-### Task 0.4 — Brand identity & docs consistency
+### Task 0.4 â€” Brand identity & docs consistency
 **Files:** `index.html`, `public/` (asset cleanup), `metadata.json`, `README.md`, `RELEASE.md`, `src/App.tsx` (title/footer), `.env.example`
 
-- [ ] **DECISION (default: keep "Overlay Wealth"):** settle one name — `Overlay Wealth` (README/metadata/public assets) vs `Uplift Wealth` (folder, `uplift-logo-*`) vs `FinTech Foundations` (RELEASE). Update everything to the single chosen name
+- [ ] **DECISION (default: keep "Overlay Wealth"):** settle one name â€” `Overlay Wealth` (README/metadata/public assets) vs `Uplift Wealth` (folder, `uplift-logo-*`) vs `FinTech Foundations` (RELEASE). Update everything to the single chosen name
 - [ ] Delete or relocate conflicting assets (`uplift-logo-*` vs `overlay-logo-*`, `overlay365.png`)
 - [ ] Rewrite `index.html` meta for the real positioning: **Black financial literacy**, community, wealth-building (currently generic fintech keywords)
 - [ ] Refresh `metadata.json` + OG image (`public/og-image.png`) with the chosen name/logo
@@ -117,7 +117,7 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`; grep repo for the discarded name and the stale "156 tests" figure
 - **Exit:** One consistent name/brand across README, index.html, metadata, logos, and RELEASE
 
-### Task 0.5 — Production deployment & backups
+### Task 0.5 â€” Production deployment & backups
 **Files:** `render.yaml`, `Dockerfile`, `.github/workflows/` (new), `.env.example`
 
 - [ ] Provision managed Postgres (Render Postgres or Neon/Supabase) wired to 0.2's `DATABASE_URL`
@@ -126,33 +126,33 @@ Phase 0 (Trust & Durability)
 - [ ] Add deploy workflow + smoke test (`/api/health`, home, one module route)
 - [ ] Wire Sentry (already a dep, not initialized): `@sentry/react` in `src/main.tsx`, `@sentry/node` in `server.ts`
 - [ ] Uptime monitor + alert (health check already exists)
-- **Verify:** Fresh clone → `npm ci && npm run verify`; deploy to staging; kill server mid-use → restart → user data intact
+- **Verify:** Fresh clone â†’ `npm ci && npm run verify`; deploy to staging; kill server mid-use â†’ restart â†’ user data intact
 - **Exit:** Live URL serving real users with durable data and a CI gate on every merge
 
 ---
 
-## Phase 1 — Measure
+## Phase 1 â€” Measure
 
 **Goal:** Know what works before building more. Can run parallel with Phase 2.
 
-### Task 1.1 — Wire analytics
+### Task 1.1 â€” Wire analytics
 **Files:** `src/lib/analytics.ts` (new), `src/main.tsx`, `src/App.tsx`, server events endpoint (optional)
 
 - [ ] Initialize PostHog (dep present) in `src/main.tsx` with `VITE_POSTHOG_KEY`
 - [ ] Track: `page_view`, `lesson_start`/`lesson_complete`, `quiz_attempt`, `game_start`/`game_complete`, `module_complete`, `certificate_download`, `signup`
-- [ ] If managed PostHog is rejected, fall back to a custom `analytics` table + batched `/api/events` — **pick one, not both**
+- [ ] If managed PostHog is rejected, fall back to a custom `analytics` table + batched `/api/events` â€” **pick one, not both**
 - **Verify:** `npm run verify`; a scripted run emits events visible in PostHog live view
 - **Exit:** Every core action emits an event; no double-tracking from two systems
 
-### Task 1.2 — Admin insights
+### Task 1.2 â€” Admin insights
 **Files:** `src/components/AdminDashboard.tsx`, `server.ts` (aggregate endpoints)
 
 - [ ] Metrics: DAU, 7-day retention, lesson-completion funnel, quiz pass rates by module, game engagement, drop-off points
-- [ ] Feed from PostHog API or aggregate SQL — reuse existing `AdminDashboard` shell
+- [ ] Feed from PostHog API or aggregate SQL â€” reuse existing `AdminDashboard` shell
 - **Verify:** `npm run verify`; dashboard renders with seeded data
 - **Exit:** Retention funnel is visible; drop-off points are identifiable per module
 
-### Task 1.3 — Acquisition & engagement loop
+### Task 1.3 â€” Acquisition & engagement loop
 **Files:** `src/components/` (waitlist form), `server.ts` (email), `.env.example`
 
 - [ ] Email provider (Resend/SendGrid) + `EMAIL_API_KEY` env; **waitlist/email capture** on home + wealth hub (highest-leverage growth lever for a trust-first platform)
@@ -163,11 +163,11 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Phase 2 — Community (the moat)
+## Phase 2 â€” Community (the moat)
 
 **Goal:** Users talk to each other. This is what no generic fintech course can copy. **Requires 0.1 + 0.2.**
 
-### Task 2.1 — Discussion threads
+### Task 2.1 â€” Discussion threads
 **Files:** `src/db/schema.ts` (+`threads`, `comments`), `src/components/DiscussionThread.tsx` (new), `src/components/ModuleView.tsx`, `server.ts`
 
 - [ ] Tables: `threads`, `comments` (userId, moduleId/lessonId, body, createdAt)
@@ -176,7 +176,7 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`; component tests + API tests for create/reply/upvote
 - **Exit:** A user can ask a question on any lesson and get a reply
 
-### Task 2.2 — Public profiles & privacy
+### Task 2.2 â€” Public profiles & privacy
 **Files:** `src/components/StudentProfile.tsx`, `src/App.tsx` (+`/profile/:userId`), `src/db/schema.ts` (+`privacy`)
 
 - [ ] Public profile: name, badges, completed modules, streak, XP (exists as self-view; add public route)
@@ -184,17 +184,17 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`
 - **Exit:** Clicking a commenter's avatar opens their public profile
 
-### Task 2.3 — Cohorts, groups & mentors
+### Task 2.3 â€” Cohorts, groups & mentors
 **Files:** `src/db/schema.ts` (+`cohorts`, `cohort_members`), `src/components/CohortView.tsx` (new), `server.ts`, `src/App.tsx`
 
 - [ ] Tables: `cohorts`, `cohort_members`
 - [ ] `CohortView`: members, progress leaderboard, cohort discussion (reuses 2.1)
 - [ ] Mentor role (existing RBAC) + "ask a mentor" in cohorts
-- [ ] Themed cohort templates: "Church Financial Peace Class", "HBCU Chapter", "Family Group Economics Circle" — directly aligned with the wealth-building content
+- [ ] Themed cohort templates: "Church Financial Peace Class", "HBCU Chapter", "Family Group Economics Circle" â€” directly aligned with the wealth-building content
 - **Verify:** `npm run verify`
 - **Exit:** A church or family can spin up a cohort and see each other's progress
 
-### Task 2.4 — Notifications
+### Task 2.4 â€” Notifications
 **Files:** `src/db/schema.ts` (+`notifications`), `src/components/NotificationCenter.tsx` (new), `server.ts`
 
 - [ ] In-app notification center (reply, cohort member milestone, streak milestone)
@@ -204,20 +204,20 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Phase 3 — Creators & CMS
+## Phase 3 â€” Creators & CMS
 
 **Goal:** Trusted Black financial educators can publish on the platform. Turns the app into a movement.
 
-### Task 3.1 — Content CMS
+### Task 3.1 â€” Content CMS
 **Files:** `content/modules/*` (move from `src/data/courseData.ts`), `src/lib/contentLoader.ts` (new), `src/components/admin/ContentEditor.tsx` (new), `server.ts`
 
-- [ ] Move lesson content to Markdown with frontmatter (title, quiz[]) — **cold start:** keep `courseData.ts` as fallback so nothing breaks mid-migration
+- [ ] Move lesson content to Markdown with frontmatter (title, quiz[]) â€” **cold start:** keep `courseData.ts` as fallback so nothing breaks mid-migration
 - [ ] Admin editor: markdown preview + quiz builder (RBAC `admin` only)
 - [ ] Version history (who changed what) in DB
 - **Verify:** `npm run verify`; `npm run test` still green with the loader active
 - **Exit:** A non-engineer can publish a lesson from the admin UI
 
-### Task 3.2 — Educator / ambassador program
+### Task 3.2 â€” Educator / ambassador program
 **Files:** `src/db/schema.ts` (+`creator`, `creator_content`), `src/components/` (creator profile/badging), marketing assets
 
 - [ ] Creator role + verified-educator badge on profiles (2.2)
@@ -228,11 +228,11 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Phase 4 — Institutional & Revenue
+## Phase 4 â€” Institutional & Revenue
 
 **Goal:** Fundable, sustainable, and trusted by institutions. **Requires 0.1 + 0.2.**
 
-### Task 4.1 — Classroom / teacher mode
+### Task 4.1 â€” Classroom / teacher mode
 **Files:** `src/components/admin/ClassroomDashboard.tsx` (new), `lectureLibrary` integration, `server.ts`, `src/App.tsx`
 
 - [ ] Teacher dashboard: create class from the 16 existing `lectureLibrary.ts` plans
@@ -241,17 +241,17 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`
 - **Exit:** A teacher enrolls students, assigns the lecture plan, and sees completion per student
 
-### Task 4.2 — Monetization
+### Task 4.2 â€” Monetization
 **Files:** `src/lib/stripe.ts` (new), `src/components/PricingPage.tsx` (new), `src/components/BillingPortal.tsx` (new), `server.ts`, `src/db/schema.ts`
 
-- [ ] Stripe SDK: free tier (modules 0–5) / premium `$19/mo` (all modules, certificates, review cards) / institutional `$99/mo` (50 seats, admin, cohorts)
+- [ ] Stripe SDK: free tier (modules 0â€“5) / premium `$19/mo` (all modules, certificates, review cards) / institutional `$99/mo` (50 seats, admin, cohorts)
 - [ ] Paywall + "Upgrade to Premium" modal; `/pricing` comparison page
-- [ ] Migrate the donations link to a real Stripe Checkout session (`STRIPE_DONATION_LINK` already exists — formalize it)
+- [ ] Migrate the donations link to a real Stripe Checkout session (`STRIPE_DONATION_LINK` already exists â€” formalize it)
 - [ ] Webhooks: `checkout.session.completed`, `subscription.deleted`, `invoice.payment_failed`
 - **Verify:** `npm run verify`; Stripe test-mode end-to-end via webhook payloads
 - **Exit:** A user can pay in test mode and unlock premium content; donations flow through Checkout
 
-### Task 4.3 — Partnership & grant pipeline
+### Task 4.3 â€” Partnership & grant pipeline
 **Files:** `docs/` (institutional one-pager), `src/components/` (demo mode / sales assets), `RELEASE.md`
 
 - [ ] Institutional one-pager: mission, curriculum, security posture (post-0.5), pricing, cohort model
@@ -262,11 +262,11 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Phase 5 — Reach
+## Phase 5 â€” Reach
 
 **Goal:** The right audience can actually find and use it.
 
-### Task 5.1 — PWA completion & mobile polish
+### Task 5.1 â€” PWA completion & mobile polish
 **Files:** `vite.config.ts` (existing `VitePWA`), `public/manifest.json`, `src/lib/` (offline sync), mobile pass on `src/App.tsx` + key views
 
 - [ ] Confirm service worker registration + offline caching for visited lessons (plugin configured; verify `registerSW`/devOptions)
@@ -275,19 +275,19 @@ Phase 0 (Trust & Durability)
 - **Verify:** `npm run verify`; Lighthouse PWA + Performance audit > 90
 - **Exit:** Installable on iOS/Android; a visited lesson renders offline
 
-### Task 5.2 — Video curriculum
-**Files:** `src/components/YouTubeVideoPlayer.tsx` (exists — wire it), `scripts/` (content), `src/data/courseData.ts`
+### Task 5.2 â€” Video curriculum
+**Files:** `src/components/YouTubeVideoPlayer.tsx` (exists â€” wire it), `scripts/` (content), `src/data/courseData.ts`
 
-- [ ] Scripts from existing top lessons (5–7 min each) — start with the wealth chapters, they're the differentiator
+- [ ] Scripts from existing top lessons (5â€“7 min each) â€” start with the wealth chapters, they're the differentiator
 - [ ] Embed player in `ModuleView` per lesson; transcripts for accessibility
 - **Verify:** `npm run verify`
-- **Exit:** 2–3 flagship wealth chapters have embedded video + transcript
+- **Exit:** 2â€“3 flagship wealth chapters have embedded video + transcript
 
-### Task 5.3 — Growth & SEO
+### Task 5.3 â€” Growth & SEO
 **Files:** `index.html`, `public/sitemap.xml`, `server.ts` (dynamic sitemap), OG assets, marketing copy
 
 - [ ] Dynamic `/api/sitemap.xml` from course data (all modules/lessons)
-- [ ] OG images per module (1200×630) + Black-financial-literacy positioning in meta (0.4)
+- [ ] OG images per module (1200Ã—630) + Black-financial-literacy positioning in meta (0.4)
 - [ ] Content marketing: publish the wealth chapters as SEO articles; cross-post with educators (3.2)
 - **Verify:** `npm run verify`; sitemap returns all module URLs
 - **Exit:** 50+ organic visits/week; key wealth pages indexed
@@ -306,7 +306,7 @@ Phase 0 (Trust & Durability)
 | 2 | Threads / comments | 100+ / 500+ |
 | 2 | Active cohorts | 5+ |
 | 3 | External educators publishing | 5+ |
-| 4 | Free → premium conversion | 5% |
+| 4 | Free â†’ premium conversion | 5% |
 | 4 | MRR | $500+ (Phase 4 done) |
 | 4 | Institutional pilots | 2+ |
 | 5 | Lighthouse (PWA/Perf/Acc/A11y/SEO) | >90 |
@@ -314,15 +314,15 @@ Phase 0 (Trust & Durability)
 
 ---
 
-## Decisions Needed (defaults marked ✓)
+## Decisions Needed (defaults marked âœ“)
 
 | Decision | Default | Why |
 |---|---|---|
-| Name | ✓ **Overlay Wealth** | Matches README/metadata/current assets; newer identity |
-| Analytics | ✓ **PostHog (managed)** | Already a dependency; fastest to value; revisit only if data-residency needs arise |
-| Email | ✓ **Resend** | Simple API; sandbox testing; cheap at volume |
-| Payments | ✓ **Stripe** | Already partially wired (`STRIPE_DONATION_LINK`); test-mode first |
-| DB host | ✓ **Render Managed Postgres** | Same platform, persistent volume, no extra vendor |
+| Name | âœ“ **Overlay Wealth** | Matches README/metadata/current assets; newer identity |
+| Analytics | âœ“ **PostHog (managed)** | Already a dependency; fastest to value; revisit only if data-residency needs arise |
+| Email | âœ“ **Resend** | Simple API; sandbox testing; cheap at volume |
+| Payments | âœ“ **Stripe** | Already partially wired (`STRIPE_DONATION_LINK`); test-mode first |
+| DB host | âœ“ **Render Managed Postgres** | Same platform, persistent volume, no extra vendor |
 | i18n / A/B / video-production | **Defer** | Not trust/community/revenue work; revisit post-Phase 4 |
 
 ---
