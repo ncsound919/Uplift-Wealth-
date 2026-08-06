@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { PageMeta } from './components/PageMeta';
 import { SearchModal } from './components/SearchModal';
 import { NotificationCenter } from './components/NotificationCenter';
+import { OfflineBanner } from './components/OfflineBanner';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { AuthModal } from './components/AuthModal';
 import { Certificate } from './components/Certificate';
@@ -1294,6 +1295,7 @@ export default function App() {
 
       {/* Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <OfflineBanner />
       <div className="fixed top-4 right-4 z-30">
         <NotificationCenter currentUserId={currentUser?.id} />
       </div>

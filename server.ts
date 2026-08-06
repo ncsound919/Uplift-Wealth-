@@ -1669,6 +1669,16 @@ app.get('/api/sitemap.xml', (req: Request, res: Response) => {
     { loc: '/game/parametric', priority: '0.8', changefreq: 'weekly' },
     { loc: '/game/fraud', priority: '0.8', changefreq: 'weekly' },
     { loc: '/game/popquiz', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/wealth-building', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/credit', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/investing', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/real-estate', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/business', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/group-economics', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/side-hustles', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/wealth-building/emergency-fund', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/cohorts', priority: '0.6', changefreq: 'weekly' },
+    { loc: '/pricing', priority: '0.7', changefreq: 'monthly' },
   ];
 
   const moduleRoutes = Array.from({ length: 16 }, (_, i) => ({
@@ -1682,6 +1692,47 @@ app.get('/api/sitemap.xml', (req: Request, res: Response) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allRoutes.map(r => `  <url>
+    <loc>${baseUrl}${r.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${r.changefreq}</changefreq>
+    <priority>${r.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+
+  res.setHeader('Content-Type', 'application/xml');
+  res.send(xml);
+});
+
+// Serve the dynamic sitemap at /sitemap.xml too (so bots get wealth/cohort routes).
+app.get('/sitemap.xml', (req: Request, res: Response) => {
+  const baseUrl = process.env.APP_URL || 'https://overlay365.org';
+  const today = new Date().toISOString().split('T')[0];
+
+  const staticRoutes = [
+    { loc: '/', priority: '1.0', changefreq: 'weekly' },
+    { loc: '/glossary', priority: '0.7', changefreq: 'weekly' },
+    { loc: '/knowledge', priority: '0.7', changefreq: 'weekly' },
+    { loc: '/profile', priority: '0.6', changefreq: 'daily' },
+    { loc: '/business-builder', priority: '0.6', changefreq: 'monthly' },
+    { loc: '/donate', priority: '0.5', changefreq: 'monthly' },
+    { loc: '/wealth-building', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/credit', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/investing', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/real-estate', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/business', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/wealth-building/group-economics', priority: '0.9', changefreq: 'weekly' },
+    { loc: '/pricing', priority: '0.7', changefreq: 'monthly' },
+  ];
+
+  const moduleRoutes = Array.from({ length: 16 }, (_, i) => ({
+    loc: `/module/${i}`,
+    priority: '0.9',
+    changefreq: 'monthly',
+  }));
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${[...staticRoutes, ...moduleRoutes].map(r => `  <url>
     <loc>${baseUrl}${r.loc}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${r.changefreq}</changefreq>
