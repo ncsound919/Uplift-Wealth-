@@ -1081,6 +1081,8 @@ export default function App() {
                 onBack={() => setActiveModuleId(null)}
                 onComplete={handleModuleComplete}
                 onLessonComplete={handleLessonComplete}
+                currentUserId={currentUser?.id}
+                onRequireAuth={() => setIsAuthModalOpen(true)}
               />
             </motion.div>
           ) : (

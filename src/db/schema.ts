@@ -70,3 +70,32 @@ export const waitlistEmails = pgTable('waitlist_emails', {
   source: text('source'),
   createdAt: text('created_at').notNull(),
 });
+
+export const threads = pgTable('threads', {
+  id: text('id').primaryKey(),
+  moduleId: text('module_id'),
+  lessonId: text('lesson_id'),
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  createdAt: text('created_at').notNull(),
+  upvotedBy: jsonb('upvoted_by').$type<string[]>().notNull().default([]),
+});
+
+export const comments = pgTable('comments', {
+  id: text('id').primaryKey(),
+  threadId: text('thread_id').notNull(),
+  userId: text('user_id').notNull(),
+  body: text('body').notNull(),
+  createdAt: text('created_at').notNull(),
+  upvotedBy: jsonb('upvoted_by').$type<string[]>().notNull().default([]),
+});
+
+export const reports = pgTable('reports', {
+  id: text('id').primaryKey(),
+  targetType: text('target_type').notNull(),
+  targetId: text('target_id').notNull(),
+  userId: text('user_id').notNull(),
+  reason: text('reason'),
+  createdAt: text('created_at').notNull(),
+});

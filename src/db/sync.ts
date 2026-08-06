@@ -5,7 +5,7 @@
  * accepts a `DbQueryRunner` so the logic is unit-testable with a fake runner
  * and runs against a real `pg` pool in production.
  */
-import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry } from './types';
+import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry, Thread, Comment, Report } from './types';
 import type { DbQueryRunner } from './client';
 
 function json(value: unknown): string {
@@ -94,6 +94,35 @@ export async function syncWaitlist(runner: DbQueryRunner, w: WaitlistEntry): Pro
   );
 }
 
+export async function syncThread(runner: DbQueryRunner, t: Thread): Promise<void> {
+  await runner.query(
+    `INSERT INTO threads (id, module_id, lesson_id, user_id, title, body, created_at, upvoted_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+     ON CONFLICT (id) DO UPDATE SET
+       upvoted_by = EXCLUDED.upvoted_by`,
+    [t.id, t.moduleId ?? null, t.lessonId ?? null, t.userId, t.title, t.body, t.createdAt, json(t.upvotedBy)]
+  );
+}
+
+export async function syncComment(runner: DbQueryRunner, c: Comment): Promise<void> {
+  await runner.query(
+    `INSERT INTO comments (id, thread_id, user_id, body, created_at, upvoted_by)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb)
+     ON CONFLICT (id) DO UPDATE SET
+       upvoted_by = EXCLUDED.upvoted_by`,
+    [c.id, c.threadId, c.userId, c.body, c.createdAt, json(c.upvotedBy)]
+  );
+}
+
+export async function syncReport(runner: DbQueryRunner, r: Report): Promise<void> {
+  await runner.query(
+    `INSERT INTO reports (id, target_type, target_id, user_id, reason, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     ON CONFLICT (id) DO NOTHING`,
+    [r.id, r.targetType, r.targetId, r.userId, r.reason ?? null, r.createdAt]
+  );
+}
+
 /** Writes the entire in-memory store to PostgreSQL (backfill / boot sync). */
 export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Promise<void> {
   for (const u of Object.values(db.users)) {
@@ -115,6 +144,15 @@ export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Pro
   }
   for (const w of db.waitlist ?? []) {
     await syncWaitlist(runner, w);
+  }
+  for (const t of db.threads ?? []) {
+    await syncThread(runner, t);
+  }
+  for (const c of db.comments ?? []) {
+    await syncComment(runner, c);
+  }
+  for (const r of db.reports ?? []) {
+    await syncReport(runner, r);
   }
 }
 
@@ -177,6 +215,35 @@ interface WaitlistRow {
   created_at: string;
 }
 
+interface ThreadRow {
+  id: string;
+  module_id: string | null;
+  lesson_id: string | null;
+  user_id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  upvoted_by: string[];
+}
+
+interface CommentRow {
+  id: string;
+  thread_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  upvoted_by: string[];
+}
+
+interface ReportRow {
+  id: string;
+  target_type: string;
+  target_id: string;
+  user_id: string;
+  reason: string | null;
+  created_at: string;
+}
+
 /** Reads the full store back out of PostgreSQL into the in-memory shape. */
 export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema> {
   const userRows = await runner.query<UserRow>('SELECT * FROM users');
@@ -185,6 +252,9 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
   const donationRows = await runner.query<DonationRow>('SELECT * FROM donations');
   const logRows = await runner.query<AuditLogRow>('SELECT * FROM audit_logs');
   const waitlistRows = await runner.query<WaitlistRow>('SELECT * FROM waitlist_emails');
+  const threadRows = await runner.query<ThreadRow>('SELECT * FROM threads');
+  const commentRows = await runner.query<CommentRow>('SELECT * FROM comments');
+  const reportRows = await runner.query<ReportRow>('SELECT * FROM reports');
 
   const users: DatabaseSchema['users'] = {};
   for (const r of userRows) {
@@ -252,5 +322,34 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
     createdAt: r.created_at,
   }));
 
-  return { users, progress, sandboxes, donations, auditLogs, waitlist };
+  const threads: DatabaseSchema['threads'] = threadRows.map((r) => ({
+    id: r.id,
+    moduleId: r.module_id ?? undefined,
+    lessonId: r.lesson_id ?? undefined,
+    userId: r.user_id,
+    title: r.title,
+    body: r.body,
+    createdAt: r.created_at,
+    upvotedBy: r.upvoted_by ?? [],
+  }));
+
+  const comments: DatabaseSchema['comments'] = commentRows.map((r) => ({
+    id: r.id,
+    threadId: r.thread_id,
+    userId: r.user_id,
+    body: r.body,
+    createdAt: r.created_at,
+    upvotedBy: r.upvoted_by ?? [],
+  }));
+
+  const reports: DatabaseSchema['reports'] = reportRows.map((r) => ({
+    id: r.id,
+    targetType: r.target_type as Report['targetType'],
+    targetId: r.target_id,
+    userId: r.user_id,
+    reason: r.reason ?? undefined,
+    createdAt: r.created_at,
+  }));
+
+  return { users, progress, sandboxes, donations, auditLogs, waitlist, threads, comments, reports };
 }

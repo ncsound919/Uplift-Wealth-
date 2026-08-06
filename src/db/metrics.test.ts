@@ -20,6 +20,9 @@ function makeDb(overrides: Partial<DatabaseSchema> = {}): DatabaseSchema {
     ],
     auditLogs: [],
     waitlist: [],
+    threads: [],
+    comments: [],
+    reports: [],
     ...overrides,
   };
 }

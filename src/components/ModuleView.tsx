@@ -27,6 +27,7 @@ import { LECTURE_CLASSES, LectureClass } from '../data/lectureLibrary';
 import { resolveIcon } from '../utils/iconResolver';
 const DiagramMermaid = lazy(() => import('./DiagramMermaid').then(m => ({ default: m.DiagramMermaid })));
 import { Quiz } from './Quiz';
+import { DiscussionThread } from './DiscussionThread';
 import { cn } from '../lib/utils';
 import { capture } from '../lib/analytics';
 import { TradingGame } from './TradingGame';
@@ -42,10 +43,12 @@ interface ModuleViewProps {
   onBack: () => void;
   onComplete: (moduleId: string) => void;
   onLessonComplete: (lessonId: string, lessonType: string, moduleId: string) => void;
+  currentUserId?: string;
+  onRequireAuth?: () => void;
 }
 
 type SandboxGameType = 'trading' | 'underwriting' | 'parametric' | 'fraud';
-type UtilityTab = 'terms' | 'insight' | 'outcomes';
+type UtilityTab = 'terms' | 'insight' | 'outcomes' | 'discussion';
 
 interface GlossaryTerm {
   word: string;
@@ -328,7 +331,7 @@ function getLessonProInsight(lessonId: string, moduleId: string, currentLessonIn
   return activeClass.overview;
 }
 
-export function ModuleView({ module, onBack, onComplete, onLessonComplete }: ModuleViewProps) {
+export function ModuleView({ module, onBack, onComplete, onLessonComplete, currentUserId, onRequireAuth }: ModuleViewProps) {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [utilityTab, setUtilityTab] = useState<UtilityTab>('outcomes');
@@ -862,6 +865,11 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete }: Mod
                   >
                     Insight
                   </button>
+                  <button onClick={() => setUtilityTab('discussion')}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${utilityTab === 'discussion' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                  >
+                    Discuss
+                  </button>
                 </div>
 
                 {utilityTab === 'outcomes' && lectureClass && (
@@ -903,6 +911,15 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete }: Mod
                     </div>
                     <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">{currentProInsight}</p>
                   </div>
+                )}
+
+                {utilityTab === 'discussion' && (
+                  <DiscussionThread
+                    moduleId={module.id}
+                    lessonId={currentLesson.id}
+                    currentUserId={currentUserId}
+                    onRequireAuth={onRequireAuth}
+                  />
                 )}
               </div>
             </div>

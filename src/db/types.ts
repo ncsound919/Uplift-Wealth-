@@ -62,6 +62,35 @@ export interface WaitlistEntry {
   createdAt: string;
 }
 
+export interface Thread {
+  id: string;
+  moduleId?: string;
+  lessonId?: string;
+  userId: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  upvotedBy: string[];
+}
+
+export interface Comment {
+  id: string;
+  threadId: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  upvotedBy: string[];
+}
+
+export interface Report {
+  id: string;
+  targetType: 'thread' | 'comment';
+  targetId: string;
+  userId: string;
+  reason?: string;
+  createdAt: string;
+}
+
 export interface DatabaseSchema {
   users: Record<string, StoredUser>;
   progress: Record<string, StoredProgress>;
@@ -69,4 +98,7 @@ export interface DatabaseSchema {
   donations: Donation[];
   auditLogs: AuditLog[];
   waitlist: WaitlistEntry[];
+  threads: Thread[];
+  comments: Comment[];
+  reports: Report[];
 }

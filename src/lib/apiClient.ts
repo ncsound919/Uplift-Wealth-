@@ -392,6 +392,79 @@ class ApiClient {
       return { price: undefined, change: undefined, changePercent: undefined };
     }
   }
+
+  // Community Discussions
+  public listThreads(filter: { moduleId?: string; lessonId?: string }) {
+    const params = new URLSearchParams();
+    if (filter.moduleId) params.set('moduleId', filter.moduleId);
+    if (filter.lessonId) params.set('lessonId', filter.lessonId);
+    const qs = params.toString();
+    return this.request<{ threads: ThreadView[] }>(`/api/threads${qs ? `?${qs}` : ''}`);
+  }
+
+  public getThread(id: string) {
+    return this.request<{ thread: ThreadView; comments: CommentView[] }>(`/api/threads/${encodeURIComponent(id)}`);
+  }
+
+  public createThread(payload: { moduleId?: string; lessonId?: string; title: string; body: string }) {
+    return this.request<{ success: boolean; thread: ThreadView }>('/api/threads', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public addComment(threadId: string, body: string) {
+    return this.request<{ success: boolean; comment: CommentView }>(`/api/threads/${encodeURIComponent(threadId)}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ body }),
+    });
+  }
+
+  public upvoteThread(threadId: string) {
+    return this.request<{ success: boolean; upvoted: boolean; upvotes: number }>(`/api/threads/${encodeURIComponent(threadId)}/upvote`, { method: 'POST' });
+  }
+
+  public upvoteComment(commentId: string) {
+    return this.request<{ success: boolean; upvoted: boolean; upvotes: number }>(`/api/comments/${encodeURIComponent(commentId)}/upvote`, { method: 'POST' });
+  }
+
+  public report(targetType: 'thread' | 'comment', targetId: string, reason?: string) {
+    return this.request<{ success: boolean; report: unknown }>('/api/reports', {
+      method: 'POST',
+      body: JSON.stringify({ targetType, targetId, reason }),
+    });
+  }
+
+  public deleteThread(threadId: string) {
+    return this.request<{ success: boolean; deleted: boolean }>(`/api/threads/${encodeURIComponent(threadId)}`, { method: 'DELETE' });
+  }
+
+  public deleteComment(commentId: string) {
+    return this.request<{ success: boolean; deleted: boolean }>(`/api/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE' });
+  }
+}
+
+export interface ThreadView {
+  id: string;
+  moduleId?: string;
+  lessonId?: string;
+  userId: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  authorName: string;
+  commentCount: number;
+  upvotes: number;
+}
+
+export interface CommentView {
+  id: string;
+  threadId: string;
+  userId: string;
+  body: string;
+  createdAt: string;
+  authorName: string;
+  upvotes: number;
 }
 
 export const apiClient = new ApiClient();

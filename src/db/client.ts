@@ -96,6 +96,32 @@ export async function ensureTables(): Promise<void> {
         source text,
         created_at text NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS threads (
+        id text PRIMARY KEY NOT NULL,
+        module_id text,
+        lesson_id text,
+        user_id text NOT NULL,
+        title text NOT NULL,
+        body text NOT NULL,
+        created_at text NOT NULL,
+        upvoted_by jsonb DEFAULT '[]'::jsonb NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS comments (
+        id text PRIMARY KEY NOT NULL,
+        thread_id text NOT NULL,
+        user_id text NOT NULL,
+        body text NOT NULL,
+        created_at text NOT NULL,
+        upvoted_by jsonb DEFAULT '[]'::jsonb NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS reports (
+        id text PRIMARY KEY NOT NULL,
+        target_type text NOT NULL,
+        target_id text NOT NULL,
+        user_id text NOT NULL,
+        reason text,
+        created_at text NOT NULL
+      );
     `);
   } finally {
     client.release();

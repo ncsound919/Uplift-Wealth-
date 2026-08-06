@@ -19,6 +19,17 @@ import { isDbConfigured, ensureTables, query } from "./src/db/client";
 import { syncFullDb, loadFullDb } from "./src/db/sync";
 import { runMigrations } from "./src/db/migrate";
 import { computeMetrics } from "./src/db/metrics";
+import {
+  listThreads,
+  getThread,
+  createThread,
+  addComment,
+  toggleThreadUpvote,
+  toggleCommentUpvote,
+  reportTarget,
+  deleteThread,
+  deleteComment,
+} from "./src/db/threadOps";
 import { sendWelcomeEmail, sendWaitlistConfirmEmail } from "./src/lib/email";
 import type { DatabaseSchema } from "./src/db/types";
 
@@ -88,7 +99,10 @@ const initialDb: DatabaseSchema = {
     }
   ],
   auditLogs: [],
-  waitlist: []
+  waitlist: [],
+  threads: [],
+  comments: [],
+  reports: []
 };
 
 let db: DatabaseSchema = { ...initialDb };
@@ -130,7 +144,7 @@ function syncToPostgres() {
 }
 
 /** Fills in any collections missing from an older store.json so new fields
- *  (e.g. `waitlist`) never break handlers on a pre-existing file. */
+ *  (e.g. `waitlist`, `threads`) never break handlers on a pre-existing file. */
 function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
   return {
     users: raw.users ?? {},
@@ -139,6 +153,9 @@ function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
     donations: raw.donations ?? [],
     auditLogs: raw.auditLogs ?? [],
     waitlist: raw.waitlist ?? [],
+    threads: raw.threads ?? [],
+    comments: raw.comments ?? [],
+    reports: raw.reports ?? [],
   };
 }
 
@@ -182,6 +199,18 @@ function initDatabase() {
           waitlist: [
             ...(db.waitlist ?? []).filter(w => !(pg.waitlist ?? []).some(p => p.email === w.email)),
             ...(pg.waitlist ?? []),
+          ],
+          threads: [
+            ...(db.threads ?? []).filter(t => !(pg.threads ?? []).some(p => p.id === t.id)),
+            ...(pg.threads ?? []),
+          ],
+          comments: [
+            ...(db.comments ?? []).filter(c => !(pg.comments ?? []).some(p => p.id === c.id)),
+            ...(pg.comments ?? []),
+          ],
+          reports: [
+            ...(db.reports ?? []).filter(r => !(pg.reports ?? []).some(p => p.id === r.id)),
+            ...(pg.reports ?? []),
           ],
         };
         saveDatabase();
@@ -616,7 +645,14 @@ app.get('/api/docs', (req, res) => {
       { path: "/api/donation-intent", method: "POST", description: "Register funding pledge intent" },
       { path: "/api/alphavantage/quote/:symbol", method: "GET", description: "Real-time stock market quote proxy" },
       { path: "/api/admin/audit-logs", method: "GET", description: "System compliance audit trail (Admin only)" },
-      { path: "/api/admin/metrics", method: "GET", description: "Aggregate platform metrics (Admin/Institution only)" }
+      { path: "/api/admin/metrics", method: "GET", description: "Aggregate platform metrics (Admin/Institution only)" },
+      { path: "/api/waitlist", method: "POST", description: "Join the email waitlist" },
+      { path: "/api/threads", method: "GET|POST", description: "List / create discussion threads" },
+      { path: "/api/threads/:id", method: "GET|DELETE", description: "Fetch or moderate a thread" },
+      { path: "/api/threads/:id/comments", method: "POST", description: "Reply to a thread" },
+      { path: "/api/threads/:id/upvote", method: "POST", description: "Upvote / un-upvote a thread" },
+      { path: "/api/comments/:id/upvote", method: "POST", description: "Upvote / un-upvote a comment" },
+      { path: "/api/reports", method: "POST", description: "Report a thread or comment for moderation" }
     ]
   });
 });
@@ -934,6 +970,107 @@ app.post('/api/waitlist', rateLimiter(10, 60000), (req: Request, res: Response) 
   void sendWaitlistConfirmEmail(cleanEmail).catch(() => {});
 
   res.json({ success: true, duplicate: !!already });
+});
+
+// 6.7.6 COMMUNITY DISCUSSION (threads, comments, reports)
+function opError(res: Response, err: unknown) {
+  const message = err instanceof Error ? err.message : 'Operation failed.';
+  const status = /not found|already reported/i.test(message) ? 404 : 400;
+  return res.status(status).json({ error: message });
+}
+
+app.get('/api/threads', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const moduleId = typeof req.query.moduleId === 'string' ? req.query.moduleId : undefined;
+  const lessonId = typeof req.query.lessonId === 'string' ? req.query.lessonId : undefined;
+  res.json({ threads: listThreads(db, { moduleId, lessonId }) });
+});
+
+app.post('/api/threads', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { moduleId, lessonId, title, body } = req.body || {};
+  try {
+    const thread = createThread(db, {
+      userId: req.user!.id,
+      moduleId: typeof moduleId === 'string' ? moduleId.slice(0, 100) : undefined,
+      lessonId: typeof lessonId === 'string' ? lessonId.slice(0, 200) : undefined,
+      title,
+      body,
+    });
+    saveDatabase();
+    res.status(201).json({ success: true, thread: { ...thread, authorName: db.users[req.user!.id]?.name || 'Scholar', commentCount: 0, upvotes: 0 } });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.get('/api/threads/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const result = getThread(db, req.params.id);
+  if (!result) return res.status(404).json({ error: 'Thread not found.' });
+  res.json(result);
+});
+
+app.post('/api/threads/:id/comments', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { body } = req.body || {};
+  try {
+    const comment = addComment(db, { threadId: req.params.id, userId: req.user!.id, body });
+    saveDatabase();
+    res.status(201).json({ success: true, comment });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.post('/api/threads/:id/upvote', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = toggleThreadUpvote(db, { threadId: req.params.id, userId: req.user!.id });
+    saveDatabase();
+    res.json({ success: true, upvoted: result.upvoted, upvotes: result.thread.upvotedBy.length });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.post('/api/comments/:id/upvote', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = toggleCommentUpvote(db, { commentId: req.params.id, userId: req.user!.id });
+    saveDatabase();
+    res.json({ success: true, upvoted: result.upvoted, upvotes: result.comment.upvotedBy.length });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.post('/api/reports', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { targetType, targetId, reason } = req.body || {};
+  if (targetType !== 'thread' && targetType !== 'comment') {
+    return res.status(400).json({ error: 'Invalid target type.' });
+  }
+  try {
+    const report = reportTarget(db, { targetType, targetId, userId: req.user!.id, reason });
+    saveDatabase();
+    res.status(201).json({ success: true, report });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.delete('/api/threads/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = deleteThread(db, { threadId: req.params.id, callerId: req.user!.id, callerRole: req.user!.role });
+    saveDatabase();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.delete('/api/comments/:id', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = deleteComment(db, { commentId: req.params.id, callerId: req.user!.id, callerRole: req.user!.role });
+    saveDatabase();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    opError(res, err);
+  }
 });
 
 // 6.8 MARKET DATA PROXY WITH CACHING & SIMULATION (Alpha Vantage)
