@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { createCohort, joinCohort, leaveCohort, deleteCohort, listMyCohorts, cohortLeaderboard, cohortRoster, getCohort } from './cohortOps';
+import { createCohort, joinCohort, joinCohortByCode, leaveCohort, deleteCohort, setCohortCurriculum, listMyCohorts, cohortLeaderboard, cohortRoster, getCohort } from './cohortOps';
 import type { DatabaseSchema } from './types';
 
 function makeDb(): DatabaseSchema {
@@ -123,5 +123,67 @@ describe('cohortOps', () => {
     const c = createCohort(db, { ownerId: 'u1', name: 'Class' });
     joinCohort(db, c.id, 'u2');
     expect(() => cohortRoster(db, c.id, 'u2', 'student')).toThrow(/owner/i);
+  });
+
+  it('lets an admin view any roster', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Class' });
+    joinCohort(db, c.id, 'u2');
+    const { roster } = cohortRoster(db, c.id, 'admin', 'admin');
+    expect(roster.map((m) => m.id)).toEqual(['u2']);
+  });
+
+  it('joins by invite code with normalization and rejects bad codes', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    const joined = joinCohortByCode(db, ` ${c.inviteCode.toLowerCase()} `, 'u2');
+    expect(joined.memberIds).toContain('u2');
+    expect(() => joinCohortByCode(db, 'nope', 'u3')).toThrow(/invalid invite code/i);
+  });
+
+  it('sets the curriculum for the owner, clamping to 20 modules', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    const ids = Array.from({ length: 25 }, (_, i) => `m${i}`);
+    const updated = setCohortCurriculum(db, c.id, ids, 'u1', 'student');
+    expect(updated.moduleIds).toHaveLength(20);
+    expect(updated.moduleIds[0]).toBe('m0');
+    expect(() => setCohortCurriculum(db, c.id, ['m1'], 'u2', 'student')).toThrow(/owner/i);
+    expect(() => setCohortCurriculum(db, 'missing', ['m1'], 'u1', 'student')).toThrow(/not found/i);
+  });
+
+  it('treats a non-array curriculum payload as an empty assignment', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    const updated = setCohortCurriculum(db, c.id, null as unknown as string[], 'u1', 'student');
+    expect(updated.moduleIds).toEqual([]);
+  });
+
+  it('lets an admin set the curriculum for any cohort', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    expect(setCohortCurriculum(db, c.id, ['m1'], 'admin', 'admin').moduleIds).toEqual(['m1']);
+  });
+
+  it('leave throws for non-members and missing cohorts', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    expect(() => leaveCohort(db, c.id, 'u3')).toThrow(/not a member/i);
+    expect(() => leaveCohort(db, 'missing', 'u2')).toThrow(/not found/i);
+  });
+
+  it('delete throws for a missing cohort', () => {
+    const db = makeDb();
+    expect(() => deleteCohort(db, 'missing', 'u1', 'student')).toThrow(/not found/i);
+  });
+
+  it('roster throws for a missing cohort', () => {
+    const db = makeDb();
+    expect(() => cohortRoster(db, 'missing', 'u1', 'student')).toThrow(/not found/i);
+  });
+
+  it('getCohort returns null for a missing cohort', () => {
+    const db = makeDb();
+    expect(getCohort(db, 'missing')).toBeNull();
   });
 });
