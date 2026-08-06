@@ -9,7 +9,7 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { getPool, isDbConfigured } from './client';
+import { getPool, isDbConfigured, splitSqlStatements } from './client';
 
 const MIGRATIONS_DIR = path.resolve(process.cwd(), 'src', 'db', 'migrations');
 
@@ -41,7 +41,11 @@ export async function runMigrations(): Promise<string[]> {
       if ((existing.rowCount ?? 0) > 0) continue;
 
       const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf-8');
-      await client.query(sql);
+      // Run each statement individually — required by Supabase's transaction
+      // pooler (port 6543), which rejects multi-statement queries.
+      for (const stmt of splitSqlStatements(sql)) {
+        await client.query(stmt);
+      }
       await client.query(
         'INSERT INTO schema_migrations (name, applied_at) VALUES ($1, $2)',
         [file, new Date().toISOString()]

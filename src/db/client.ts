@@ -42,7 +42,7 @@ export const query: DbQueryRunner = {
 export async function ensureTables(): Promise<void> {
   const client: PoolClient = await getPool().connect();
   try {
-    await client.query(`
+    for (const stmt of splitSqlStatements(`
       CREATE TABLE IF NOT EXISTS users (
         id text PRIMARY KEY NOT NULL,
         name text NOT NULL,
@@ -175,10 +175,31 @@ export async function ensureTables(): Promise<void> {
         created_at text NOT NULL,
         reviewed_at text
       );
-    `);
+    `)) {
+      await client.query(stmt);
+    }
   } finally {
     client.release();
   }
+}
+
+/**
+ * Splits a SQL script into individual statements so each can run as its own
+ * query. This is required for Supabase's transaction pooler (port 6543), which
+ * rejects multi-statement queries. Handles drizzle's `--> statement-breakpoint`
+ * separators — both `;--> statement-breakpoint` (drizzle's format) and the
+ * marker on its own line — plus plain `;`-separated DDL.
+ */
+export function splitSqlStatements(sql: string): string[] {
+  const normalized = sql
+    .replace(/\s*;\s*-->\s*statement-breakpoint\s*/g, ';\n')
+    .replace(/\s*-->\s*statement-breakpoint\s*/g, ';\n');
+  const statements: string[] = [];
+  for (const part of normalized.split(/;\s*\r?\n/)) {
+    const s = part.trim().replace(/;+$/, '');
+    if (s) statements.push(`${s};`);
+  }
+  return statements;
 }
 
 /** Closes the pool (used in tests / graceful shutdown). */
