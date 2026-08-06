@@ -134,6 +134,29 @@ describe('apiClient', () => {
     expect(localStorage.getItem('hacu_user_data')).toBeTruthy();
   });
 
+  it('register sends POST to /api/auth/register and stores token/user on success', async () => {
+    const mockRes = { success: true, token: 'reg-token', user: { id: 'u3', name: 'Reg User', role: 'student', track: 'all', badges: [], streakDays: 0, lastActive: new Date().toISOString() } };
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockRes) } as any);
+    const result = await apiClient.register('reg@example.com', 'password123', 'Reg User');
+    expect(result.success).toBe(true);
+    expect(localStorage.getItem('hacu_auth_token')).toBe('reg-token');
+    expect(localStorage.getItem('hacu_user_data')).toBeTruthy();
+  });
+
+  it('refreshes the access token and retries the request once on 401', async () => {
+    localStorage.setItem('hacu_auth_token', 'expired-token');
+    vi.resetModules();
+    const { apiClient: freshClient } = await import('../lib/apiClient');
+    const mockUser = { id: 'u1', name: 'U', role: 'student', track: 'all', badges: [], streakDays: 0, lastActive: new Date().toISOString() };
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({ ok: false, status: 401, json: () => Promise.resolve({ message: 'Unauthorized' }) } as any)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ success: true, token: 'new-token', user: mockUser }) } as any)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ status: 'ok' }) } as any);
+    const result = await freshClient.getHealth();
+    expect(result).toEqual({ status: 'ok' });
+    expect(localStorage.getItem('hacu_auth_token')).toBe('new-token');
+  });
+
   it('loginWithGoogle sends POST and stores token/user on success', async () => {
     const mockRes = { success: true, token: 'google-token', user: { id: 'u2', name: 'G User', role: 'student', track: 'all', badges: [], streakDays: 0, lastActive: new Date().toISOString() } };
     vi.mocked(fetch).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockRes) } as any);
@@ -149,6 +172,34 @@ describe('apiClient', () => {
     await apiClient.logout();
     expect(localStorage.getItem('hacu_auth_token')).toBeNull();
     expect(localStorage.getItem('hacu_user_data')).toBeNull();
+  });
+
+  it('saveStats sends PUT to /api/progress/stats', async () => {
+    const mockRes = { xp: 100, gameTimeSeconds: 0, streakDays: 3, badges: ['wise_wizard'] };
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockRes) } as any);
+    const result = await apiClient.saveStats({ xp: 100, streakDays: 3, badges: ['wise_wizard'] });
+    expect(result).toEqual(mockRes);
+  });
+
+  it('saveStats queues offline and flushPendingStats pushes the latest snapshot', async () => {
+    vi.mocked(fetch)
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ xp: 120 }) } as any)
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ xp: 100 }) } as any);
+    const queued = await apiClient.saveStats({ xp: 100 });
+    expect(queued).toEqual({ queued: true });
+    expect(localStorage.getItem('overlay_pending_stats')).toContain('100');
+    await apiClient.saveStats({ xp: 120 });
+    await apiClient.flushPendingStats();
+    expect(JSON.parse(localStorage.getItem('overlay_pending_stats') || '[]')).toEqual([]);
+  });
+
+  it('isAuthenticated reflects a stored token', async () => {
+    expect(apiClient.isAuthenticated).toBe(false);
+    localStorage.setItem('hacu_auth_token', 'tok');
+    vi.resetModules();
+    const { apiClient: freshClient } = await import('../lib/apiClient');
+    expect(freshClient.isAuthenticated).toBe(true);
   });
 
   it('getStockQuote fetches quote from API', async () => {

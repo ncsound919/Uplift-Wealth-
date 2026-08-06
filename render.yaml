@@ -1,7 +1,7 @@
 # Render.com blueprint — deploys Overlay Wealth as a Docker web service.
 services:
   - type: web
-    name: uplift-wealth
+    name: overlay-wealth
     runtime: docker
     plan: starter
     dockerfilePath: ./Dockerfile
@@ -16,8 +16,16 @@ services:
         sync: false
       - key: VITE_POSTHOG_KEY
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
       # Public URL + CORS origin allow-list:
       - key: APP_URL
-        value: https://uplift-wealth.onrender.com
+        value: https://overlay-wealth.onrender.com
       - key: ALLOWED_ORIGINS
-        value: https://uplift-wealth.onrender.com
+        value: https://overlay-wealth.onrender.com

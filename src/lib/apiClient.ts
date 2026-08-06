@@ -21,6 +21,17 @@ export interface ProgressState {
   completedModules: string[];
   quizScores: Record<string, number>; // e.g. { "module-1": 100 }
   certificates: { moduleId: string; issuedAt: string; score: number }[];
+  xp?: number;
+  streakDays?: number;
+  badges?: string[];
+  gameTimeSeconds?: number;
+}
+
+export interface ProgressStats {
+  xp?: number;
+  streakDays?: number;
+  badges?: string[];
+  gameTimeSeconds?: number;
 }
 
 export interface SandboxSavePayload {
@@ -40,13 +51,20 @@ const DEFAULT_USER_ID = 'demo-student-01';
 
 class ApiClient {
   private userId: string = DEFAULT_USER_ID;
-  private token: string = 'demo-jwt-token-hacu-fintech';
+  private token: string = '';
 
   constructor() {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('hacu_user_id');
       if (stored) this.userId = stored;
+      const storedToken = localStorage.getItem('hacu_auth_token');
+      if (storedToken) this.token = storedToken;
     }
+  }
+
+  /** True when a real account token is present (vs anonymous demo/guest). */
+  public get isAuthenticated(): boolean {
+    return !!this.token;
   }
 
   public setUserId(id: string) {
@@ -56,17 +74,30 @@ class ApiClient {
     }
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}, retry = true): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.token}`,
       'X-User-Id': this.userId,
       'X-User-Role': 'student',
       ...(options.headers as Record<string, string> || {}),
     };
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
 
     try {
-      const res = await fetch(endpoint, { ...options, headers });
+      let res = await fetch(endpoint, { ...options, headers });
+
+      // Access token expired — try a silent refresh via the HttpOnly cookie,
+      // then replay the request once.
+      if (res.status === 401 && retry && this.token) {
+        const refreshed = await this.tryRefresh();
+        if (refreshed) {
+          headers['Authorization'] = `Bearer ${this.token}`;
+          res = await fetch(endpoint, { ...options, headers });
+        }
+      }
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ message: res.statusText }));
         throw new Error(errorData.message || `API Error: ${res.status}`);
@@ -76,6 +107,28 @@ class ApiClient {
       const message = err instanceof Error ? err.message : String(err);
       console.warn(`[API Client Fallback] ${endpoint}:`, message);
       throw err;
+    }
+  }
+
+  private async tryRefresh(): Promise<boolean> {
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (data && data.token) {
+        this.token = data.token;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hacu_auth_token', data.token);
+          if (data.user) localStorage.setItem('hacu_user_data', JSON.stringify(data.user));
+        }
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
   }
 
@@ -140,11 +193,59 @@ class ApiClient {
     }
   }
 
-  public async saveLessonProgress(lessonId: string, moduleId: string): Promise<ProgressState> {
+  // ---- Offline stats queue --------------------------------------------------
+  // Stats writes (XP/streak/badges/game time) are the noisiest. When the server
+  // is unreachable they queue locally (latest-wins snapshot) and flush on
+  // reconnect via flushPendingStats(). localStorage remains the offline cache.
+
+  private readStatsQueue(): ProgressStats[] {
+    try {
+      const raw = localStorage.getItem('overlay_pending_stats');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private writeStatsQueue(queue: ProgressStats[]) {
+    localStorage.setItem('overlay_pending_stats', JSON.stringify(queue.slice(-50)));
+  }
+
+  private queueStats(stats: ProgressStats) {
+    const queue = this.readStatsQueue();
+    queue.push(stats);
+    this.writeStatsQueue(queue);
+  }
+
+  /** Pushes the latest queued stats snapshot to the server (idempotent upsert). */
+  public async flushPendingStats(): Promise<void> {
+    const queue = this.readStatsQueue();
+    if (!queue.length) return;
+    const latest = queue[queue.length - 1];
+    const res = await this.saveStats(latest);
+    if (res && !('queued' in res)) {
+      this.writeStatsQueue([]);
+    }
+  }
+
+  public async saveStats(stats: ProgressStats): Promise<ProgressStats | { queued: boolean }> {
+    try {
+      return await this.request<ProgressStats>('/api/progress/stats', {
+        method: 'PUT',
+        body: JSON.stringify(stats)
+      });
+    } catch (err) {
+      console.warn('[API Client] Stats offline — queued for retry:', err);
+      this.queueStats(stats);
+      return { queued: true };
+    }
+  }
+
+  public async saveLessonProgress(lessonId: string, moduleId: string, stats?: ProgressStats): Promise<ProgressState> {
     try {
       const res = await this.request<ProgressState>('/api/progress/lesson', {
         method: 'POST',
-        body: JSON.stringify({ userId: this.userId, lessonId, moduleId })
+        body: JSON.stringify({ userId: this.userId, lessonId, moduleId, stats })
       });
       localStorage.setItem('hacu_progress', JSON.stringify(res));
       return res;
@@ -212,10 +313,26 @@ class ApiClient {
   }
 
   // Auth Methods
-  public async loginWithEmail(email: string, password?: string, name?: string) {
-    const res = await this.request<{ success: boolean; token: string; user: UserProfile }>('/api/auth/login', {
+  public async register(email: string, password: string, name?: string) {
+    const res = await this.request<{ success: boolean; token: string; user: UserProfile }>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, name })
+    });
+    if (res.token && res.user) {
+      this.token = res.token;
+      this.setUserId(res.user.id);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hacu_auth_token', res.token);
+        localStorage.setItem('hacu_user_data', JSON.stringify(res.user));
+      }
+    }
+    return res;
+  }
+
+  public async loginWithEmail(email: string, password?: string) {
+    const res = await this.request<{ success: boolean; token: string; user: UserProfile }>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
     });
     if (res.token && res.user) {
       this.token = res.token;

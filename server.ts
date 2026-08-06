@@ -2,6 +2,23 @@ import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
+import * as Sentry from "@sentry/node";
+import {
+  hashPassword,
+  verifyPassword,
+  signAccessToken,
+  signRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+  userIdFromEmail,
+  isValidEmail,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_MAX_AGE,
+} from "./src/lib/auth";
+import { isDbConfigured, ensureTables, query } from "./src/db/client";
+import { syncFullDb, loadFullDb } from "./src/db/sync";
+import { runMigrations } from "./src/db/migrate";
+import type { DatabaseSchema } from "./src/db/types";
 
 dotenv.config({ quiet: true });
 dotenv.config({ path: '.env.local', override: true, quiet: true });
@@ -13,54 +30,22 @@ const START_TIME = Date.now();
 const DIST_READY = fs.existsSync(path.join(process.cwd(), 'dist', 'index.html'));
 const effectiveEnv = process.env.NODE_ENV || (DIST_READY ? 'production' : 'development');
 
+// Error tracking (optional — no-op without SENTRY_DSN).
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: effectiveEnv,
+    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.1,
+    integrations: [Sentry.expressIntegration()],
+  });
+  console.log('[Monitoring] Sentry initialized (server)');
+}
+
 // ---------------------------------------------------------------------------
 // 1. DATA PERSISTENCE ENGINE (File-backed with Atomic Synchronous Memory Store)
 // ---------------------------------------------------------------------------
 const DATA_DIR = path.join(process.cwd(), '.data');
 const DB_FILE = path.join(DATA_DIR, 'store.json');
-
-interface DatabaseSchema {
-  users: Record<string, {
-    id: string;
-    name: string;
-    role: 'student' | 'builder' | 'institution' | 'admin';
-    track: string;
-    avatar?: string;
-    badges: string[];
-    streakDays: number;
-    lastActive: string;
-  }>;
-  progress: Record<string, {
-    userId: string;
-    completedLessons: string[];
-    completedModules: string[];
-    quizScores: Record<string, number>;
-    certificates: Array<{ moduleId: string; issuedAt: string; score: number }>;
-  }>;
-  sandboxes: Record<string, Array<{
-    id: string;
-    sandboxType: string;
-    stateData: any;
-    savedAt: string;
-    notes?: string;
-  }>>;
-  donations: Array<{
-    id: string;
-    userId: string;
-    amount: number;
-    tierLabel?: string;
-    timestamp: string;
-  }>;
-  auditLogs: Array<{
-    id: string;
-    timestamp: string;
-    ip: string;
-    method: string;
-    path: string;
-    userId?: string;
-    action: string;
-  }>;
-}
 
 const initialDb: DatabaseSchema = {
   users: {
@@ -98,6 +83,42 @@ const initialDb: DatabaseSchema = {
 
 let db: DatabaseSchema = { ...initialDb };
 
+/** Fire-and-forget PostgreSQL dual-write. Debounced (trailing) so bursts of
+ *  file writes — e.g. the per-request audit log — coalesce into at most one
+ *  full sync every few seconds. The file store stays authoritative until the
+ *  migration is proven (Phase 0.2/0.3), so a PG failure is non-fatal. */
+let pgSyncQueued = false;
+let lastPgSyncAt = 0;
+const PG_SYNC_INTERVAL_MS = 5000;
+
+async function runPgSync() {
+  const snapshot = db;
+  try {
+    await ensureTables();
+    await syncFullDb(query, snapshot);
+  } catch (err) {
+    console.warn('[DB] Postgres sync failed (file store remains authoritative):', err);
+  }
+}
+
+function syncToPostgres() {
+  if (!isDbConfigured()) return;
+  if (pgSyncQueued) return;
+  const now = Date.now();
+  if (now - lastPgSyncAt >= PG_SYNC_INTERVAL_MS) {
+    lastPgSyncAt = now;
+    void runPgSync();
+    return;
+  }
+  // Trailing debounce: ensure a final sync runs after the last burst.
+  pgSyncQueued = true;
+  setTimeout(() => {
+    pgSyncQueued = false;
+    lastPgSyncAt = Date.now();
+    void runPgSync();
+  }, PG_SYNC_INTERVAL_MS);
+}
+
 function initDatabase() {
   try {
     if (!fs.existsSync(DATA_DIR)) {
@@ -111,6 +132,41 @@ function initDatabase() {
     }
   } catch (err) {
     console.warn('[DB Engine] Failed loading store.json, using in-memory default:', err);
+  }
+
+  // Postgres is the durable source of truth when configured: run migrations,
+  // hydrate from it (overlaying on top of the local file so nothing local is
+  // lost), then push the merged state back to both stores.
+  if (isDbConfigured()) {
+    void (async () => {
+      try {
+        await runMigrations();
+        await ensureTables();
+        const pg = await loadFullDb(query);
+
+        const localDonationIds = new Set(db.donations.map(d => d.id));
+        const localLogIds = new Set(db.auditLogs.map(l => l.id));
+
+        db = {
+          users: { ...db.users, ...pg.users },
+          progress: { ...db.progress, ...pg.progress },
+          sandboxes: { ...db.sandboxes, ...pg.sandboxes },
+          donations: [
+            ...db.donations.filter(d => !pg.donations.some(p => p.id === d.id)),
+            ...pg.donations,
+          ],
+          auditLogs: [
+            ...db.auditLogs.filter(l => !pg.auditLogs.some(p => p.id === l.id)),
+            ...pg.auditLogs,
+          ],
+        };
+        saveDatabase();
+        syncToPostgres();
+        console.log(`[DB] Hydrated from PostgreSQL (${Object.keys(pg.users).length} users).`);
+      } catch (err) {
+        console.warn('[DB Engine] Postgres unavailable; continuing with file store:', err);
+      }
+    })();
   }
 }
 
@@ -151,6 +207,9 @@ function saveDatabase() {
       saveDatabase();
     }
   });
+
+  // Dual-write to PostgreSQL (debounced). Non-fatal on failure.
+  syncToPostgres();
 }
 
 initDatabase();
@@ -209,13 +268,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // ---------------------------------------------------------------------------
 // 3. STRUCTURED REQUEST LOGGER & RATE LIMITER
 // ---------------------------------------------------------------------------
-const requestCounts = new Map<string, { count: number; resetAt: number }>();
-
 function rateLimiter(maxRequests = 100, windowMs = 60000) {
+  // Per-instance counter map so a route-level limiter (e.g. login) never
+  // competes with the global /api limiter for the same budget.
+  const counts = new Map<string, { count: number; resetAt: number }>();
   return (req: Request, res: Response, next: NextFunction) => {
     const ip = req.ip || req.socket.remoteAddress || '127.0.0.1';
     const now = Date.now();
-    const record = requestCounts.get(ip) || { count: 0, resetAt: now + windowMs };
+    const record = counts.get(ip) || { count: 0, resetAt: now + windowMs };
 
     if (now > record.resetAt) {
       record.count = 1;
@@ -224,7 +284,7 @@ function rateLimiter(maxRequests = 100, windowMs = 60000) {
       record.count += 1;
     }
 
-    requestCounts.set(ip, record);
+    counts.set(ip, record);
 
     if (record.count > maxRequests) {
       return res.status(429).json({
@@ -275,20 +335,27 @@ export interface AuthenticatedRequest extends Request {
 }
 
 function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const userId = (req.headers['x-user-id'] as string) || req.query.userId as string || 'demo-student-01';
-  const userRole = (req.headers['x-user-role'] as 'student' | 'builder' | 'institution' | 'admin') || 'student';
+  const authHeader = (req.headers.authorization as string) || '';
+  const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  const verified = bearer ? verifyAccessToken(bearer) : null;
 
-  req.user = {
-    id: userId,
-    role: userRole
-  };
+  if (verified) {
+    req.user = { id: verified.id, role: verified.role };
+  } else {
+    // Guest / legacy fallback: header- or query-driven identity keeps the
+    // anonymous demo session and pre-auth integrations working until Phase 0.3
+    // makes the server the source of truth.
+    const userId = (req.headers['x-user-id'] as string) || (req.query.userId as string) || 'demo-student-01';
+    const userRole = (req.headers['x-user-role'] as 'student' | 'builder' | 'institution' | 'admin') || 'student';
+    req.user = { id: userId, role: userRole };
+  }
 
   // Ensure user exists in DB
-  if (!db.users[userId]) {
-    db.users[userId] = {
-      id: userId,
+  if (!db.users[req.user.id]) {
+    db.users[req.user.id] = {
+      id: req.user.id,
       name: 'Scholar User',
-      role: userRole,
+      role: req.user.role,
       track: 'all',
       badges: ['pioneer_scholar'],
       streakDays: 1,
@@ -335,53 +402,92 @@ function setCache(key: string, data: any, ttlMs = 300000) {
 // 6. RESTFUL API ENDPOINTS
 // ---------------------------------------------------------------------------
 
-// 6.0 AUTHENTICATION ENDPOINTS (Google & Email Login)
-app.post('/api/auth/login', (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || typeof email !== 'string') {
-    return res.status(400).json({ error: 'Valid email is required.' });
-  }
+// 6.0 AUTHENTICATION ENDPOINTS (Email register/login, refresh, Google stub)
+function findUserByEmail(email: string) {
+  const clean = email.toLowerCase().trim();
+  return Object.values(db.users).find(u => u.email === clean);
+}
 
+function getCookie(req: Request, name: string): string | undefined {
+  const header = req.headers.cookie || '';
+  const match = new RegExp(`(?:^|;\\s*)${name}=([^;]*)`).exec(header);
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+function setRefreshCookie(res: Response, token: string) {
+  const secure = process.env.NODE_ENV === 'production';
+  res.setHeader('Set-Cookie', `${REFRESH_COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; Path=/; Max-Age=${REFRESH_COOKIE_MAX_AGE}; SameSite=Lax${secure ? '; Secure' : ''}`);
+}
+
+function clearRefreshCookie(res: Response) {
+  res.setHeader('Set-Cookie', `${REFRESH_COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax`);
+}
+
+app.post('/api/auth/register', rateLimiter(5, 60000), async (req: Request, res: Response) => {
+  const { email, password, name } = req.body || {};
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'A valid email is required.' });
+  }
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+  }
   const cleanEmail = email.toLowerCase().trim();
-  const userId = `usr-${Buffer.from(cleanEmail).toString('hex').slice(0, 12)}`;
-
-  if (!db.users[userId]) {
-    db.users[userId] = {
-      id: userId,
-      name: name ? String(name).trim() : cleanEmail.split('@')[0],
-      role: 'student',
-      track: 'all',
-      badges: ['pioneer_scholar'],
-      streakDays: 1,
-      lastActive: new Date().toISOString()
-    };
-    saveDatabase();
+  if (findUserByEmail(cleanEmail)) {
+    return res.status(409).json({ error: 'An account with this email already exists.' });
   }
 
-  const user = db.users[userId];
-  const token = `jwt-token-${userId}-${Date.now()}`;
+  const passwordHash = await hashPassword(password);
+  const id = userIdFromEmail(cleanEmail);
+  db.users[id] = {
+    id,
+    email: cleanEmail,
+    passwordHash,
+    name: name ? String(name).trim() : cleanEmail.split('@')[0],
+    role: 'student',
+    track: 'all',
+    badges: ['pioneer_scholar'],
+    streakDays: 1,
+    lastActive: new Date().toISOString()
+  };
+  saveDatabase();
 
-  res.json({
-    success: true,
-    token,
-    user: {
-      ...user,
-      email: cleanEmail
-    }
-  });
+  const token = signAccessToken({ id, role: 'student' });
+  setRefreshCookie(res, signRefreshToken({ id, role: 'student' }));
+  res.status(201).json({ success: true, token, user: { ...db.users[id], email: cleanEmail } });
 });
 
-app.post('/api/auth/google', (req, res) => {
-  const { email } = req.body;
-  if (!email || typeof email !== 'string') {
-    return res.status(400).json({ error: 'Valid email is required.' });
+app.post('/api/auth/login', rateLimiter(5, 60000), async (req: Request, res: Response) => {
+  const { email, password } = req.body || {};
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'A valid email is required.' });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+  const user = findUserByEmail(cleanEmail);
+  if (!user || !user.passwordHash) {
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+  const ok = await verifyPassword(String(password || ''), user.passwordHash);
+  if (!ok) {
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+
+  const token = signAccessToken({ id: user.id, role: user.role });
+  setRefreshCookie(res, signRefreshToken({ id: user.id, role: user.role }));
+  res.json({ success: true, token, user: { ...user, email: cleanEmail } });
+});
+
+app.post('/api/auth/google', rateLimiter(5, 60000), (req: Request, res: Response) => {
+  const { email } = req.body || {};
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'A valid email is required.' });
   }
   const cleanEmail = email.toLowerCase().trim();
-  const userId = `usr-google-${Buffer.from(cleanEmail).toString('hex').slice(0, 12)}`;
-
+  const userId = userIdFromEmail(cleanEmail, 'usr-google');
   if (!db.users[userId]) {
     db.users[userId] = {
       id: userId,
+      email: cleanEmail,
       name: cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
       role: 'student',
       track: 'all',
@@ -393,15 +499,27 @@ app.post('/api/auth/google', (req, res) => {
   }
 
   const user = db.users[userId];
-  const token = `google-jwt-${userId}-${Date.now()}`;
+  const token = signAccessToken({ id: userId, role: user.role });
+  setRefreshCookie(res, signRefreshToken({ id: userId, role: user.role }));
+  res.json({ success: true, token, user: { ...user, email: cleanEmail } });
+});
 
+app.post('/api/auth/refresh', (req: Request, res: Response) => {
+  const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+  const verified = refreshToken ? verifyRefreshToken(refreshToken) : null;
+  if (!verified) {
+    return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+  }
+  const stored = db.users[verified.id];
+  const role = stored ? stored.role : verified.role;
+  const token = signAccessToken({ id: verified.id, role });
+  setRefreshCookie(res, signRefreshToken({ id: verified.id, role }));
   res.json({
     success: true,
     token,
-    user: {
-      ...user,
-      email: cleanEmail
-    }
+    user: stored
+      ? { ...stored, email: stored.email || '' }
+      : { id: verified.id, name: 'Scholar User', role, track: 'all', badges: ['pioneer_scholar'], streakDays: 1, lastActive: new Date().toISOString() }
   });
 });
 
@@ -416,10 +534,11 @@ app.get('/api/auth/me', authenticate, (req: AuthenticatedRequest, res: Response)
     streakDays: 1,
     lastActive: new Date().toISOString()
   };
-  res.json({ user });
+  res.json({ user: { ...user, email: user.email || '' } });
 });
 
-app.post('/api/auth/logout', (req, res) => {
+app.post('/api/auth/logout', (req: Request, res: Response) => {
+  clearRefreshCookie(res);
   res.json({ success: true, message: 'Successfully logged out.' });
 });
 
@@ -448,7 +567,7 @@ app.get('/api/health', (req, res) => {
 // 6.2 SYSTEM API DOCUMENTATION SCHEMA
 app.get('/api/docs', (req, res) => {
   res.json({
-    title: "HACU Fintech Open API Specification",
+    title: "Overlay Wealth Open API Specification",
     version: "1.0.0",
     description: "Production Express backend engine powering credit underwriting, parametric smart contracts, trading sandboxes, and course progress synchronization.",
     endpoints: [
@@ -516,14 +635,61 @@ app.get('/api/progress', authenticate, (req: AuthenticatedRequest, res: Response
     completedLessons: [],
     completedModules: [],
     quizScores: {},
-    certificates: []
+    certificates: [],
+    xp: 0,
+    gameTimeSeconds: 0
   };
-  res.json(userProgress);
+  const user = db.users[userId];
+  res.json({
+    ...userProgress,
+    xp: userProgress.xp ?? 0,
+    gameTimeSeconds: userProgress.gameTimeSeconds ?? 0,
+    streakDays: user?.streakDays ?? 0,
+    badges: user?.badges ?? []
+  });
+});
+
+// Full stats snapshot sync (XP, streak, badges, game time) — server is the
+// source of truth once a user is signed in; the client's localStorage is only
+// the offline cache.
+app.put('/api/progress/stats', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!.id;
+  const { xp, streakDays, badges, gameTimeSeconds } = req.body || {};
+
+  const userProgress = db.progress[userId] || {
+    userId,
+    completedLessons: [],
+    completedModules: [],
+    quizScores: {},
+    certificates: [],
+    xp: 0,
+    gameTimeSeconds: 0
+  };
+  if (typeof xp === 'number' && Number.isFinite(xp)) userProgress.xp = Math.max(0, Math.round(xp));
+  if (typeof gameTimeSeconds === 'number' && Number.isFinite(gameTimeSeconds)) userProgress.gameTimeSeconds = Math.max(0, Math.round(gameTimeSeconds));
+  db.progress[userId] = userProgress;
+
+  const user = db.users[userId] || {
+    id: userId,
+    name: 'Scholar User',
+    role: 'student',
+    track: 'all',
+    badges: [],
+    streakDays: 0,
+    lastActive: new Date().toISOString()
+  };
+  if (typeof streakDays === 'number' && Number.isFinite(streakDays)) user.streakDays = Math.max(0, Math.round(streakDays));
+  if (Array.isArray(badges)) user.badges = badges.map(String);
+  user.lastActive = new Date().toISOString();
+  db.users[userId] = user;
+
+  saveDatabase();
+  res.json({ xp: userProgress.xp, gameTimeSeconds: userProgress.gameTimeSeconds, streakDays: user.streakDays, badges: user.badges });
 });
 
 app.post('/api/progress/lesson', authenticate, (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
-  const { lessonId, moduleId } = req.body;
+  const { lessonId, moduleId, stats } = req.body;
 
   if (!lessonId || typeof lessonId !== 'string') {
     return res.status(400).json({ error: 'Missing required lessonId string.' });
@@ -534,17 +700,37 @@ app.post('/api/progress/lesson', authenticate, (req: AuthenticatedRequest, res: 
     completedLessons: [],
     completedModules: [],
     quizScores: {},
-    certificates: []
+    certificates: [],
+    xp: 0,
+    gameTimeSeconds: 0
   };
 
   if (!userProgress.completedLessons.includes(lessonId)) {
     userProgress.completedLessons.push(lessonId);
   }
 
+  // Optional stats snapshot piggybacked on lesson completion.
+  if (stats && typeof stats === 'object') {
+    if (typeof stats.xp === 'number' && Number.isFinite(stats.xp)) userProgress.xp = Math.max(0, Math.round(stats.xp));
+    if (typeof stats.gameTimeSeconds === 'number' && Number.isFinite(stats.gameTimeSeconds)) userProgress.gameTimeSeconds = Math.max(0, Math.round(stats.gameTimeSeconds));
+    const user = db.users[userId];
+    if (user) {
+      if (typeof stats.streakDays === 'number' && Number.isFinite(stats.streakDays)) user.streakDays = Math.max(0, Math.round(stats.streakDays));
+      if (Array.isArray(stats.badges)) user.badges = stats.badges.map(String);
+    }
+  }
+
   db.progress[userId] = userProgress;
   saveDatabase();
 
-  res.json(userProgress);
+  const user = db.users[userId];
+  res.json({
+    ...userProgress,
+    xp: userProgress.xp ?? 0,
+    gameTimeSeconds: userProgress.gameTimeSeconds ?? 0,
+    streakDays: user?.streakDays ?? 0,
+    badges: user?.badges ?? []
+  });
 });
 
 // 6.5 QUIZ EVALUATION & CERTIFICATE GENERATION
@@ -900,6 +1086,11 @@ ${allRoutes.map(r => `  <url>
 // ---------------------------------------------------------------------------
 // 7. RFC 7807 CENTRALIZED ERROR HANDLER
 // ---------------------------------------------------------------------------
+// Send errors to Sentry (no-op when SENTRY_DSN is unset) before responding.
+if (process.env.SENTRY_DSN) {
+  Sentry.setupExpressErrorHandler(app);
+}
+
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('[Unhandled Express Error]:', err);
   res.status(err.status || 500).json({
@@ -931,7 +1122,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[HACU Fintech Engine] Server listening on http://0.0.0.0:${PORT} (${effectiveEnv} mode)`);
+    console.log(`[Overlay Wealth Engine] Server listening on http://0.0.0.0:${PORT} (${effectiveEnv} mode)`);
   });
 }
 

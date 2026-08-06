@@ -1,6 +1,6 @@
 {
   "name": "Overlay Wealth",
-  "description": "A modern, accessible course on digital currency, algorithmic trading, and financial infrastructure for beginners to experts.",
+  "description": "Free interactive financial literacy platform built for Black communities — credit, investing, real estate, business, and group economics through courses, games, and tools. Part of Overlay365.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

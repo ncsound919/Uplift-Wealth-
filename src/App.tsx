@@ -128,7 +128,9 @@ export default function App() {
     capture('page_view', { path: location.pathname, title: titles[activeView] || activeView });
   }, [activeView, location.pathname]);
 
-  // Sync server progress and health state
+  // Sync server progress and health state. For signed-in users the server is
+  // the source of truth for XP/streak/badges/game time; lessons/modules union
+  // with the local cache (which doubles as the offline store).
   useEffect(() => {
     apiClient.getProgress().then((progress) => {
       if (progress.completedLessons?.length) {
@@ -137,7 +139,32 @@ export default function App() {
       if (progress.completedModules?.length) {
         setCompletedModules((prev) => Array.from(new Set([...prev, ...progress.completedModules])));
       }
+      if (apiClient.isAuthenticated && typeof progress.xp === 'number') {
+        setXp(progress.xp);
+        localStorage.setItem('user_xp', progress.xp.toString());
+        if (typeof progress.streakDays === 'number') {
+          setStreak(progress.streakDays);
+          localStorage.setItem('user_streak', progress.streakDays.toString());
+        }
+        if (Array.isArray(progress.badges)) {
+          setBadges(progress.badges);
+          localStorage.setItem('user_badges', JSON.stringify(progress.badges));
+        }
+        if (typeof progress.gameTimeSeconds === 'number') {
+          setGameTimeSeconds(progress.gameTimeSeconds);
+          localStorage.setItem('game_time_seconds', progress.gameTimeSeconds.toString());
+        }
+      }
     }).catch((err) => console.log('[Server Sync] Using local cache:', err));
+  }, []);
+
+  // Flush queued offline stats when the connection returns.
+  useEffect(() => {
+    const handleOnline = () => {
+      apiClient.flushPendingStats().catch(() => {});
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
   }, []);
 
   // Global keyboard shortcuts
@@ -274,6 +301,7 @@ export default function App() {
         clearInterval(gameTimerRef.current);
         gameTimerRef.current = null;
         localStorage.setItem('game_time_seconds', gameTimeRef.current.toString());
+        scheduleStatsSync();
       }
     };
   }, [activeDirectGame, activeModuleId]);
@@ -334,6 +362,24 @@ export default function App() {
     }, 4000);
   };
 
+  // Debounced snapshot push of XP/streak/badges/game time to the server.
+  // localStorage is always current (every setter writes it), so reading it here
+  // avoids stale-state closure bugs. Only signed-in users sync to the server.
+  const statsSyncTimer = useRef<number | null>(null);
+  const scheduleStatsSync = () => {
+    if (!apiClient.isAuthenticated) return;
+    if (statsSyncTimer.current) window.clearTimeout(statsSyncTimer.current);
+    statsSyncTimer.current = window.setTimeout(() => {
+      statsSyncTimer.current = null;
+      apiClient.saveStats({
+        xp: parseInt(localStorage.getItem('user_xp') || '0', 10),
+        streakDays: parseInt(localStorage.getItem('user_streak') || '0', 10),
+        badges: (() => { try { return JSON.parse(localStorage.getItem('user_badges') || '[]'); } catch { return []; } })(),
+        gameTimeSeconds: parseInt(localStorage.getItem('game_time_seconds') || '0', 10),
+      }).catch(() => {});
+    }, 2000);
+  };
+
   const addXp = (amount: number, reason?: string) => {
     showToast("XP Earned!", `+${amount} XP ${reason ? `for ${reason}` : ''}`, amount);
     setXp((prev) => {
@@ -355,6 +401,7 @@ export default function App() {
       }
       return nextXp;
     });
+    scheduleStatsSync();
   };
 
   const handleLessonComplete = (lessonId: string, lessonType: string) => {
@@ -363,8 +410,12 @@ export default function App() {
       setCompletedLessons(newLessons);
       localStorage.setItem('completed_lessons', JSON.stringify(newLessons));
 
-      // Persist to Express backend server DB
-      apiClient.saveLessonProgress(lessonId, activeModuleId || 'module-1').catch((err) => {
+      // Persist to Express backend server DB (piggyback the latest stats snapshot)
+      apiClient.saveLessonProgress(lessonId, activeModuleId || 'module-1', {
+        xp: parseInt(localStorage.getItem('user_xp') || '0', 10),
+        streakDays: parseInt(localStorage.getItem('user_streak') || '0', 10),
+        badges: (() => { try { return JSON.parse(localStorage.getItem('user_badges') || '[]'); } catch { return []; } })(),
+      }).catch((err) => {
         console.warn('[API Client Sync Error]:', err);
       });
 
@@ -382,6 +433,7 @@ export default function App() {
         localStorage.setItem('user_streak', nextStreak.toString());
         return nextStreak;
       });
+      scheduleStatsSync();
     }
   };
 
@@ -419,6 +471,7 @@ export default function App() {
         });
       }
       setTimeout(() => setCertModuleId(moduleId), 500);
+      scheduleStatsSync();
     }
   };
 

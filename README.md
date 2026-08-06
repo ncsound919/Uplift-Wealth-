@@ -5,14 +5,14 @@
 **Interactive financial education platform — from beginner to expert.**
 
 [![Build](https://img.shields.io/badge/build-passing-green)]()
-[![Tests](https://img.shields.io/badge/tests-156%20passing-green)]()
+[![Tests](https://img.shields.io/badge/tests-1824%20passing-green)]()
 [![TypeScript](https://img.shields.io/badge/typescript-strict-blue)]()
 
 </div>
 
 ## What Is This?
 
-Overlay Wealth is a full-stack fintech education platform that teaches modern financial technology through 15 modules spanning beginner to expert levels. Each module combines text lessons, interactive quizzes, simulations, and games.
+Overlay Wealth is a full-stack financial literacy platform built for Black communities — from beginner to expert. It teaches modern money, credit, investing, real estate, business, and financial technology through 15 modules, wealth-building chapters, simulations, and games. It is part of the Overlay365 ecosystem.
 
 ### Platform Highlights
 
@@ -21,7 +21,7 @@ Overlay Wealth is a full-stack fintech education platform that teaches modern fi
 - **Quantitative finance**: Black-Scholes options pricing, MPT portfolio optimization, risk analytics (Sharpe, Sortino, VaR)
 - **Gamified learning**: XP, levels, badges, streaks, progress tracking
 - **Interactive diagrams**: KaTeX math rendering, Mermaid sequence diagrams, React Flow architecture diagrams, Markmap mind maps
-- **136+ unit and integration tests** across 11 test files
+- **1,824 unit and integration tests** across 83 test files
 
 ## Quick Start
 
@@ -49,7 +49,7 @@ Visit `http://localhost:3000` — the app includes a fully functional Express ba
 The repo ships with a `Dockerfile`, `.dockerignore`, and `render.yaml` blueprint.
 
 1. Push the repo to GitHub.
-2. In the Render dashboard: **New → Blueprint** → select the repo. Render provisions the `uplift-wealth` web service from `render.yaml`.
+2. In the Render dashboard: **New → Blueprint** → select the repo. Render provisions the `overlay-wealth` web service from `render.yaml`.
 3. In the service's **Environment** tab, set secrets:
    - `GEMINI_API_KEY` (Module Builder)
    - `ALPHA_VANTAGE_API_KEY` (real stock quotes; simulator falls back if omitted)
@@ -160,7 +160,7 @@ The platform works fully without any API keys — the trading simulator uses a h
 ## Testing
 
 ```bash
-npm run test              # 156 tests in ~8s
+npm run test              # 1,824 tests
 npm run test:coverage     # With coverage report
 ```
 

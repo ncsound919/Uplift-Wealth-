@@ -20,6 +20,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build /app/dist ./dist
+# DB migrations are applied at boot when DATABASE_URL is set.
+COPY --from=build /app/src/db/migrations ./src/db/migrations
 
 # File-backed DB dir must be writable by the non-root user.
 RUN mkdir -p .data && chown -R node:node /app

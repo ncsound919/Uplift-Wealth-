@@ -1,11 +1,11 @@
-# Release 1.0.0 — FinTech Foundations
+# Release 1.0.0 — Overlay Wealth
 
 ## Release Checklist
 
 ### Pre-release
 - [x] TypeScript compiles clean (`tsc --noEmit` — 0 errors)
 - [x] Production build succeeds (`vite build` — ~34s)
-- [x] All 1570 tests pass across 69 test files
+- [x] All 1,824 tests pass across 83 test files
 - [x] Coverage thresholds met on all tracked files
 - [x] Error boundary added and tested
 - [x] CORS hardened in production mode

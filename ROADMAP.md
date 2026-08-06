@@ -1,5 +1,7 @@
 # Implementation Roadmap — Phase 1-4
 
+> **SUPERSEDED:** This is the original engineering roadmap written for the generic "FinTech Foundations" product. The platform is now **Overlay Wealth** — a financial literacy platform for Black communities. Use [docs/superpowers/plans/2026-08-06-leading-black-financial-literacy-platform.md](docs/superpowers/plans/2026-08-06-leading-black-financial-literacy-platform.md) as the current plan. This file is retained for historical reference.
+
 ## Quick Wins ✅ COMPLETED
 - [x] **SEO meta tags** — OG, description, theme-color, JSON-LD schema
 - [x] **robots.txt + sitemap.xml** — all 15 modules + key pages indexed

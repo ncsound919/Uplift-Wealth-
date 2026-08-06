@@ -2418,7 +2418,7 @@ Double-entry logic is more relevant than ever in the age of instant payments and
         title: "Designing a Complete Financial App Venture",
         type: 'text',
         content: `### Synthesizing Your Fintech Venture
-To complete the FinTech Foundations curriculum, you will design and stress-test a structurally viable fintech venture or institution. Your venture blueprint must align across four core pillars:
+To complete the Overlay Wealth curriculum, you will design and stress-test a structurally viable fintech venture or institution. Your venture blueprint must align across four core pillars:
 
 1. **The Product & Impact Pillar:**
    * Address a specific structural friction (e.g., credit invisibility, MDI capital constraints, youth financial health, or remittance extraction).

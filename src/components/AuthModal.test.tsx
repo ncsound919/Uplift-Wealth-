@@ -4,11 +4,13 @@ import { AuthModal } from './AuthModal';
 
 const mockLoginWithEmail = vi.fn();
 const mockLoginWithGoogle = vi.fn();
+const mockRegister = vi.fn();
 
 vi.mock('../lib/apiClient', () => ({
   apiClient: {
     loginWithEmail: (...args: any[]) => mockLoginWithEmail(...args),
     loginWithGoogle: (...args: any[]) => mockLoginWithGoogle(...args),
+    register: (...args: any[]) => mockRegister(...args),
   },
 }));
 
@@ -107,7 +109,7 @@ describe('AuthModal', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => {
-      expect(mockLoginWithEmail).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123', undefined);
+      expect(mockLoginWithEmail).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123');
     });
   });
 
@@ -176,8 +178,8 @@ describe('AuthModal', () => {
     expect(await screen.findByText('Google SSO failed.')).toBeInTheDocument();
   });
 
-  it('calls loginWithEmail with name on signup', async () => {
-    mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'FinTech Scholar' } });
+  it('calls register with name on signup', async () => {
+    mockRegister.mockResolvedValue({ user: { id: 'u1', name: 'FinTech Scholar' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     fireEvent.click(screen.getByText('Sign Up'));
     fireEvent.change(screen.getByPlaceholderText('Your Full Name'), { target: { value: 'FinTech Scholar' } });
@@ -185,7 +187,7 @@ describe('AuthModal', () => {
     fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => {
-      expect(mockLoginWithEmail).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123', 'FinTech Scholar');
+      expect(mockRegister).toHaveBeenCalledWith('ncsound919@gmail.com', 'password123', 'FinTech Scholar');
     });
   });
 
