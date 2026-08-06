@@ -25,6 +25,9 @@ function makeDb(overrides: Partial<DatabaseSchema> = {}): DatabaseSchema {
     reports: [],
   cohorts: [],
   notifications: [],
+  lessonOverrides: [],
+  contentRevisions: [],
+  creatorApplications: [],
     ...overrides,
   };
 }

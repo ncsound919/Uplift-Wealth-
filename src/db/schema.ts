@@ -25,6 +25,8 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash'),
   tokenVersion: integer('token_version').notNull().default(0),
   profilePublic: boolean('profile_public').notNull().default(false),
+  creatorVerified: boolean('creator_verified').notNull().default(false),
+  creatorBio: text('creator_bio'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
@@ -120,4 +122,34 @@ export const notifications = pgTable('notifications', {
   message: text('message').notNull(),
   read: boolean('read').notNull().default(false),
   createdAt: text('created_at').notNull(),
+});
+
+export const lessonOverrides = pgTable('lesson_overrides', {
+  id: text('id').primaryKey(), // `${moduleId}:${lessonId}`
+  moduleId: text('module_id').notNull(),
+  lessonId: text('lesson_id').notNull(),
+  content: text('content').notNull(),
+  version: integer('version').notNull().default(1),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const contentRevisions = pgTable('content_revisions', {
+  id: text('id').primaryKey(),
+  moduleId: text('module_id').notNull(),
+  lessonId: text('lesson_id').notNull(),
+  content: text('content').notNull(),
+  version: integer('version').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const creatorApplications = pgTable('creator_applications', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  bio: text('bio').notNull(),
+  portfolioUrl: text('portfolio_url'),
+  status: text('status').notNull().default('pending'),
+  createdAt: text('created_at').notNull(),
+  reviewedAt: text('reviewed_at'),
 });

@@ -23,6 +23,9 @@ function makeDb(): DatabaseSchema {
     reports: [],
     cohorts: [],
   notifications: [],
+  lessonOverrides: [],
+  contentRevisions: [],
+  creatorApplications: [],
   };
 }
 

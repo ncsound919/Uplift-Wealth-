@@ -5,7 +5,7 @@
  * accepts a `DbQueryRunner` so the logic is unit-testable with a fake runner
  * and runs against a real `pg` pool in production.
  */
-import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry, Thread, Comment, Report, Cohort, Notification } from './types';
+import type { DatabaseSchema, StoredUser, StoredProgress, Sandbox, Donation, AuditLog, WaitlistEntry, Thread, Comment, Report, Cohort, Notification, LessonOverride, ContentRevision, CreatorApplication } from './types';
 import type { DbQueryRunner } from './client';
 
 function json(value: unknown): string {
@@ -16,8 +16,8 @@ function json(value: unknown): string {
 
 export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<void> {
   await runner.query(
-    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version, profile_public)
-     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12)
+    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version, profile_public, creator_verified, creator_bio)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13,$14)
      ON CONFLICT (id) DO UPDATE SET
        name = EXCLUDED.name,
        role = EXCLUDED.role,
@@ -29,8 +29,10 @@ export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<vo
        email = EXCLUDED.email,
        password_hash = EXCLUDED.password_hash,
        token_version = EXCLUDED.token_version,
-       profile_public = EXCLUDED.profile_public`,
-    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0, u.profilePublic ?? false]
+       profile_public = EXCLUDED.profile_public,
+       creator_verified = EXCLUDED.creator_verified,
+       creator_bio = EXCLUDED.creator_bio`,
+    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0, u.profilePublic ?? false, u.creatorVerified ?? false, u.creatorBio ?? null]
   );
 }
 
@@ -147,6 +149,39 @@ export async function syncNotification(runner: DbQueryRunner, n: Notification): 
   );
 }
 
+export async function syncLessonOverride(runner: DbQueryRunner, o: LessonOverride): Promise<void> {
+  await runner.query(
+    `INSERT INTO lesson_overrides (id, module_id, lesson_id, content, version, updated_by, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (id) DO UPDATE SET
+       content = EXCLUDED.content,
+       version = EXCLUDED.version,
+       updated_by = EXCLUDED.updated_by,
+       updated_at = EXCLUDED.updated_at`,
+    [`${o.moduleId}:${o.lessonId}`, o.moduleId, o.lessonId, o.content, o.version, o.updatedBy, o.updatedAt]
+  );
+}
+
+export async function syncContentRevision(runner: DbQueryRunner, r: ContentRevision): Promise<void> {
+  await runner.query(
+    `INSERT INTO content_revisions (id, module_id, lesson_id, content, version, updated_by, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (id) DO NOTHING`,
+    [r.id, r.moduleId, r.lessonId, r.content, r.version, r.updatedBy, r.updatedAt]
+  );
+}
+
+export async function syncCreatorApplication(runner: DbQueryRunner, a: CreatorApplication): Promise<void> {
+  await runner.query(
+    `INSERT INTO creator_applications (id, user_id, bio, portfolio_url, status, created_at, reviewed_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     ON CONFLICT (id) DO UPDATE SET
+       status = EXCLUDED.status,
+       reviewed_at = EXCLUDED.reviewed_at`,
+    [a.id, a.userId, a.bio, a.portfolioUrl ?? null, a.status, a.createdAt, a.reviewedAt ?? null]
+  );
+}
+
 /** Writes the entire in-memory store to PostgreSQL (backfill / boot sync). */
 export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Promise<void> {
   for (const u of Object.values(db.users)) {
@@ -184,6 +219,15 @@ export async function syncFullDb(runner: DbQueryRunner, db: DatabaseSchema): Pro
   for (const n of db.notifications ?? []) {
     await syncNotification(runner, n);
   }
+  for (const o of db.lessonOverrides ?? []) {
+    await syncLessonOverride(runner, o);
+  }
+  for (const r of db.contentRevisions ?? []) {
+    await syncContentRevision(runner, r);
+  }
+  for (const a of db.creatorApplications ?? []) {
+    await syncCreatorApplication(runner, a);
+  }
 }
 
 // ---- hydration -----------------------------------------------------------
@@ -201,6 +245,8 @@ interface UserRow {
   password_hash: string | null;
   token_version?: number;
   profile_public?: boolean;
+  creator_verified?: boolean;
+  creator_bio?: string | null;
 }
 
 interface ProgressRow {
@@ -296,6 +342,36 @@ interface NotificationRow {
   created_at: string;
 }
 
+interface LessonOverrideRow {
+  id: string;
+  module_id: string;
+  lesson_id: string;
+  content: string;
+  version: number;
+  updated_by: string;
+  updated_at: string;
+}
+
+interface ContentRevisionRow {
+  id: string;
+  module_id: string;
+  lesson_id: string;
+  content: string;
+  version: number;
+  updated_by: string;
+  updated_at: string;
+}
+
+interface CreatorApplicationRow {
+  id: string;
+  user_id: string;
+  bio: string;
+  portfolio_url: string | null;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
 /** Reads the full store back out of PostgreSQL into the in-memory shape. */
 export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema> {
   const userRows = await runner.query<UserRow>('SELECT * FROM users');
@@ -309,6 +385,9 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
   const reportRows = await runner.query<ReportRow>('SELECT * FROM reports');
   const cohortRows = await runner.query<CohortRow>('SELECT * FROM cohorts');
   const notificationRows = await runner.query<NotificationRow>('SELECT * FROM notifications');
+  const overrideRows = await runner.query<LessonOverrideRow>('SELECT * FROM lesson_overrides');
+  const revisionRows = await runner.query<ContentRevisionRow>('SELECT * FROM content_revisions');
+  const applicationRows = await runner.query<CreatorApplicationRow>('SELECT * FROM creator_applications');
 
   const users: DatabaseSchema['users'] = {};
   for (const r of userRows) {
@@ -325,6 +404,8 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
       passwordHash: r.password_hash ?? undefined,
       tokenVersion: r.token_version ?? 0,
       profilePublic: r.profile_public ?? false,
+      creatorVerified: r.creator_verified ?? false,
+      creatorBio: r.creator_bio ?? undefined,
     };
   }
 
@@ -427,5 +508,34 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
     createdAt: r.created_at,
   }));
 
-  return { users, progress, sandboxes, donations, auditLogs, waitlist, threads, comments, reports, cohorts, notifications };
+  const lessonOverrides: DatabaseSchema['lessonOverrides'] = overrideRows.map((r) => ({
+    moduleId: r.module_id,
+    lessonId: r.lesson_id,
+    content: r.content,
+    version: r.version,
+    updatedBy: r.updated_by,
+    updatedAt: r.updated_at,
+  }));
+
+  const contentRevisions: DatabaseSchema['contentRevisions'] = revisionRows.map((r) => ({
+    id: r.id,
+    moduleId: r.module_id,
+    lessonId: r.lesson_id,
+    content: r.content,
+    version: r.version,
+    updatedBy: r.updated_by,
+    updatedAt: r.updated_at,
+  }));
+
+  const creatorApplications: DatabaseSchema['creatorApplications'] = applicationRows.map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    bio: r.bio,
+    portfolioUrl: r.portfolio_url ?? undefined,
+    status: r.status as CreatorApplication['status'],
+    createdAt: r.created_at,
+    reviewedAt: r.reviewed_at ?? undefined,
+  }));
+
+  return { users, progress, sandboxes, donations, auditLogs, waitlist, threads, comments, reports, cohorts, notifications, lessonOverrides, contentRevisions, creatorApplications };
 }

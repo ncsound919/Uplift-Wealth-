@@ -49,6 +49,9 @@ const baseDb: DatabaseSchema = {
   reports: [],
   cohorts: [],
   notifications: [],
+  lessonOverrides: [],
+  contentRevisions: [],
+  creatorApplications: [],
 };
 
 describe('sync: upserts', () => {
@@ -111,7 +114,7 @@ describe('sync: full database', () => {
 
   it('loadFullDb hydrates the in-memory shape from rows', async () => {
     const { runner } = recordingRunner({
-      users: [{ id: 'u1', name: 'Nia', role: 'student', track: 'all', avatar: null, badges: ['pioneer'], streak_days: 3, last_active: 't1', email: 'nia@x.dev', password_hash: 'hash', token_version: 4, profile_public: true }],
+      users: [{ id: 'u1', name: 'Nia', role: 'student', track: 'all', avatar: null, badges: ['pioneer'], streak_days: 3, last_active: 't1', email: 'nia@x.dev', password_hash: 'hash', token_version: 4, profile_public: true, creator_verified: true, creator_bio: 'Credit coach' }],
       progress: [{ user_id: 'u1', completed_lessons: ['m1-l1'], completed_modules: [], quiz_scores: { m1: 100 }, certificates: [] }],
       sandboxes: [{ id: 'sb1', user_id: 'u1', sandbox_type: 'trading', state_data: { balance: 5000 }, saved_at: 't2', notes: null }],
       donations: [{ id: 'd1', user_id: 'u1', amount: '50', tier_label: 'Community', timestamp: 't3' }],
@@ -122,7 +125,7 @@ describe('sync: full database', () => {
 
     expect(db.users.u1).toEqual({
       id: 'u1', name: 'Nia', role: 'student', track: 'all', avatar: undefined,
-      badges: ['pioneer'], streakDays: 3, lastActive: 't1', email: 'nia@x.dev', passwordHash: 'hash', tokenVersion: 4, profilePublic: true,
+      badges: ['pioneer'], streakDays: 3, lastActive: 't1', email: 'nia@x.dev', passwordHash: 'hash', tokenVersion: 4, profilePublic: true, creatorVerified: true, creatorBio: 'Credit coach',
     });
     expect(db.progress.u1.completedLessons).toEqual(['m1-l1']);
     expect(db.progress.u1.quizScores).toEqual({ m1: 100 });
@@ -134,6 +137,6 @@ describe('sync: full database', () => {
   it('loadFullDb handles empty tables', async () => {
     const { runner } = recordingRunner();
     const db = await loadFullDb(runner);
-    expect(db).toEqual({ users: {}, progress: {}, sandboxes: {}, donations: [], auditLogs: [], waitlist: [], threads: [], comments: [], reports: [], cohorts: [], notifications: [] });
+    expect(db).toEqual({ users: {}, progress: {}, sandboxes: {}, donations: [], auditLogs: [], waitlist: [], threads: [], comments: [], reports: [], cohorts: [], notifications: [], lessonOverrides: [], contentRevisions: [], creatorApplications: [] });
   });
 });

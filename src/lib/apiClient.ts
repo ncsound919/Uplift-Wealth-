@@ -493,6 +493,53 @@ class ApiClient {
   public markNotificationRead(id: string) {
     return this.request<{ success: boolean; notification: NotificationView }>(`/api/notifications/${encodeURIComponent(id)}/read`, { method: 'POST' });
   }
+
+  // Content CMS
+  public getEffectiveContent(moduleId: string, lessonId: string) {
+    return this.request<{ overridden: boolean; content: string | null; version: number }>(`/api/content/${encodeURIComponent(moduleId)}/${encodeURIComponent(lessonId)}`);
+  }
+
+  public listOverrides() {
+    return this.request<{ overrides: LessonOverrideView[] }>('/api/content/overrides');
+  }
+
+  public getContentRevisions(moduleId: string, lessonId: string) {
+    return this.request<{ revisions: ContentRevisionView[] }>(`/api/content/${encodeURIComponent(moduleId)}/${encodeURIComponent(lessonId)}/revisions`);
+  }
+
+  public saveLessonOverride(moduleId: string, lessonId: string, content: string) {
+    return this.request<{ success: boolean; override: LessonOverrideView }>(`/api/content/${encodeURIComponent(moduleId)}/${encodeURIComponent(lessonId)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    });
+  }
+
+  public deleteLessonOverride(moduleId: string, lessonId: string) {
+    return this.request<{ success: boolean; deleted: boolean }>(`/api/content/${encodeURIComponent(moduleId)}/${encodeURIComponent(lessonId)}`, { method: 'DELETE' });
+  }
+
+  // Creator program
+  public applyAsCreator(bio: string, portfolioUrl?: string) {
+    return this.request<{ success: boolean; application: unknown }>('/api/creator/apply', {
+      method: 'POST',
+      body: JSON.stringify({ bio, portfolioUrl }),
+    });
+  }
+
+  public getCreatorStatus() {
+    return this.request<{ verified: boolean; bio?: string; application: { status: string; createdAt: string } | null }>('/api/creator/status');
+  }
+
+  public listCreatorApplications() {
+    return this.request<{ applications: Array<{ id: string; userId: string; bio: string; portfolioUrl?: string; status: string; createdAt: string }> }>('/api/creator/applications');
+  }
+
+  public reviewCreatorApplication(id: string, status: 'approved' | 'rejected') {
+    return this.request<{ success: boolean; application: unknown }>(`/api/creator/applications/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
 }
 
 export interface ThreadView {
@@ -524,6 +571,8 @@ export interface PublicProfile {
   badges: string[];
   streakDays: number;
   track: string;
+  creatorVerified?: boolean;
+  creatorBio?: string;
   xp: number;
   completedModules: string[];
   completedLessonsCount: number;
@@ -558,6 +607,25 @@ export interface NotificationView {
   message: string;
   read: boolean;
   createdAt: string;
+}
+
+export interface LessonOverrideView {
+  moduleId: string;
+  lessonId: string;
+  content: string;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface ContentRevisionView {
+  id: string;
+  moduleId: string;
+  lessonId: string;
+  content: string;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
 }
 
 export const apiClient = new ApiClient();

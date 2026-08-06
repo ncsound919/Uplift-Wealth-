@@ -30,6 +30,7 @@ import { Quiz } from './Quiz';
 import { DiscussionThread } from './DiscussionThread';
 import { cn } from '../lib/utils';
 import { capture } from '../lib/analytics';
+import { apiClient } from '../lib/apiClient';
 import { TradingGame } from './TradingGame';
 import { UnderwritingGame } from './UnderwritingGame';
 import { ParametricGame } from './ParametricGame';
@@ -347,6 +348,17 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete, curre
     }
   }, [currentLesson?.id, module.id]);
 
+  // Lesson body: base content, overridable by an admin CMS edit.
+  const [lessonBody, setLessonBody] = useState(currentLesson?.content || '');
+  useEffect(() => {
+    setLessonBody(currentLesson?.content || '');
+    let cancelled = false;
+    apiClient.getEffectiveContent(module.id, currentLesson?.id || '')
+      .then((res) => { if (!cancelled && res.overridden && res.content !== null) setLessonBody(res.content); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [module.id, currentLesson?.id]);
+
   const currentGlossary = useMemo(
     () => getLessonGlossary(currentLesson.id, module.id, currentLessonIndex, module.lessons.length),
     [currentLesson.id, module.id, currentLessonIndex, module.lessons.length]
@@ -452,7 +464,7 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete, curre
                   },
                 }}
               >
-                {currentLesson.content || ''}
+                {lessonBody || ''}
               </Markdown>
             </div>
 

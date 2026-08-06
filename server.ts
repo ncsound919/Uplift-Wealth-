@@ -40,6 +40,13 @@ import {
   deleteCohort,
   cohortLeaderboard,
 } from "./src/db/cohortOps";
+import {
+  getEffectiveContent,
+  listOverrides,
+  getRevisions,
+  saveOverride,
+  deleteOverride,
+} from "./src/db/contentOps";
 import { sendWelcomeEmail, sendWaitlistConfirmEmail, sendEmail, escapeHtml } from "./src/lib/email";
 import type { DatabaseSchema } from "./src/db/types";
 
@@ -114,7 +121,10 @@ const initialDb: DatabaseSchema = {
   comments: [],
   reports: [],
   cohorts: [],
-  notifications: []
+  notifications: [],
+  lessonOverrides: [],
+  contentRevisions: [],
+  creatorApplications: []
 };
 
 let db: DatabaseSchema = { ...initialDb };
@@ -170,6 +180,9 @@ function normalizeDb(raw: DatabaseSchema): DatabaseSchema {
     reports: raw.reports ?? [],
     cohorts: raw.cohorts ?? [],
     notifications: raw.notifications ?? [],
+    lessonOverrides: raw.lessonOverrides ?? [],
+    contentRevisions: raw.contentRevisions ?? [],
+    creatorApplications: raw.creatorApplications ?? [],
   };
 }
 
@@ -233,6 +246,18 @@ function initDatabase() {
           notifications: [
             ...(db.notifications ?? []).filter(n => !(pg.notifications ?? []).some(p => p.id === n.id)),
             ...(pg.notifications ?? []),
+          ],
+          lessonOverrides: [
+            ...(db.lessonOverrides ?? []).filter(o => !(pg.lessonOverrides ?? []).some(p => p.moduleId === o.moduleId && p.lessonId === o.lessonId)),
+            ...(pg.lessonOverrides ?? []),
+          ],
+          contentRevisions: [
+            ...(db.contentRevisions ?? []).filter(r => !(pg.contentRevisions ?? []).some(p => p.id === r.id)),
+            ...(pg.contentRevisions ?? []),
+          ],
+          creatorApplications: [
+            ...(db.creatorApplications ?? []).filter(a => !(pg.creatorApplications ?? []).some(p => p.id === a.id)),
+            ...(pg.creatorApplications ?? []),
           ],
         };
         saveDatabase();
@@ -738,6 +763,8 @@ app.get('/api/profile/:userId', (req: Request, res: Response) => {
     badges: user.badges ?? [],
     streakDays: user.streakDays ?? 0,
     track: user.track,
+    creatorVerified: user.creatorVerified ?? false,
+    creatorBio: user.creatorBio ?? undefined,
     xp: progress?.xp ?? 0,
     completedModules: progress?.completedModules ?? [],
     completedLessonsCount: progress?.completedLessons?.length ?? 0,
@@ -1245,6 +1272,98 @@ app.post('/api/notifications/:id/read', authenticate, (req: AuthenticatedRequest
   notification.read = true;
   saveDatabase();
   res.json({ success: true, notification });
+});
+
+// 6.7.9 CONTENT CMS (admin-only writes; reads are public)
+app.get('/api/content/:moduleId/:lessonId', (req: Request, res: Response) => {
+  const eff = getEffectiveContent(db, req.params.moduleId, req.params.lessonId);
+  res.json({ overridden: !!eff, content: eff?.content ?? null, version: eff?.version ?? 0 });
+});
+
+app.get('/api/content/overrides', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  res.json({ overrides: listOverrides(db) });
+});
+
+app.get('/api/content/:moduleId/:lessonId/revisions', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  res.json({ revisions: getRevisions(db, req.params.moduleId, req.params.lessonId) });
+});
+
+app.put('/api/content/:moduleId/:lessonId', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  const { content } = req.body || {};
+  try {
+    const result = saveOverride(db, {
+      moduleId: req.params.moduleId,
+      lessonId: req.params.lessonId,
+      content,
+      updatedBy: req.user!.id,
+    });
+    saveDatabase();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+app.delete('/api/content/:moduleId/:lessonId', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = deleteOverride(db, req.params.moduleId, req.params.lessonId);
+    saveDatabase();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+// 6.7.10 CREATOR / EDUCATOR PROGRAM
+app.post('/api/creator/apply', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { bio, portfolioUrl } = req.body || {};
+  const cleanBio = typeof bio === 'string' ? bio.trim().slice(0, 2000) : '';
+  if (!cleanBio) return res.status(400).json({ error: 'Tell us a little about yourself and what you teach.' });
+  const existing = (db.creatorApplications ?? []).find((a) => a.userId === req.user!.id && a.status === 'pending');
+  if (existing) return res.status(409).json({ error: 'You already have a pending application.' });
+  const application = {
+    id: `cre-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    userId: req.user!.id,
+    bio: cleanBio,
+    portfolioUrl: typeof portfolioUrl === 'string' && portfolioUrl.trim() ? portfolioUrl.trim().slice(0, 500) : undefined,
+    status: 'pending' as const,
+    createdAt: new Date().toISOString(),
+  };
+  db.creatorApplications.push(application);
+  saveDatabase();
+  res.status(201).json({ success: true, application });
+});
+
+app.get('/api/creator/status', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const user = db.users[req.user!.id];
+  const application = (db.creatorApplications ?? []).find((a) => a.userId === req.user!.id);
+  res.json({
+    verified: user?.creatorVerified ?? false,
+    bio: user?.creatorBio ?? undefined,
+    application: application ? { status: application.status, createdAt: application.createdAt } : null,
+  });
+});
+
+app.get('/api/creator/applications', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  res.json({ applications: (db.creatorApplications ?? []).sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
+});
+
+app.put('/api/creator/applications/:id', authenticate, requireRole(['admin', 'institution']), (req: AuthenticatedRequest, res: Response) => {
+  const { status } = req.body || {};
+  if (status !== 'approved' && status !== 'rejected') {
+    return res.status(400).json({ error: 'Invalid status.' });
+  }
+  const application = (db.creatorApplications ?? []).find((a) => a.id === req.params.id);
+  if (!application) return res.status(404).json({ error: 'Application not found.' });
+  application.status = status;
+  application.reviewedAt = new Date().toISOString();
+  const user = db.users[application.userId];
+  if (user) {
+    user.creatorVerified = status === 'approved';
+    user.creatorBio = application.bio;
+  }
+  saveDatabase();
+  res.json({ success: true, application });
 });
 
 // 6.8 MARKET DATA PROXY WITH CACHING & SIMULATION (Alpha Vantage)

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { BarChart3, Flag, FlaskConical, RefreshCw, ShieldCheck, Users, Eye, EyeOff, Trophy, Clock } from 'lucide-react';
+import { BarChart3, Flag, FlaskConical, RefreshCw, ShieldCheck, Users, Eye, EyeOff, Trophy, Clock, FileText, Award } from 'lucide-react';
 import { PageMeta } from './PageMeta';
+import { ContentAdmin } from './ContentAdmin';
 import { getAllFlags, overrideFlag, clearOverride, clearAllOverrides, isFlagEnabled } from '../lib/featureFlags';
 import { ACTIVE_EXPERIMENTS, getVariant } from '../lib/experiments';
+import { apiClient } from '../lib/apiClient';
 import { cn } from '../lib/utils';
 import type { PlatformMetrics } from '../db/metrics';
 
@@ -248,6 +250,65 @@ export function AdminDashboard() {
           </p>
         </motion.div>
       )}
+
+      <CreatorReviewPanel />
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="w-4 h-4 text-indigo-500" />
+          <h3 className="font-black text-sm text-slate-900 dark:text-white">Content Editor</h3>
+        </div>
+        <ContentAdmin />
+      </div>
+    </div>
+  );
+}
+
+function CreatorReviewPanel() {
+  const [apps, setApps] = useState<Array<{ id: string; userId: string; bio: string; portfolioUrl?: string; status: string; createdAt: string }>>([]);
+  const [loaded, setLoaded] = useState(false);
+  const load = useCallback(() => {
+    apiClient.listCreatorApplications()
+      .then((res) => { setApps(res.applications); setLoaded(true); })
+      .catch(() => { setLoaded(true); });
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const review = async (id: string, status: 'approved' | 'rejected') => {
+    await apiClient.reviewCreatorApplication(id, status).catch(() => {});
+    load();
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+      <div className="flex items-center gap-2 mb-4">
+        <Award className="w-4 h-4 text-amber-500" />
+        <h3 className="font-black text-sm text-slate-900 dark:text-white">Educator Applications</h3>
+      </div>
+      {!loaded && <div className="text-xs text-slate-400 animate-pulse">Loading…</div>}
+      {loaded && apps.length === 0 && <div className="text-xs text-slate-400 italic">No educator applications yet.</div>}
+      <div className="space-y-2">
+        {apps.map((a) => (
+          <div key={a.id} className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 capitalize">{a.status}</span>
+              <span className="text-[10px] text-slate-400">{new Date(a.createdAt).toLocaleDateString()}</span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">{a.bio}</p>
+            {a.portfolioUrl && <p className="text-[11px] text-indigo-600 dark:text-indigo-400 mt-1">{a.portfolioUrl}</p>}
+            {a.status === 'pending' && (
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => review(a.id, 'approved')} className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer transition-colors">
+                  Approve
+                </button>
+                <button onClick={() => review(a.id, 'rejected')} className="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold cursor-pointer transition-colors">
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

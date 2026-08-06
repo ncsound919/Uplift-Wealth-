@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { getJSON, storageKeys } from '../lib/storage';
 import { useState } from 'react';
 import { apiClient } from '../lib/apiClient';
+import { CreatorApplicationForm } from './CreatorApplicationForm';
 import {
   Clock, CheckCircle2, Gamepad2, Flame, Award, Trophy, Sparkles, TrendingUp, Globe
 } from 'lucide-react';
@@ -133,6 +134,8 @@ export function StudentProfile(props: Props) {
           )} />
         </button>
       </div>
+
+      <CreatorApplicationForm />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-1">

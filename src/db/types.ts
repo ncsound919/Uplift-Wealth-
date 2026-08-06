@@ -20,6 +20,9 @@ export interface StoredUser {
   tokenVersion?: number;
   /** Opt-in: makes the profile viewable at /profile/:userId. Default private. */
   profilePublic?: boolean;
+  /** Verified educator (set by an admin after approving a creator application). */
+  creatorVerified?: boolean;
+  creatorBio?: string;
 }
 
 export interface StoredProgress {
@@ -118,6 +121,37 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface LessonOverride {
+  moduleId: string;
+  lessonId: string;
+  content: string;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface ContentRevision {
+  id: string;
+  moduleId: string;
+  lessonId: string;
+  content: string;
+  version: number;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export type CreatorStatus = 'pending' | 'approved' | 'rejected';
+
+export interface CreatorApplication {
+  id: string;
+  userId: string;
+  bio: string;
+  portfolioUrl?: string;
+  status: CreatorStatus;
+  createdAt: string;
+  reviewedAt?: string;
+}
+
 export interface DatabaseSchema {
   users: Record<string, StoredUser>;
   progress: Record<string, StoredProgress>;
@@ -130,4 +164,7 @@ export interface DatabaseSchema {
   reports: Report[];
   cohorts: Cohort[];
   notifications: Notification[];
+  lessonOverrides: LessonOverride[];
+  contentRevisions: ContentRevision[];
+  creatorApplications: CreatorApplication[];
 }

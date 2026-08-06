@@ -56,6 +56,8 @@ export async function ensureTables(): Promise<void> {
         password_hash text,
         token_version integer DEFAULT 0 NOT NULL,
         profile_public boolean DEFAULT false NOT NULL,
+        creator_verified boolean DEFAULT false NOT NULL,
+        creator_bio text,
         created_at text DEFAULT to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') NOT NULL
       );
       CREATE TABLE IF NOT EXISTS progress (
@@ -141,6 +143,33 @@ export async function ensureTables(): Promise<void> {
         message text NOT NULL,
         read boolean DEFAULT false NOT NULL,
         created_at text NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS lesson_overrides (
+        id text PRIMARY KEY NOT NULL,
+        module_id text NOT NULL,
+        lesson_id text NOT NULL,
+        content text NOT NULL,
+        version integer DEFAULT 1 NOT NULL,
+        updated_by text NOT NULL,
+        updated_at text NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS content_revisions (
+        id text PRIMARY KEY NOT NULL,
+        module_id text NOT NULL,
+        lesson_id text NOT NULL,
+        content text NOT NULL,
+        version integer NOT NULL,
+        updated_by text NOT NULL,
+        updated_at text NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS creator_applications (
+        id text PRIMARY KEY NOT NULL,
+        user_id text NOT NULL,
+        bio text NOT NULL,
+        portfolio_url text,
+        status text DEFAULT 'pending' NOT NULL,
+        created_at text NOT NULL,
+        reviewed_at text
       );
     `);
   } finally {

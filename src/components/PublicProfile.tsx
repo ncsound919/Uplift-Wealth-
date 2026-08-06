@@ -51,8 +51,18 @@ export function PublicProfile() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center text-2xl font-black">
               {profile.name.charAt(0).toUpperCase()}
             </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-3">{profile.name}</h1>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white mt-3 flex items-center justify-center gap-2">
+              {profile.name}
+              {profile.creatorVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                  <Award className="w-3 h-3" /> Verified Educator
+                </span>
+              )}
+            </h1>
             <p className="text-xs text-slate-400 uppercase tracking-widest mt-1">Overlay Wealth Scholar</p>
+            {profile.creatorBio && (
+              <p className="text-sm text-slate-500 dark:text-slate-300 mt-2 max-w-md mx-auto">{profile.creatorBio}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
