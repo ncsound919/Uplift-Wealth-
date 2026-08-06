@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
-import { Check, Loader2, Sparkles } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { Check, Loader2, Sparkles, BookOpen } from 'lucide-react';
 import { apiClient, type BillingPlan } from '../lib/apiClient';
 import { cn } from '../lib/utils';
 
 export function PricingPage({ currentTier, onRequireAuth }: { currentTier?: string; onRequireAuth?: () => void }) {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [checkingOut, setCheckingOut] = useState<'premium' | 'institutional' | null>(null);
+  const [checkingOut, setCheckingOut] = useState<boolean>(false);
   const upgraded = params.get('upgraded') === 'true';
 
   const load = useCallback(() => {
@@ -19,21 +20,21 @@ export function PricingPage({ currentTier, onRequireAuth }: { currentTier?: stri
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const checkout = async (tier: 'premium' | 'institutional') => {
+  const checkout = async () => {
     setError(null);
     if (!currentTier || currentTier === 'guest') {
       onRequireAuth?.();
       return;
     }
-    setCheckingOut(tier);
+    setCheckingOut(true);
     try {
-      const res = await apiClient.startCheckout(tier);
+      const res = await apiClient.startCheckout('institutional');
       if (res.url) window.location.href = res.url;
       else setError('Checkout is not available yet.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed.');
     } finally {
-      setCheckingOut(null);
+      setCheckingOut(false);
     }
   };
 
@@ -62,16 +63,16 @@ export function PricingPage({ currentTier, onRequireAuth }: { currentTier?: stri
           <Loader2 className="w-4 h-4 animate-spin" /> Loading plans…
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 max-w-3xl mx-auto">
           {plans.map((p) => {
             const isCurrent = currentTier === p.id;
-            const isPaid = p.id === 'premium' || p.id === 'institutional';
+            const isPaid = p.id === 'institutional';
             return (
               <div
                 key={p.id}
                 className={cn(
                   'rounded-2xl border bg-white dark:bg-slate-950 p-6 flex flex-col',
-                  p.id === 'premium' ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-slate-200 dark:border-slate-800'
+                  isPaid ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-slate-200 dark:border-slate-800'
                 )}
               >
                 <span className="text-xs font-black uppercase tracking-widest text-slate-400">{p.name}</span>
@@ -93,16 +94,11 @@ export function PricingPage({ currentTier, onRequireAuth }: { currentTier?: stri
                   </div>
                 ) : isPaid ? (
                   <button
-                    onClick={() => checkout(p.id as 'premium' | 'institutional')}
-                    disabled={checkingOut === p.id}
-                    className={cn(
-                      'mt-5 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider cursor-pointer transition-colors disabled:opacity-50',
-                      p.id === 'premium'
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                        : 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-slate-200'
-                    )}
+                    onClick={checkout}
+                    disabled={checkingOut}
+                    className="mt-5 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition-colors disabled:opacity-50"
                   >
-                    {checkingOut === p.id ? 'Redirecting…' : p.id === 'premium' ? 'Go Premium' : 'Contact for teams'}
+                    {checkingOut ? 'Redirecting…' : 'Get Institutional'}
                   </button>
                 ) : (
                   <div className="mt-5 px-4 py-2.5 rounded-xl text-center text-xs font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-900 text-slate-500">
@@ -116,8 +112,17 @@ export function PricingPage({ currentTier, onRequireAuth }: { currentTier?: stri
       )}
 
       <p className="text-center text-[11px] text-slate-400">
-        Institutional pricing supports classrooms, HBCU chapters, churches, and community organizations.
+        Membership is always free — all modules, games, and certificates, no paywalls. Institutional pricing supports classrooms, HBCU chapters, churches, and community organizations.
       </p>
+
+      <div className="text-center">
+        <button
+          onClick={() => navigate('/institutional')}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+        >
+          <BookOpen className="w-3.5 h-3.5" /> View the classroom curriculum guide
+        </button>
+      </div>
     </div>
   );
 }

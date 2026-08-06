@@ -11,9 +11,9 @@ describe('stripe helper', () => {
     vi.restoreAllMocks();
   });
 
-  it('defines the three tiers', () => {
-    expect(PLANS.map((p) => p.id)).toEqual(['free', 'premium', 'institutional']);
-    expect(PLANS.find((p) => p.id === 'premium')!.monthly).toBe(10);
+  it('defines the free + institutional tiers (no premium)', () => {
+    expect(PLANS.map((p) => p.id)).toEqual(['free', 'institutional']);
+    expect(PLANS.find((p) => p.id === 'institutional')!.monthly).toBe(99);
   });
 
   it('isStripeConfigured reflects the secret', () => {
@@ -24,21 +24,21 @@ describe('stripe helper', () => {
 
   it('createCheckoutSession posts a subscription session', async () => {
     vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_x');
-    vi.stubEnv('STRIPE_PRICE_PREMIUM', 'price_premium');
+    vi.stubEnv('STRIPE_PRICE_INSTITUTIONAL', 'price_institutional');
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, text: () => Promise.resolve(''), json: () => Promise.resolve({ id: 'cs_1', url: 'https://checkout.stripe.com/abc' }) } as Response);
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await createCheckoutSession({ tier: 'premium', email: 'a@b.co', successUrl: 'https://x/success', cancelUrl: 'https://x/cancel' });
+    const result = await createCheckoutSession({ tier: 'institutional', email: 'a@b.co', successUrl: 'https://x/success', cancelUrl: 'https://x/cancel' });
     expect(result.url).toContain('checkout.stripe.com');
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toContain('/checkout/sessions');
     expect(init.headers.Authorization).toBe('Bearer sk_test_x');
-    expect(init.body).toContain('price_premium');
+    expect(init.body).toContain('price_institutional');
     expect(init.body).toContain('mode=subscription');
   });
 
   it('throws when Stripe is not configured', async () => {
-    await expect(createCheckoutSession({ tier: 'premium', email: 'a@b.co', successUrl: 'x', cancelUrl: 'y' })).rejects.toThrow(/not configured/i);
+    await expect(createCheckoutSession({ tier: 'institutional', email: 'a@b.co', successUrl: 'x', cancelUrl: 'y' })).rejects.toThrow(/not configured/i);
   });
 
   it('throws when no price is configured for the tier', async () => {

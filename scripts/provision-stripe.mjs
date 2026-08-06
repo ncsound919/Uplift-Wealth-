@@ -21,7 +21,6 @@ if (!key) {
 const webhookUrl = process.argv.find((a, i) => a === '--webhook' && process.argv[i + 1]) ? process.argv[process.argv.indexOf('--webhook') + 1] : process.env.STRIPE_WEBHOOK_URL;
 
 const PLANS = [
-  { name: 'Overlay Wealth Premium', priceName: 'Premium', amount: 1000, interval: 'month' },   // $10/mo
   { name: 'Overlay Wealth Institutional', priceName: 'Institutional', amount: 9900, interval: 'month' }, // $99/mo
 ];
 

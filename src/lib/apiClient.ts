@@ -561,7 +561,7 @@ class ApiClient {
     return this.request<{ tier: string; email: string; hasStripeCustomer: boolean; stripeConfigured: boolean }>('/api/billing/status');
   }
 
-  public startCheckout(tier: 'premium' | 'institutional') {
+  public startCheckout(tier: 'institutional') {
     return this.request<{ success: boolean; url: string | null }>('/api/billing/checkout', {
       method: 'POST',
       body: JSON.stringify({ tier }),

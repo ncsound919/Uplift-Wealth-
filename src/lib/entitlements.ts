@@ -1,25 +1,24 @@
 /**
- * Client-side entitlement rules. Free users get modules 0–5; premium +
- * institutional tiers unlock the rest. The server is the source of truth for
- * tier (see /api/billing/status); this file only decides *what* a tier unlocks.
+ * Client-side entitlement rules. All curriculum is FREE for every member.
+ * Only institutional (classroom) plans are paid — they unlock cohort/classroom
+ * management, not module access. The server is the source of truth for tier.
  */
-export type BillingTier = 'free' | 'premium' | 'institutional';
+export type BillingTier = 'free' | 'institutional';
 
 export function moduleNumber(moduleId: string): number {
   const m = /module-(\d+)/.exec(moduleId);
   return m ? Number(m[1]) : Number.MAX_SAFE_INTEGER;
 }
 
-/** Modules 0–5 are free; everything else requires a paid tier. */
-export function isPremiumModule(moduleId: string): boolean {
-  return moduleNumber(moduleId) > 5;
+/** The full curriculum is free — no paid module tiers. */
+export function isPremiumModule(_moduleId: string): boolean {
+  return false;
 }
 
-export function requiredTier(moduleId: string): BillingTier {
-  return isPremiumModule(moduleId) ? 'premium' : 'free';
+export function requiredTier(_moduleId: string): BillingTier {
+  return 'free';
 }
 
-export function canAccess(tier: BillingTier | undefined, moduleId: string): boolean {
-  if (!tier) tier = 'free';
-  return tier === 'premium' || tier === 'institutional' || !isPremiumModule(moduleId);
+export function canAccess(_tier: BillingTier | undefined, _moduleId: string): boolean {
+  return true;
 }

@@ -7,25 +7,25 @@ const mocks = vi.hoisted(() => ({
   startCheckout: vi.fn(),
 }));
 
-vi.mock('react-router', () => ({ useSearchParams: () => [new URLSearchParams()] }));
+vi.mock('react-router', () => ({ useSearchParams: () => [new URLSearchParams()], useNavigate: () => vi.fn() }));
 vi.mock('../lib/apiClient', () => ({ apiClient: mocks }));
 
 const plans = [
-  { id: 'free', name: 'Free', monthly: 0, description: 'Start', features: ['Modules 0-5'] },
-  { id: 'premium', name: 'Premium', monthly: 10, description: 'Everything', features: ['All modules'] },
+  { id: 'free', name: 'Free Member', monthly: 0, description: 'Complete access', features: ['All modules'] },
   { id: 'institutional', name: 'Institutional', monthly: 99, description: 'Classrooms', features: ['50 seats'] },
 ];
 
 describe('PricingPage', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('renders all three plans', async () => {
+  it('renders the free and institutional plans', async () => {
     mocks.getBillingPlans.mockResolvedValue({ plans, stripeConfigured: true });
     render(<PricingPage currentTier="free" />);
-    expect(await screen.findByText('Premium')).toBeInTheDocument();
-    expect(screen.getByText('Institutional')).toBeInTheDocument();
-    expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.getByText('$10')).toBeInTheDocument();
+    expect(await screen.findByText('Institutional')).toBeInTheDocument();
+    expect(screen.getByText('Free Member')).toBeInTheDocument();
+    expect(screen.getByText('$99')).toBeInTheDocument();
+    expect(screen.queryByText('$10')).not.toBeInTheDocument();
+    expect(screen.queryByText(/premium/i)).not.toBeInTheDocument();
   });
 
   it('marks the current plan', async () => {
@@ -34,12 +34,12 @@ describe('PricingPage', () => {
     expect(await screen.findByText('Current plan')).toBeInTheDocument();
   });
 
-  it('prompts for auth when a guest clicks Go Premium', async () => {
+  it('prompts for auth when a guest clicks Get Institutional', async () => {
     mocks.getBillingPlans.mockResolvedValue({ plans, stripeConfigured: true });
     const onRequireAuth = vi.fn();
     render(<PricingPage currentTier="guest" onRequireAuth={onRequireAuth} />);
-    await screen.findByText('Premium');
-    fireEvent.click(screen.getByRole('button', { name: /go premium/i }));
+    await screen.findByText('Institutional');
+    fireEvent.click(screen.getByRole('button', { name: /get institutional/i }));
     expect(onRequireAuth).toHaveBeenCalled();
   });
 
@@ -50,9 +50,9 @@ describe('PricingPage', () => {
     const orig = window.location;
     Object.defineProperty(window, 'location', { value: loc, writable: true });
     render(<PricingPage currentTier="free" />);
-    await screen.findByText('Premium');
-    fireEvent.click(screen.getByRole('button', { name: /go premium/i }));
-    await waitFor(() => expect(mocks.startCheckout).toHaveBeenCalledWith('premium'));
+    await screen.findByText('Institutional');
+    fireEvent.click(screen.getByRole('button', { name: /get institutional/i }));
+    await waitFor(() => expect(mocks.startCheckout).toHaveBeenCalledWith('institutional'));
     Object.defineProperty(window, 'location', { value: orig, writable: true });
   });
 });

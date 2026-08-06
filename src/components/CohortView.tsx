@@ -30,7 +30,7 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
     setLoading(true);
     apiClient.listMyCohorts()
       .then((res) => setCohorts(res.cohorts))
-      .catch(() => setError('Could not load your cohorts.'))
+      .catch(() => setError('Could not load your groups.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -116,7 +116,7 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-emerald-500" />
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Learning Cohorts</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Learning Groups</h2>
             <p className="text-xs text-slate-500">Grow together — church groups, HBCU chapters, family circles, and clubs.</p>
           </div>
         </div>
@@ -159,9 +159,9 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
       </form>
 
       {loading ? (
-        <div className="text-xs text-slate-400 animate-pulse py-6">Loading your cohorts…</div>
+        <div className="text-xs text-slate-400 animate-pulse py-6">Loading your groups…</div>
       ) : cohorts.length === 0 ? (
-        <div className="text-xs text-slate-400 italic py-6">You're not in any cohorts yet. Create one or join with an invite code.</div>
+        <div className="text-xs text-slate-400 italic py-6">You're not in any groups yet. Create one or join with an invite code.</div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {cohorts.map((c) => (

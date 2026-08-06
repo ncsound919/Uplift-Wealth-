@@ -32,10 +32,10 @@ export function WealthBuilding() {
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
             <Sparkles className="w-3.5 h-3.5" />
-            New wealth tools & community cohorts
+            New wealth tools & community groups
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md">
-            Join the list — we'll email you when new chapters, calculators, and group-economics cohorts launch.
+            Join the list — we'll email you when new chapters, calculators, and group-economics circles launch.
           </p>
         </div>
         <WaitlistForm source="wealth-hub" compact />

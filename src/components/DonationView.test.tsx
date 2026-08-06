@@ -54,7 +54,7 @@ describe('DonationView', () => {
 
   it('shows Venmo handle', () => {
     render(<DonationView />);
-    const elements = screen.getAllByText(/@ncsound/i);
+    const elements = screen.getAllByText(/\$helptools/i);
     expect(elements.length).toBeGreaterThan(0);
   });
 
@@ -66,7 +66,7 @@ describe('DonationView', () => {
   it('renders impact cards', () => {
     render(<DonationView />);
     expect(screen.getByText('Black Community Focus')).toBeInTheDocument();
-    expect(screen.getByText('100% Free & Open Access')).toBeInTheDocument();
+    expect(screen.getByText('Free Membership')).toBeInTheDocument();
     expect(screen.getByText('Interactive Sandboxes')).toBeInTheDocument();
   });
 
@@ -115,9 +115,9 @@ describe('DonationView', () => {
   it('copies Venmo handle on Venmo Copy button click', () => {
     window.alert = vi.fn();
     render(<DonationView />);
-    fireEvent.click(screen.getByText('Copy @ncsound'));
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('@ncsound');
-    expect(window.alert).toHaveBeenCalledWith('Venmo handle @ncsound copied to clipboard!');
+    fireEvent.click(screen.getByText('Copy Venmo handle'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('$helptools');
+    expect(window.alert).toHaveBeenCalledWith('Venmo handle $helptools copied to clipboard!');
   });
 
   it('shows all donation tier cards as radio buttons', () => {
@@ -187,10 +187,10 @@ describe('DonationView', () => {
     expect(checkedRadio.getAttribute('aria-checked')).toBe('true');
   });
 
-  it('shows Venmo external link to venmo.com/ncsound', () => {
+  it('shows Venmo external link to venmo.com/helptools', () => {
     render(<DonationView />);
     const venmoLink = screen.getByText('Open Venmo');
-    expect(venmoLink.closest('a')).toHaveAttribute('href', 'https://venmo.com/ncsound');
+    expect(venmoLink.closest('a')).toHaveAttribute('href', 'https://venmo.com/helptools');
   });
 
   it('shows CashApp external link to cash.app/$helptools', () => {
@@ -199,10 +199,10 @@ describe('DonationView', () => {
     expect(cashAppLink.closest('a')).toHaveAttribute('href', 'https://cash.app/$helptools');
   });
 
-  it('shows Instagram link to instagram.com/ncsound', () => {
+  it('shows Instagram link to instagram.com/overlay365', () => {
     render(<DonationView />);
     const instagramLink = screen.getByText('Visit Instagram Page');
-    expect(instagramLink.closest('a')).toHaveAttribute('href', 'https://instagram.com/ncsound');
+    expect(instagramLink.closest('a')).toHaveAttribute('href', 'https://instagram.com/overlay365');
   });
 
   it('shows CashApp donate link with correct amount', () => {
@@ -229,7 +229,7 @@ describe('DonationView', () => {
 
   it('shows description text', () => {
     render(<DonationView />);
-    expect(screen.getByText(/free and open-access/)).toBeInTheDocument();
+    expect(screen.getByText(/Membership is completely free/)).toBeInTheDocument();
   });
 
   it('shows founder speech label', () => {

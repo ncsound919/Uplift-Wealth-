@@ -9,10 +9,9 @@ import crypto from 'crypto';
 export const STRIPE_API = 'https://api.stripe.com/v1';
 
 export interface Plan {
-  id: 'free' | 'premium' | 'institutional';
+  id: 'free' | 'institutional';
   name: string;
   monthly: number;
-  priceId?: string;
   description: string;
   features: string[];
 }
@@ -20,30 +19,23 @@ export interface Plan {
 export const PLANS: Plan[] = [
   {
     id: 'free',
-    name: 'Free',
+    name: 'Free Member',
     monthly: 0,
-    description: 'Start building financial literacy today.',
-    features: ['Modules 0–5', 'Basic games & simulators', 'Community discussions', 'Wealth Building chapters'],
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    monthly: 10,
-    description: 'Everything, including expert modules and certificates.',
-    features: ['All 15 modules', 'Certificates of completion', 'Review cards (spaced repetition)', 'Early access to new tools'],
+    description: 'Complete access to the full curriculum — no paywalls.',
+    features: ['All 16 modules', 'Games & simulators', 'Community discussions & groups', 'Wealth Building chapters', 'Certificates of completion'],
   },
   {
     id: 'institutional',
     name: 'Institutional',
     monthly: 99,
-    description: 'For classrooms, HBCU chapters, and community orgs.',
-    features: ['Up to 50 seats', 'Cohort & classroom management', 'Teacher roster analytics', 'Priority support'],
+    description: 'For classrooms, HBCU chapters, churches, and community orgs.',
+    features: ['Up to 50 seats', 'Group & classroom management', 'Teacher roster analytics', 'Classroom curriculum guide (PDF)', 'Priority support'],
   },
 ];
 
 /** Stripe price IDs are read from env at call time (not import time). */
-export function priceIdFor(tier: 'premium' | 'institutional'): string | undefined {
-  return tier === 'premium' ? process.env.STRIPE_PRICE_PREMIUM : process.env.STRIPE_PRICE_INSTITUTIONAL;
+export function priceIdFor(tier: 'institutional'): string | undefined {
+  return process.env.STRIPE_PRICE_INSTITUTIONAL;
 }
 
 export function isStripeConfigured(): boolean {
@@ -79,9 +71,9 @@ export interface CheckoutResult {
   sessionId: string;
 }
 
-/** Create a subscription Checkout session for the given tier. */
+/** Create a subscription Checkout session for the institutional tier. */
 export async function createCheckoutSession(input: {
-  tier: 'premium' | 'institutional';
+  tier: 'institutional';
   email: string;
   successUrl: string;
   cancelUrl: string;

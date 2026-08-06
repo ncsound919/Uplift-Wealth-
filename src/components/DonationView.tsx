@@ -12,7 +12,8 @@ import {
   ArrowLeft,
   Video,
   CreditCard,
-  Mail
+  Mail,
+  Globe
 } from 'lucide-react';
 import { YouTubeVideoPlayer } from './YouTubeVideoPlayer';
 
@@ -178,7 +179,7 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
         </h1>
 
         <p className="text-sm md:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          This platform is 100% free and open-access. We build interactive financial simulators, credit underwriting labs, and market tools to empower the Black community and close the racial wealth gap through technical education.
+          Membership is completely free — every module, game, simulator, and certificate, no paywalls. We build interactive financial tools to empower the Black community and close the racial wealth gap through technical education. The only paid plan is institutional, for classrooms, HBCU chapters, churches, and community organizations.
         </p>
 
         {/* Support Channels Grid: CashApp/Chime, Venmo, Instagram */}
@@ -217,24 +218,24 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
           <div className="bg-slate-950/90 border border-blue-500/40 rounded-2xl p-5 shadow-xl space-y-3 flex flex-col justify-between">
             <div className="space-y-1">
               <span className="text-xs font-black text-blue-400 uppercase tracking-widest block">Venmo Handle</span>
-              <span className="text-2xl font-black text-white block tracking-tight">@ncsound</span>
+              <span className="text-2xl font-black text-white block tracking-tight">$helptools</span>
               <p className="text-xs text-slate-400 leading-tight">Support directly on Venmo for community projects.</p>
             </div>
 
             <div className="flex flex-col gap-2 pt-2">
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText('@ncsound');
-                  alert('Venmo handle @ncsound copied to clipboard!');
+                  navigator.clipboard.writeText('$helptools');
+                  alert('Venmo handle $helptools copied to clipboard!');
                 }}
                 className="w-full px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
               >
                 <Copy className="w-3.5 h-3.5" />
-                <span>Copy @ncsound</span>
+                <span>Copy Venmo handle</span>
               </button>
 
               <a
-                href="https://venmo.com/ncsound"
+                href="https://venmo.com/helptools"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-800 transition-colors"
@@ -249,13 +250,13 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
           <div className="bg-slate-950/90 border border-pink-500/40 rounded-2xl p-5 shadow-xl space-y-3 flex flex-col justify-between">
             <div className="space-y-1">
               <span className="text-xs font-black text-pink-400 uppercase tracking-widest block">Instagram Contact</span>
-              <span className="text-2xl font-black text-white block tracking-tight">@ncsound</span>
-              <p className="text-xs text-slate-400 leading-tight">Connect with the founder directly on Instagram for updates.</p>
+              <span className="text-2xl font-black text-white block tracking-tight">@overlay365</span>
+              <p className="text-xs text-slate-400 leading-tight">Follow @overlay365 for updates across the Overlay ecosystem.</p>
             </div>
 
             <div className="pt-2">
               <a
-                href="https://instagram.com/ncsound"
+                href="https://instagram.com/overlay365"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:opacity-90 text-white font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:scale-102 active:scale-95"
@@ -371,8 +372,8 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
 
         <ImpactCard
           icon={BookOpen}
-          title="100% Free & Open Access"
-          description="No subscriptions, no hidden paywalls, and no corporate advertising. Every student, builder, and organizer gets complete access to all 12 modules."
+          title="Free Membership"
+          description="No paywalls, no corporate advertising. Every student and builder gets complete access to all 16 modules and tools. Institutional classroom plans are the only paid tier."
           colorClass="bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400"
         />
 
@@ -401,8 +402,32 @@ export function DonationView({ onBackToDashboard }: DonationViewProps) {
           </div>
           <div>
             <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Instagram</p>
-            <a href="https://instagram.com/tap919" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">@tap919</a>
+            <a href="https://instagram.com/overlay365" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">@overlay365</a>
           </div>
+        </div>
+      </div>
+
+      {/* Parent site promotion */}
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/60 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full bg-indigo-500/10 blur-2xl" />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-wider">
+              <Globe className="w-3.5 h-3.5" /> Overlay365
+            </div>
+            <h3 className="text-lg font-black">The Overlay ecosystem</h3>
+            <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+              Overlay Wealth is one part of Overlay365. Visit <strong>Overlay365.com</strong> to explore Health and Justice — the full ecosystem built to uplift our communities.
+            </p>
+          </div>
+          <a
+            href="https://overlay365.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-slate-900 font-black text-xs uppercase tracking-wider hover:bg-slate-100 transition-colors"
+          >
+            Visit Overlay365.com <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
       </div>
 

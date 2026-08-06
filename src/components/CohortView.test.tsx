@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CohortView } from './CohortView';
 
@@ -25,7 +25,7 @@ describe('CohortView', () => {
   it('shows the empty state', async () => {
     mocks.listMyCohorts.mockResolvedValue({ cohorts: [] });
     render(<CohortView currentUserId="u1" />);
-    expect(await screen.findByText(/not in any cohorts yet/i)).toBeInTheDocument();
+    expect(await screen.findByText(/not in any groups yet/i)).toBeInTheDocument();
   });
 
   it('lists my cohorts', async () => {
@@ -39,7 +39,7 @@ describe('CohortView', () => {
     mocks.listMyCohorts.mockResolvedValue({ cohorts: [] });
     mocks.createCohort.mockResolvedValue({ success: true, cohort: cohort() });
     render(<CohortView currentUserId="u1" />);
-    await screen.findByText(/not in any cohorts yet/i);
+    await screen.findByText(/not in any groups yet/i);
     fireEvent.click(screen.getByRole('button', { name: /\+ New Cohort/i }));
     fireEvent.change(screen.getByPlaceholderText(/Cohort name/i), { target: { value: 'HBCU Chapter' } });
     fireEvent.click(screen.getByRole('button', { name: /HBCU \/ Campus Chapter/i }));
@@ -51,7 +51,7 @@ describe('CohortView', () => {
     mocks.listMyCohorts.mockResolvedValue({ cohorts: [] });
     mocks.joinCohortByCode.mockResolvedValue({ success: true, cohort: cohort() });
     render(<CohortView currentUserId="u1" />);
-    await screen.findByText(/not in any cohorts yet/i);
+    await screen.findByText(/not in any groups yet/i);
     fireEvent.change(screen.getByPlaceholderText(/invite code/i), { target: { value: 'ab12cd' } });
     fireEvent.click(screen.getByRole('button', { name: /join/i }));
     await waitFor(() => expect(mocks.joinCohortByCode).toHaveBeenCalledWith('ab12cd'));

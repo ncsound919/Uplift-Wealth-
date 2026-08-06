@@ -284,6 +284,12 @@ let isWriting = false;
 let writePending = false;
 
 function saveDatabase() {
+  // On serverless (Vercel) the filesystem is ephemeral/read-only — Postgres is
+  // the only durable store, so skip the file write entirely (immediate sync).
+  if (process.env.VERCEL === '1') {
+    syncToPostgres();
+    return;
+  }
   if (isWriting) {
     writePending = true;
     return;
@@ -1415,8 +1421,8 @@ app.get('/api/billing/status', authenticate, (req: AuthenticatedRequest, res: Re
 
 app.post('/api/billing/checkout', authenticate, async (req: AuthenticatedRequest, res: Response) => {
   const { tier } = req.body || {};
-  if (tier !== 'premium' && tier !== 'institutional') {
-    return res.status(400).json({ error: 'Choose premium or institutional.' });
+  if (tier !== 'institutional') {
+    return res.status(400).json({ error: 'Institutional is the only paid plan.' });
   }
   const user = db.users[req.user!.id];
   if (!user?.email) return res.status(400).json({ error: 'Add an email to your account before upgrading.' });
@@ -1466,7 +1472,8 @@ app.post('/api/billing/webhook', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid payload.' });
   }
 
-  const tier = event.data?.object?.metadata?.tier === 'institutional' ? 'institutional' : 'premium';
+  // Institutional is the only paid tier; everything else is free membership.
+  const tier = 'institutional';
   if (event.type === 'checkout.session.completed') {
     const object = event.data?.object;
     const email = object?.id ? '' : '';
