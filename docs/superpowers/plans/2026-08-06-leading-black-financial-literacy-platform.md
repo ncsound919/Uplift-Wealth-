@@ -1,4 +1,10 @@
-﻿# Overlay Wealth â€” Road to the Leading Black Financial Literacy Platform
+﻿# Overlay Wealth — Road to the Leading Black Financial Literacy Platform
+
+> **STATUS (2026-08-06): Phases 0–5 implemented on the `phase0-trust` branch.**
+> Phase 0 (trust/durability), 1 (measure), 2 (community), 3 (creators/CMS),
+> 4 (institutional & revenue), and 5 (reach) are code-complete with tests.
+> Remaining work is operational: provision Postgres + Stripe + PostHog +
+> Resend + Sentry, set secrets, and deploy (see `docs/deployment-checklist.md`).
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
