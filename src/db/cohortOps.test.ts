@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { createCohort, joinCohort, leaveCohort, deleteCohort, listMyCohorts, cohortLeaderboard, getCohort } from './cohortOps';
+import { createCohort, joinCohort, leaveCohort, deleteCohort, listMyCohorts, cohortLeaderboard, cohortRoster, getCohort } from './cohortOps';
 import type { DatabaseSchema } from './types';
 
 function makeDb(): DatabaseSchema {
@@ -93,5 +93,35 @@ describe('cohortOps', () => {
     expect(deleteCohort(db, c.id, 'u1', 'student').deleted).toBe(true);
     const c2 = createCohort(db, { ownerId: 'u1', name: 'Other' });
     expect(deleteCohort(db, c2.id, 'admin', 'admin').deleted).toBe(true);
+  });
+
+  it('caps free classes at 10 student seats', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Circle' });
+    for (let i = 0; i < 10; i++) joinCohort(db, c.id, `s${i}`);
+    expect(() => joinCohort(db, c.id, 'overflow')).toThrow(/full \(10 seats\)/);
+  });
+
+  it('allows 50 seats for an institutional owner', () => {
+    const db = makeDb();
+    db.users.u1.subscriptionTier = 'institutional';
+    const c = createCohort(db, { ownerId: 'u1', name: 'Class' });
+    for (let i = 0; i < 50; i++) joinCohort(db, c.id, `s${i}`);
+    expect(() => joinCohort(db, c.id, 'overflow')).toThrow(/full \(50 seats\)/);
+  });
+
+  it('excludes the owner from the student roster', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Class' });
+    joinCohort(db, c.id, 'u2');
+    const { roster } = cohortRoster(db, c.id, 'u1', 'student');
+    expect(roster.map((m) => m.id)).toEqual(['u2']);
+  });
+
+  it('only the owner can view the roster', () => {
+    const db = makeDb();
+    const c = createCohort(db, { ownerId: 'u1', name: 'Class' });
+    joinCohort(db, c.id, 'u2');
+    expect(() => cohortRoster(db, c.id, 'u2', 'student')).toThrow(/owner/i);
   });
 });

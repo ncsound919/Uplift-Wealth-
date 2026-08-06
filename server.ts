@@ -1258,6 +1258,17 @@ app.get('/api/cohorts/:id/roster', authenticate, (req: AuthenticatedRequest, res
   }
 });
 
+// Institution dashboard: owned cohorts + rosters in one round-trip.
+app.get('/api/institution/classes', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const classes = listMyCohorts(db, req.user!.id)
+    .filter((c) => c.ownerId === req.user!.id)
+    .map((cohort) => ({
+      cohort,
+      roster: cohortRoster(db, cohort.id, req.user!.id, req.user!.role).roster,
+    }));
+  res.json({ classes });
+});
+
 // 6.7.8 NOTIFICATIONS (in-app + optional email)
 function notify(userId: string, type: 'reply' | 'cohort' | 'streak' | 'system', title: string, message: string) {
   if (!userId || !db.notifications) return;

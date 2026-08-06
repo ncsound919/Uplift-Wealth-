@@ -53,10 +53,23 @@ export function createCohort(
   return cohort;
 }
 
+export const FREE_SEAT_LIMIT = 10;
+export const INSTITUTIONAL_SEAT_LIMIT = 50;
+
+/** Seat capacity for a class based on its owner's billing tier. */
+export function cohortSeatLimit(ownerTier?: string): number {
+  return ownerTier === 'institutional' ? INSTITUTIONAL_SEAT_LIMIT : FREE_SEAT_LIMIT;
+}
+
 export function joinCohort(db: DatabaseSchema, cohortId: string, userId: string): Cohort {
   const cohort = db.cohorts.find((c) => c.id === cohortId);
   if (!cohort) throw new Error('Cohort not found.');
   if (cohort.memberIds.includes(userId)) throw new Error('You are already a member.');
+  const students = cohort.memberIds.filter((id) => id !== cohort.ownerId).length;
+  const limit = cohortSeatLimit(db.users[cohort.ownerId]?.subscriptionTier);
+  if (students >= limit) {
+    throw new Error(`This class is full (${limit} seats). Ask the group owner to upgrade to Institutional for up to ${INSTITUTIONAL_SEAT_LIMIT} seats.`);
+  }
   cohort.memberIds.push(userId);
   return cohort;
 }
@@ -110,7 +123,7 @@ export function setCohortCurriculum(
   return cohort;
 }
 
-/** Per-member completion of the cohort's assigned modules (teacher roster). */
+/** Per-member completion of the cohort's assigned modules (student roster, owner excluded). */
 export function cohortRoster(
   db: DatabaseSchema,
   cohortId: string,
@@ -121,16 +134,17 @@ export function cohortRoster(
   if (!cohort) throw new Error('Cohort not found.');
   const isAdmin = callerRole === 'admin' || callerRole === 'institution';
   if (!isAdmin && cohort.ownerId !== callerId) throw new Error('Only the cohort owner can view the roster.');
-  const memberIds = new Set([...cohort.memberIds, cohort.ownerId]);
-  const roster = [...memberIds].map((id) => {
-    const p = db.progress[id];
-    return {
-      id,
-      name: db.users[id]?.name || 'Scholar',
-      completedModules: p?.completedModules ?? [],
-      xp: p?.xp ?? 0,
-    };
-  });
+  const roster = cohort.memberIds
+    .filter((id) => id !== cohort.ownerId)
+    .map((id) => {
+      const p = db.progress[id];
+      return {
+        id,
+        name: db.users[id]?.name || 'Scholar',
+        completedModules: p?.completedModules ?? [],
+        xp: p?.xp ?? 0,
+      };
+    });
   return { roster };
 }
 

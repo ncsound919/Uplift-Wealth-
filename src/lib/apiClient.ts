@@ -492,6 +492,10 @@ class ApiClient {
     return this.request<{ roster: Array<{ id: string; name: string; completedModules: string[]; xp: number }> }>(`/api/cohorts/${encodeURIComponent(id)}/roster`);
   }
 
+  public listInstitutionClasses() {
+    return this.request<{ classes: Array<{ cohort: CohortView; roster: Array<{ id: string; name: string; completedModules: string[]; xp: number }> }> }>('/api/institution/classes');
+  }
+
   // Notifications
   public getNotifications() {
     return this.request<{ notifications: NotificationView[]; unreadCount: number }>('/api/notifications');

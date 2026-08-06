@@ -21,27 +21,15 @@ export function InstitutionDashboard({ currentUserId, currentTier }: { currentUs
   const [classes, setClasses] = useState<ClassView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const seats = currentTier === 'institutional' ? 50 : 10;
 
   const load = useCallback(() => {
     setLoading(true);
-    apiClient.listMyCohorts()
-      .then(async (res) => {
-        const owned = res.cohorts.filter((c) => c.ownerId === currentUserId);
-        const views: ClassView[] = [];
-        for (const cohort of owned) {
-          try {
-            const r = await apiClient.getCohortRoster(cohort.id);
-            views.push({ cohort, roster: r.roster });
-          } catch {
-            views.push({ cohort, roster: [] });
-          }
-        }
-        setClasses(views);
-        setError(null);
-      })
+    apiClient.listInstitutionClasses()
+      .then((res) => { setClasses(res.classes); setError(null); })
       .catch(() => setError('Could not load your institution dashboard.'))
       .finally(() => setLoading(false));
-  }, [currentUserId]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
@@ -78,7 +66,7 @@ export function InstitutionDashboard({ currentUserId, currentTier }: { currentUs
       {currentTier !== 'institutional' && (
         <div className="rounded-2xl border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="text-sm text-emerald-800 dark:text-emerald-300">
-            <strong>Tip:</strong> upgrading to Institutional unlocks unlimited classes and roster analytics for up to 50 seats.
+            <strong>Tip:</strong> free classes hold up to 10 students. Institutional upgrades each class to <strong>50 seats</strong> for \$99/mo.
           </div>
           <button onClick={() => navigate('/institutions')} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-colors shrink-0">
             View Institutional pricing
@@ -108,7 +96,7 @@ export function InstitutionDashboard({ currentUserId, currentTier }: { currentUs
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center"><BookOpen className="w-5 h-5" /></div>
                   <div>
                     <div className="text-sm font-black text-slate-900 dark:text-white">{c.cohort.name}</div>
-                    <div className="text-[11px] text-slate-400 capitalize">{c.cohort.type.replace('_', ' ')} · {c.roster.length} students · invite code <span className="font-mono font-bold">{c.cohort.inviteCode}</span></div>
+                    <div className="text-[11px] text-slate-400 capitalize">{c.cohort.type.replace('_', ' ')} · {c.roster.length} students · {c.roster.length}/{seats} seats · invite code <span className="font-mono font-bold">{c.cohort.inviteCode}</span></div>
                   </div>
                 </div>
                 <button onClick={() => navigate('/cohorts')} className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Open group</button>
