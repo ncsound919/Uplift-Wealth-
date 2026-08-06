@@ -303,7 +303,7 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
       customers: answers.customers || customInput || null,
     });
     return (
-      <div className="relative z-10 bg-white dark:bg-slate-950/60 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800">
+      <div className="relative z-10 bg-white dark:bg-slate-950/60 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl mx-auto">
         <div className="flex items-center gap-2 mb-5">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <Wand2 className="w-4 h-4" />
@@ -384,7 +384,7 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
   const q = questions[step];
 
   return (
-    <div className="relative z-10 bg-white dark:bg-slate-950/60 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800">
+    <div className="relative z-10 bg-white dark:bg-slate-950/60 p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl mx-auto">
       {/* Progress */}
       <div className="flex items-center gap-2 mb-5">
         {questions.map((_, idx) => (
@@ -397,7 +397,7 @@ export function BusinessQuickStart({ onComplete }: BusinessQuickStartProps) {
           />
         ))}
       </div>
-      <div className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-3">
+      <div className="text-[10px] font-mono font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-3">
         Question {step + 1} of {questions.length}
       </div>
 

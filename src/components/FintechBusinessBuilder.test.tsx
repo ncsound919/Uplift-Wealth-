@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
-import { FintechBusinessBuilder } from './FintechBusinessBuilder';
+import type { ComponentProps } from 'react';
+import { FintechBusinessBuilder as RealFintechBusinessBuilder } from './FintechBusinessBuilder';
 
 vi.mock('motion/react', () => {
   const Div = require('react').forwardRef(({ children, ...props }: any, ref: any) => <div ref={ref} {...props}>{children}</div>);
   Div.displayName = 'MotionDiv';
   return { motion: new Proxy({}, { get: () => Div }), AnimatePresence: ({ children }: any) => <div>{children}</div> };
 });
+
+// The product now defaults to the simplified QuickStart flow. These existing
+// tests target the legacy 12-step Assembly Line, so render it explicitly in
+// builder mode (the product hides it behind the "Advanced" link).
+function FintechBusinessBuilder(props: ComponentProps<typeof RealFintechBusinessBuilder>) {
+  return <RealFintechBusinessBuilder initialMode="builder" {...props} />;
+}
 
 function enterBizName(name = 'Velo') {
   const input = screen.getByPlaceholderText(/e.g. Velo, Bold, Aura/i);
@@ -49,7 +57,7 @@ function advanceMounted(ticks: number) {
 function finishSimAfterUnmount(onAwardXp: any) {
   const { unmount } = render(<FintechBusinessBuilder onAwardXp={onAwardXp} />);
   goToDossier();
-  fireEvent.click(screen.getByText(/Run stress test simulator/i));
+  fireEvent.click(screen.getByText(/Run stress test/i));
   unmount();
   act(() => { vi.advanceTimersByTime(700 * 20); });
 }
@@ -89,9 +97,9 @@ describe('FintechBusinessBuilder', () => {
     expect(screen.getAllByText(/The Basics/i).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders badge shelf area', () => {
+  it('hides the badge shelf in the simplified builder', () => {
     render(<FintechBusinessBuilder />);
-    expect(screen.getByText(/ACTIVE UNLOCKS/i)).toBeInTheDocument();
+    expect(screen.queryByText(/ACTIVE UNLOCKS/i)).not.toBeInTheDocument();
   });
 
   it('accepts optional props', () => {
@@ -110,13 +118,13 @@ describe('FintechBusinessBuilder', () => {
     render(<FintechBusinessBuilder />);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     expect(screen.getByText(/What problem does it solve/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /back/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }));
     expect(screen.getByText(/What type of business are you building/i)).toBeInTheDocument();
   });
 
   it('disables back button on step 1', () => {
     render(<FintechBusinessBuilder />);
-    expect(screen.getByRole('button', { name: /back/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /^back$/i })).toBeDisabled();
   });
 
   it('navigates to step 4 via milestone click (adjacent)', () => {
@@ -388,36 +396,25 @@ describe('FintechBusinessBuilder', () => {
     expect(btn.className).toContain('bg-indigo-600');
   });
 
-  // ---- STEP 12: DOSSIER ----
-  it('shows venture dossier on step 12', () => {
+  // ---- STEP 12: COMPLETION SUMMARY ----
+  it('shows the completion summary on step 12', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
+    expect(screen.getByText('Your plan is ready')).toBeInTheDocument();
+    expect(screen.getByText(/Download My Complete Plan/i)).toBeInTheDocument();
   });
 
-  it('switches dossier tabs on step 12', () => {
+  it('shows the download and start-over buttons on the step 12 summary', () => {
     render(<FintechBusinessBuilder />);
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('4. FinCEN BOI & Tax Calendar'));
-    expect(screen.getByText(/FinCEN Beneficial Ownership/i)).toBeInTheDocument();
-  });
-
-  it('toggles BOI checkbox in compliance tab', () => {
-    render(<FintechBusinessBuilder />);
-    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName();
-  enterFounder();
-    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('4. FinCEN BOI & Tax Calendar'));
-    const checkbox = screen.getByRole('checkbox');
-    fireEvent.click(checkbox);
-    expect(checkbox).toBeChecked();
+    expect(screen.getByText(/Download My Complete Plan/i)).toBeInTheDocument();
+    expect(screen.getByText(/Start over/i)).toBeInTheDocument();
   });
 
   it('shows stress test button on step 12', () => {
@@ -426,7 +423,7 @@ describe('FintechBusinessBuilder', () => {
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    expect(screen.getByText(/Run stress test simulator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Run stress test/i)).toBeInTheDocument();
   });
 
   // ---- AWARD XP CALLBACK ----
@@ -458,7 +455,7 @@ describe('FintechBusinessBuilder', () => {
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
+    expect(screen.getByText('Your plan is ready')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Reset Builder'));
     expect(screen.getByText(/What type of business are you building/i)).toBeInTheDocument();
   });
@@ -469,59 +466,19 @@ describe('FintechBusinessBuilder', () => {
     expect(screen.queryByText('Reset Builder')).not.toBeInTheDocument();
   });
 
-  // ---- BADGES ----
-  it('unlocks Compliance Guard badge by default (KYC + LLC)', () => {
-    render(<FintechBusinessBuilder />);
-    expect(screen.getByText(/Compliance Guard/i)).toBeInTheDocument();
-  });
-
-  it('unlocks VC Catalyst badge with C-Corp + Delaware + Seed + Vesting', () => {
-    render(<FintechBusinessBuilder />);
-    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName();
-  enterFounder();
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/C-Corporation \(Delaware standard\)/).closest('button')!);
-    for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    expect(screen.getByText(/VC Catalyst/i)).toBeInTheDocument();
-  });
-
-  it('unlocks TAM Commander badge with large reach', () => {
-    render(<FintechBusinessBuilder />);
-    for (let i = 0; i < 2; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    const slider = document.querySelector('input[type="range"]') as HTMLInputElement;
-    fireEvent.change(slider, { target: { value: '500000' } });
-    expect(screen.getByText(/TAM Commander/i)).toBeInTheDocument();
-  });
-
-  it('unlocks Sovereign Bootstrapper badge', () => {
-    render(<FintechBusinessBuilder />);
-    for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName();
-  enterFounder();
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Limited Liability Company \(LLC\)/).closest('button')!);
-    for (let i = 0; i < 4; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    const soloFounderBtn = screen.getByText('Solo founder (bootstrap)');
-    fireEvent.click(soloFounderBtn);
-    expect(screen.getByText(/Sovereign Bootstrapper/i)).toBeInTheDocument();
-  });
-
   // ---- SIMULATION MODAL ----
   function runSimTest() {
     for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
   }
 
   it('opens simulation modal on stress test click', async () => {
     render(<FintechBusinessBuilder />);
     runSimTest();
-    expect(screen.getByText(/Run stress test simulator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Run stress test/i)).toBeInTheDocument();
   });
 
   it('shows simulation modal opens', () => {
@@ -536,7 +493,7 @@ describe('FintechBusinessBuilder', () => {
     enterBizName();
   enterFounder();
     for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    act(() => { fireEvent.click(screen.getByText(/Run stress test simulator/i)); });
+    act(() => { fireEvent.click(screen.getByText(/Run stress test/i)); });
     expect(screen.getByText(/FinTech Sandbox Stress Test Simulator/i)).toBeInTheDocument();
     globalThis.setInterval = originalInterval;
     vi.useRealTimers();
@@ -552,7 +509,7 @@ describe('FintechBusinessBuilder', () => {
       const nextBtn = screen.queryByRole('button', { name: /next step/i });
       if (nextBtn && !nextBtn.hasAttribute('disabled')) fireEvent.click(nextBtn);
     }
-    expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
+    expect(screen.getByText('Your plan is ready')).toBeInTheDocument();
   });
 
   it('next button is disabled when business name is short on step 6', () => {
@@ -594,100 +551,9 @@ describe('FintechBusinessBuilder', () => {
     expect(milestone1.className).toContain('bg-blue-600');
   });
 
-  it('telemetry hud renders with legitimacy score', () => {
+  it('does not render the legacy telemetry hud', () => {
     render(<FintechBusinessBuilder />);
-    expect(screen.getByText(/Legitimacy/)).toBeInTheDocument();
-    expect(screen.getByText(/80%/)).toBeInTheDocument();
-  });
-
-  // ---- ADDITIONAL COVERAGE: REVENUE MODEL BRANCHES ----
-  it('computes transactional take-rate revenue when Transactional monetization is selected', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(4);
-    const btn = screen.getByText('Transactional Take-Rate (bps)').closest('button')!;
-    fireEvent.click(btn);
-    expect(btn.className).toContain('border-blue-500');
-    // txVolume(150000)*0.015*12 + reachUsers(10000)*3*12 = 387,000
-    expect(screen.getByText('$387,000')).toBeInTheDocument();
-  });
-
-  it('computes flat-rate revenue for AUM monetization model', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(4);
-    const btn = screen.getByText('Advising Asset Under Management (AUM)').closest('button')!;
-    fireEvent.click(btn);
-    // default flat rate: reachUsers(10000)*15*12 = 1,800,000
-    expect(screen.getByText('$1,800,000')).toBeInTheDocument();
-  });
-
-  // ---- ADDITIONAL COVERAGE: FUNDABILITY GRADE BANDS ----
-  it('shows S grade and boosts score when beachhead reach exceeds 500K', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(2);
-    const slider = document.querySelector('input[type="range"]') as HTMLInputElement;
-    fireEvent.change(slider, { target: { value: '600000' } });
-    expect(screen.getByText('S ★')).toBeInTheDocument();
-  });
-
-  it('shows B+ grade with bootstrapped funding, LLC and no vesting', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(4);
-    fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName('AB');
-  enterFounder();
-    clickNext(5); // steps 7,8,9,10,11 (LLC/Delaware/virtual/default apis)
-    fireEvent.click(screen.getByText('Slicing Split').closest('button')!);
-    expect(screen.getByText('B+')).toBeInTheDocument();
-  });
-
-  it('shows B grade when legitimacy is low but co-founder partnership is used', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(4);
-    fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName('AB');
-  enterFounder();
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Solo Proprietorship/).closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Home residential address/i).closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('Persona KYC / Alloy AML').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('Slicing Split').closest('button')!);
-    expect(screen.getByText('B')).toBeInTheDocument();
-  });
-
-  it('shows C+ grade when legitimacy is low and running solo', () => {
-    render(<FintechBusinessBuilder />);
-    clickNext(4);
-    fireEvent.click(screen.getByText('Sovereign Bootstrapper').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName('AB');
-  enterFounder();
-    clickNext(3); // steps 7,8,9
-    fireEvent.click(screen.getByText(/Home residential address/i).closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('Persona KYC / Alloy AML').closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText('Solo founder (bootstrap)'));
-    fireEvent.click(screen.getByText('Slicing Split').closest('button')!);
-    expect(screen.getByText('C+')).toBeInTheDocument();
-  });
-
-  // ---- ADDITIONAL COVERAGE: BADGES ----
-  it('unlocks Web3 Trailblazer badge with stablecoin lane and Web3 API', () => {
-    render(<FintechBusinessBuilder />);
-    fireEvent.click(screen.getByRole('button', { name: /stablecoin infrastructure/i }));
-    clickNext(4);
-    fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    enterBizName();
-  enterFounder();
-    clickNext(4); // steps 7,8,9,10
-    fireEvent.click(screen.getByText('Circle Mint SDK / Coinbase API').closest('button')!);
-    expect(screen.getByText(/Web3 Trailblazer/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Assembly Line Telemetry/i)).not.toBeInTheDocument();
   });
 
   // ---- ADDITIONAL COVERAGE: CUSTOM INPUTS ----
@@ -708,16 +574,6 @@ describe('FintechBusinessBuilder', () => {
     expect((sliders[1] as HTMLInputElement).value).toBe('500000');
   });
 
-  // ---- ADDITIONAL COVERAGE: PRINT DOSSIER ----
-  it('calls window.print from the pitch deck tab', () => {
-    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => {});
-    render(<FintechBusinessBuilder />);
-    goToDossier();
-    fireEvent.click(screen.getByText(/Print Dossier/i));
-    expect(printSpy).toHaveBeenCalled();
-    printSpy.mockRestore();
-  });
-
   // ---- ADDITIONAL COVERAGE: SIMULATOR LOG PATHS ----
   it('funds a Delaware C-Corp seed round during the sim', () => {
     vi.useFakeTimers();
@@ -728,7 +584,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByText(/C-Corporation \(Delaware standard\)/).closest('button')!);
     clickNext(5); // steps 8,9,10,11,12
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(12);
     expect(screen.getByText(/FUNDED: Pre-Seed SAFE Note fully signed/i)).toBeInTheDocument();
     vi.useRealTimers();
@@ -745,7 +601,7 @@ describe('FintechBusinessBuilder', () => {
     vi.useFakeTimers();
     render(<FintechBusinessBuilder />);
     goToDossier();
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(15);
     expect(screen.getByText(/SUCCESS: Active KYC\/Fraud prevention rails/i)).toBeInTheDocument();
     expect(screen.getByText(/VENTURE DECLARED STABLE/i)).toBeInTheDocument();
@@ -764,7 +620,7 @@ describe('FintechBusinessBuilder', () => {
     clickNext(5); // steps 7,8,9,10,11
     fireEvent.click(screen.getByText('In-app Referral Dividends').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(12);
     expect(screen.getByText(/REASSURING: Focusing purely on cashflow collection/i)).toBeInTheDocument();
     expect(screen.getByText(/Consistent, moderate organic accounts onboarded/i)).toBeInTheDocument();
@@ -780,7 +636,7 @@ describe('FintechBusinessBuilder', () => {
     clickNext(5); // steps 7,8,9,10,11
     fireEvent.click(screen.getByText('Viral Web Widgets & SEO').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(12);
     expect(screen.getByText(/Financial calculator SEO pages lock in top rank/i)).toBeInTheDocument();
     vi.useRealTimers();
@@ -796,7 +652,7 @@ describe('FintechBusinessBuilder', () => {
     fireEvent.click(screen.getByText('Persona KYC / Alloy AML').closest('button')!);
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
     fireEvent.click(screen.getByRole('button', { name: /next step/i }));
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(15);
     expect(screen.getByText(/No active compliance or anti-money-laundering API rails/i)).toBeInTheDocument();
     expect(screen.getByText(/VENTURE VULNERABLE/i)).toBeInTheDocument();
@@ -818,7 +674,7 @@ describe('FintechBusinessBuilder', () => {
     const completeCapstone = vi.fn();
     render(<FintechBusinessBuilder onAwardXp={awardXp} onCompleteCapstone={completeCapstone} />);
     goToDossier();
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     expect(screen.getByText(/Initializing sandbox simulator/i)).toBeInTheDocument();
     advanceMounted(15);
     // Outcome panel is now reachable: the finish branch ran after the final log.
@@ -834,24 +690,22 @@ describe('FintechBusinessBuilder', () => {
     vi.useFakeTimers();
     render(<FintechBusinessBuilder />);
     goToDossier();
-    fireEvent.click(screen.getByText(/Run stress test simulator/i));
+    fireEvent.click(screen.getByText(/Run stress test/i));
     advanceMounted(15);
     fireEvent.click(screen.getByText('Close'));
     expect(screen.queryByText(/FinTech Sandbox Stress Test Simulator/i)).not.toBeInTheDocument();
     vi.useRealTimers();
   });
 
-  // ---- QUICKSTART WIZARD ----
-  it('opens QuickStart mode and shows the first question', () => {
-    render(<FintechBusinessBuilder />);
-    fireEvent.click(screen.getByRole('button', { name: /quickstart/i }));
+  // ---- QUICKSTART WIZARD (DEFAULT MODE) ----
+  it('lands on the QuickStart flow by default', () => {
+    render(<RealFintechBusinessBuilder />);
     expect(screen.getByText(/What kind of business are you starting/i)).toBeInTheDocument();
     expect(screen.getByText(/Question 1 of 8/i)).toBeInTheDocument();
   });
 
-  it('runs the full QuickStart flow and lands on the pre-filled dossier', async () => {
-    render(<FintechBusinessBuilder />);
-    fireEvent.click(screen.getByRole('button', { name: /quickstart/i }));
+  it('runs the full QuickStart flow and lands on the summary', async () => {
+    render(<RealFintechBusinessBuilder />);
 
     // Q1: business type
     fireEvent.click(screen.getByRole('button', { name: /Fintech \/ Digital Finance/i }));
@@ -888,20 +742,20 @@ describe('FintechBusinessBuilder', () => {
     // Reveal phase
     expect(screen.getByText(/Connecting the dots/i)).toBeInTheDocument();
 
-    // Wait for reveal to finish, then click through to the dossier.
+    // Wait for reveal to finish, then click through to the summary.
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /view my plan/i })).toBeInTheDocument();
     }, { timeout: 5000 });
     fireEvent.click(screen.getByRole('button', { name: /view my plan/i }));
 
-    // Landed on the pre-filled dossier.
-    expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
+    // Landed on the calm summary with the business name pre-filled.
+    expect(screen.getByText('Your plan is ready')).toBeInTheDocument();
+    expect(screen.getByText(/Download My Complete Plan/i)).toBeInTheDocument();
     expect(screen.getAllByText(/NiaPay/i).length).toBeGreaterThanOrEqual(1);
   }, 15000);
 
   it('lets the user skip all QuickStart questions', async () => {
-    render(<FintechBusinessBuilder />);
-    fireEvent.click(screen.getByRole('button', { name: /quickstart/i }));
+    render(<RealFintechBusinessBuilder />);
 
     for (let i = 0; i < 8; i++) {
       fireEvent.click(screen.getByRole('button', { name: /skip/i }));
@@ -913,14 +767,15 @@ describe('FintechBusinessBuilder', () => {
       expect(screen.getByRole('button', { name: /view my plan/i })).toBeInTheDocument();
     }, { timeout: 5000 });
     fireEvent.click(screen.getByRole('button', { name: /view my plan/i }));
-    expect(screen.getByText('Venture Dossier Unlocked!')).toBeInTheDocument();
+    expect(screen.getByText('Your plan is ready')).toBeInTheDocument();
   }, 15000);
 
-  it('switches from QuickStart back to Step-by-Step mode', () => {
-    render(<FintechBusinessBuilder />);
-    fireEvent.click(screen.getByRole('button', { name: /quickstart/i }));
+  it('switches from QuickStart to the Advanced 12-step Assembly Line', () => {
+    render(<RealFintechBusinessBuilder />);
     expect(screen.getByText(/What kind of business are you starting/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /step-by-step/i }));
+    fireEvent.click(screen.getByRole('button', { name: /12-step assembly line/i }));
     expect(screen.getByText(/What type of business are you building/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /back to quickstart/i }));
+    expect(screen.getByText(/What kind of business are you starting/i)).toBeInTheDocument();
   });
 });

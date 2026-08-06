@@ -1,129 +1,39 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Briefcase, 
-  ChevronRight, 
-  ChevronLeft, 
-  Check, 
-  HelpCircle, 
-  Download, 
-  FileText, 
-  Layers, 
-  AlertCircle, 
-  Plus, 
-  MapPin, 
-  Users, 
-  DollarSign, 
-  FileCheck, 
-  Cpu, 
-  Flame, 
-  TrendingUp, 
-  Building2, 
-  ExternalLink,
+import {
+  Briefcase,
+  ChevronRight,
+  ChevronLeft,
+  Check,
   Sparkles,
   RefreshCw,
-  Printer,
-  Shield,
-  Target,
-  LineChart,
-  Lock,
   Terminal,
-  Globe,
-  Coins,
-  ShieldAlert,
-  Play,
-  Award,
-  BookOpen,
   Scale,
-  Calendar,
-  AlertTriangle,
-  UserCheck,
-  Rocket
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { FintechStarterMap } from './FintechStarterMap';
 import { BusinessQuickStart } from './BusinessQuickStart';
+import { BusinessSummary } from './BusinessSummary';
+import { downloadCompletePlan, type PlanContext } from '../lib/planDownload';
+import { STATE_PORTALS } from '../lib/statePortals';
 import type { BusinessBlueprint } from '../lib/businessBlueprint';
-
-// State portal metadata for quick legal lookup and comparative scoring
-const STATE_PORTALS: Record<string, { 
-  name: string; 
-  url: string; 
-  cost: number; 
-  rating: number;
-  franchiseTax: string;
-  pros: string;
-  cons: string;
-}> = {
-  'Delaware': { 
-    name: 'Delaware Division of Corporations', 
-    url: 'https://corp.delaware.gov/onlineservices/', 
-    cost: 90, 
-    rating: 5,
-    franchiseTax: '$300 flat (LLC) or $175+ sliding scale (Corp)',
-    pros: 'Gold standard for institutional venture capital; elite Court of Chancery solves corporate disputes swiftly.',
-    cons: 'Requires keeping a registered agent ($45-$150/yr) and paying annual franchise taxes regardless of income.'
-  },
-  'Wyoming': { 
-    name: 'Wyoming Secretary of State', 
-    url: 'https://wyobiz.wyo.gov/', 
-    cost: 100, 
-    rating: 5,
-    franchiseTax: '$60 flat (under $300k assets)',
-    pros: 'Industry-leading asset privacy; zero state personal or corporate income tax; extremely low ongoing fees.',
-    cons: 'Lacks the specialized dispute courts of Delaware; major VCs will ask you to flip to Delaware before funding.'
-  },
-  'California': { 
-    name: 'California Secretary of State (bizfile)', 
-    url: 'https://bizfileonline.sos.ca.gov/', 
-    cost: 70, 
-    rating: 3,
-    franchiseTax: '$800/yr minimum (Franchise Tax Board)',
-    pros: 'Proximity to the tech capital of the world, making local physical banking and state licensing integrations smoother.',
-    cons: 'Oversized $800/yr minimum tax penalty even if pre-revenue; heavy state-level regulatory overhead.'
-  },
-  'Texas': { 
-    name: 'Texas Secretary of State', 
-    url: 'https://www.sos.state.tx.us/corp/sosdirect.shtml', 
-    cost: 300, 
-    rating: 4,
-    franchiseTax: '0.75% of taxable margin (exempt under $2.47M revenue)',
-    pros: 'Massive, hyper-growth economy; friendly corporate laws; no state-level personal income tax.',
-    cons: 'High upfront filing fee ($300); complex annual franchise tax information report filing requirement.'
-  },
-  'New York': { 
-    name: 'New York Department of State', 
-    url: 'https://apps.dos.ny.gov/reonline/', 
-    cost: 200, 
-    rating: 3,
-    franchiseTax: '$25+ sliding scale (LLC filing fee)',
-    pros: 'Access to the global financial epicenter of Wall Street; strong pool of FinTech talent and resources.',
-    cons: 'Archaic and expensive LLC "publication requirement" costing $800-$1,500 in local newspaper ads.'
-  },
-  'Florida': { 
-    name: 'Florida Sunbiz Portal', 
-    url: 'https://dos.myflorida.com/sunbiz/', 
-    cost: 125, 
-    rating: 4,
-    franchiseTax: 'Zero annual state corporate franchise tax for LLCs',
-    pros: 'Rapidly emerging FinTech and crypto startup corridors; zero state personal income tax; fast online filing.',
-    cons: 'Relatively high annual report fee ($138.75) due every year by May 1st or face a brutal $400 late penalty.'
-  }
-};
 
 interface FintechBusinessBuilderProps {
   onAwardXp?: (amount: number, reason: string) => void;
   onCompleteCapstone?: () => void;
   badges?: string[];
+  /** Initial mode for the builder. Defaults to the simplified QuickStart pipeline. */
+  initialMode?: 'quickstart' | 'builder';
 }
 
 export function FintechBusinessBuilder({
   onAwardXp,
   onCompleteCapstone,
-  badges = []
+  badges = [],
+  initialMode = 'quickstart'
 }: FintechBusinessBuilderProps = {}) {
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [mode, setMode] = useState<'builder' | 'map' | 'quickstart'>('builder');
+  const [mode, setMode] = useState<'builder' | 'quickstart' | 'summary'>(initialMode);
   const [businessType, setBusinessType] = useState<'fintech' | 'retail' | 'food' | 'services' | 'consulting' | 'real_estate' | 'other'>('fintech');
   
   // Pipeline State Store
@@ -158,9 +68,6 @@ export function FintechBusinessBuilder({
   const [equitySplit, setEquitySplit] = useState<string>('Equal 50/50 Split (4-Year Vesting with 1-Year Cliff)');
   const [boiChecked, setBoiChecked] = useState<boolean>(false);
 
-  // Review screen active sub-tabs
-  const [activeTab, setActiveTab] = useState<'plan' | 'legal' | 'banking' | 'growth' | 'compliance'>('plan');
-
   // Interactive Simulator Game State
   const [showSimModal, setShowSimModal] = useState<boolean>(false);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
@@ -180,9 +87,6 @@ export function FintechBusinessBuilder({
     safeClosed: false,
     complianceScore: 100
   });
-
-  // Badge list unlocked dynamically
-  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([]);
 
   // Resolving helper values
   const finalLane = useMemo(() => lane === 'Other' ? (customLane || 'Fintech Startup') : lane, [lane, customLane]);
@@ -265,27 +169,6 @@ export function FintechBusinessBuilder({
       score
     };
   }, [businessName, structure, filingState, hqType, selectedApis, reachUsers, monthlyFee, txVolume, monetization, foundersCount, marketingChannel, fundingStrategy, equitySplit]);
-
-  // Unlock badges dynamically inside useEffect based on setup
-  useEffect(() => {
-    const badges: string[] = [];
-    if (selectedApis.includes('KYC Identity Decisioning') && (structure === 'LLC' || structure === 'C-Corp')) {
-      badges.push('Compliance Guard');
-    }
-    if (filingState === 'Delaware' && structure === 'C-Corp' && fundingStrategy.includes('Seed') && equitySplit.includes('Vesting')) {
-      badges.push('VC Catalyst');
-    }
-    if (structure === 'LLC' && fundingStrategy.includes('Bootstrapped') && foundersCount.includes('Solo')) {
-      badges.push('Sovereign Bootstrapper');
-    }
-    if (selectedApis.includes('Web3 Stablecoin Rails') && finalLane.toLowerCase().includes('stablecoin') || finalLane.toLowerCase().includes('crypto')) {
-      badges.push('Web3 Trailblazer');
-    }
-    if (reachUsers >= 250000) {
-      badges.push('TAM Commander');
-    }
-    setUnlockedBadges(badges);
-  }, [selectedApis, structure, filingState, fundingStrategy, equitySplit, foundersCount, finalLane, reachUsers]);
 
   // Milestone mapping (12 steps grouped into 6 clear progress phases)
   const MILESTONES = [
@@ -381,6 +264,72 @@ export function FintechBusinessBuilder({
     setFounderState(bp.founderState);
     setFundingStrategy(bp.fundingStrategy);
     setEquitySplit(bp.equitySplit);
+  };
+
+  // Restore every builder field to its default.
+  const resetAllState = () => {
+    setCurrentStep(1);
+    setBusinessType('fintech');
+    setLane('Digital Banking');
+    setCustomLane('');
+    setProblem('High transaction friction and slow settlement corridors.');
+    setCustomProblem('');
+    setSelectedCohort('Gig workers & Freelancers');
+    setReachUsers(10000);
+    setMonetization('Subscription model (recurring software license fee)');
+    setMonthlyFee(12);
+    setTxVolume(150000);
+    setBusinessName('');
+    setBrandStyle('Urban');
+    setStructure('LLC');
+    setFilingState('Delaware');
+    setHqType('Virtual office address');
+    setFoundersCount('Co-founding partnership');
+    setSelectedApis(['Payments API Integration', 'KYC Identity Decisioning']);
+    setMarketingChannel('Developer Relations & API documentation');
+    setFounderName('');
+    setFounderState('California');
+    setFundingStrategy('Seed Venture Capital SAFE ($500K - $2M)');
+    setEquitySplit('Equal 50/50 Split (4-Year Vesting with 1-Year Cliff)');
+    setBoiChecked(false);
+  };
+
+  // Full context used to assemble the downloadable plan document + starter kit.
+  const planContext = useMemo<PlanContext>(() => ({
+    businessName: businessName.trim() || 'Your Business',
+    founderName: founderName.trim() || 'Your Name',
+    founderState,
+    filingState,
+    structure: structure === 'Solo' ? 'Sole Prop' : (structure as 'LLC' | 'C-Corp'),
+    finalLane,
+    selectedCohort,
+    finalProblem,
+    selectedApis,
+    monetization,
+    equitySplit,
+    fundingStrategy,
+    hqType,
+    businessType,
+    reachUsers,
+    monthlyFee,
+    txVolume,
+    marketingChannel,
+    brandStyle,
+    stats,
+  }), [businessName, founderName, founderState, filingState, structure, finalLane, selectedCohort, finalProblem, selectedApis, monetization, equitySplit, fundingStrategy, hqType, businessType, reachUsers, monthlyFee, txVolume, marketingChannel, brandStyle, stats]);
+
+  const handleDownloadPlan = () => {
+    downloadCompletePlan(planContext);
+  };
+
+  const handleStartOver = () => {
+    resetAllState();
+    setMode('quickstart');
+  };
+
+  const handleAdvancedMode = () => {
+    setCurrentStep(1);
+    setMode('builder');
   };
 
   // High fidelity stress-test simulation algorithm
@@ -611,94 +560,59 @@ export function FintechBusinessBuilder({
       {/* Background Grid */}
       <div className="absolute inset-0 bg-grid-slate-200/40 dark:bg-grid-slate-950/20 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] pointer-events-none" />
 
-      {/* HEADER HUD BAR */}
-      <div className="relative z-10 flex flex-wrap md:flex-nowrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5 mb-6">
+      {/* HEADER */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-slate-950 dark:bg-emerald-950/40 flex items-center justify-center border border-slate-800/80 shadow-inner">
-            <Briefcase className="w-6 h-6 text-emerald-500 animate-pulse" />
+            <Briefcase className="w-6 h-6 text-emerald-500" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white">Business Builder</h1>
-              <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-mono font-black tracking-widest uppercase">STRESS-TEST VERIFIED</span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Launch any business — answer a few questions and get a complete launch plan with legal docs, pricing, and growth steps.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Answer a few questions and get a complete launch plan — legal docs, pricing, and growth steps. Full details come in your download.</p>
           </div>
         </div>
 
-        {/* COMPREHENSIVE TELEMETRY DISPLAY */}
-        <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-950 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="px-3 py-1 text-center border-r border-slate-150 dark:border-slate-850">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase block">Legitimacy</span>
-            <span className="text-xs font-mono font-black text-blue-600 dark:text-blue-400">{stats.legit}%</span>
-          </div>
-          <div className="px-3 py-1 text-center border-r border-slate-150 dark:border-slate-850">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase block">Launch Cost</span>
-            <span className="text-xs font-mono font-black text-slate-800 dark:text-slate-200">${stats.budget}</span>
-          </div>
-          <div className="px-3 py-1 text-center border-r border-slate-150 dark:border-slate-850">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase block">Fundability</span>
-            <span className="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{stats.grade}</span>
-          </div>
-          <div className="px-3 py-1 text-center">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase block">Yr 1 Proj Revenue</span>
-            <span className="text-xs font-mono font-black text-indigo-600 dark:text-indigo-400">${stats.revenue.toLocaleString()}</span>
-          </div>
-        </div>
+        {mode === 'builder' ? (
+          <button
+            onClick={() => setMode('quickstart')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Back to QuickStart
+          </button>
+        ) : mode === 'quickstart' ? (
+          <button
+            onClick={() => { setCurrentStep(1); setMode('builder'); }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
+          >
+            Advanced: 12-step Assembly Line
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        ) : null}
       </div>
 
-      {/* MODE TOGGLE: QuickStart vs Step-by-Step vs Starter Map */}
-      <div className="relative z-10 flex flex-wrap items-center gap-2 mb-6">
-        <button
-          onClick={() => setMode('quickstart')}
-          className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-            mode === 'quickstart'
-              ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
-          )}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          QuickStart
-        </button>
-        <button
-          onClick={() => setMode('builder')}
-          className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-            mode === 'builder'
-              ? "bg-slate-950 dark:bg-white text-white dark:text-slate-950 border-slate-950 dark:border-white shadow-sm"
-              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
-          )}
-        >
-          <Briefcase className="w-3.5 h-3.5" />
-          Step-by-Step
-        </button>
-        <button
-          onClick={() => setMode('map')}
-          className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
-            mode === 'map'
-              ? "bg-slate-950 dark:bg-white text-white dark:text-slate-950 border-slate-950 dark:border-white shadow-sm"
-              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300"
-          )}
-        >
-          <Rocket className="w-3.5 h-3.5" />
-          Starter Map
-        </button>
-      </div>
-
-      {mode === 'map' ? (
-        <div className="relative z-10 bg-white dark:bg-slate-950/60 p-4 md:p-5 rounded-2xl border border-slate-200 dark:border-slate-850 shadow-xs">
-          <FintechStarterMap
-            onNavigateToBusinessBuilder={() => setMode('builder')}
-          />
-        </div>
-      ) : mode === 'quickstart' ? (
+      {mode === 'quickstart' ? (
         <BusinessQuickStart onComplete={(blueprint) => {
           applyBlueprint(blueprint);
-          setMode('builder');
-          setCurrentStep(12);
+          setMode('summary');
         }} />
+      ) : mode === 'summary' ? (
+        <BusinessSummary
+          businessName={businessName}
+          finalLane={finalLane}
+          businessType={businessType}
+          selectedCohort={selectedCohort}
+          monetization={monetization}
+          structure={structure}
+          filingState={filingState}
+          fundingStrategy={fundingStrategy}
+          onDownload={handleDownloadPlan}
+          onStressTest={runStressTest}
+          onStartOver={handleStartOver}
+          onAdvancedMode={handleAdvancedMode}
+        />
       ) : (
       <>
       {/* ROADMAP PROGRESS BAR */}
@@ -740,29 +654,11 @@ export function FintechBusinessBuilder({
         </div>
       </div>
 
-      {/* DYNAMIC TROPHY BADGE SHELF */}
-      <div className="relative z-10 flex flex-wrap gap-2 items-center bg-slate-100/70 dark:bg-slate-950/30 px-4 py-2 rounded-2xl border border-slate-200/60 dark:border-slate-850 mb-6">
-        <span className="text-xs font-mono font-black text-slate-400 dark:text-slate-500 uppercase flex items-center gap-1">
-          <Award className="w-3.5 h-3.5 text-amber-500" /> ACTIVE UNLOCKS:
-        </span>
-        {unlockedBadges.length === 0 ? (
-          <span className="text-xs text-slate-400 italic">No badges active yet. Advance steps to trigger legal alignments!</span>
-        ) : (
-          <div className="flex flex-wrap gap-1.5">
-            {unlockedBadges.map(b => (
-              <span key={b} className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-black uppercase tracking-wide rounded-md flex items-center gap-1 animate-fade-in">
-                ⚡ {b}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* MAIN STEP WORKSPACE */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[440px] items-start">
+      <div className="relative z-10 w-full min-h-[440px]">
         
         {/* INTERACTIVE COMPONENT CONFIGURATOR CARD */}
-        <div className="lg:col-span-8 bg-white dark:bg-slate-950/60 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-850 shadow-xs">
+        <div className="bg-white dark:bg-slate-950/60 p-5 md:p-6 rounded-2xl border border-slate-200 dark:border-slate-850 shadow-xs">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -1436,414 +1332,28 @@ export function FintechBusinessBuilder({
                 </div>
               )}
 
-              {/* STEP 12: UNLOCKED EXECUTIVE VENTURE DOSSIER & REGULATORY SANDBOX */}
+              {/* STEP 12: WRAP-UP */}
               {currentStep === 12 && (
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg md:text-xl font-black text-slate-900 dark:text-white">Venture Dossier Unlocked!</h2>
-                        <p className="text-xs text-slate-500">Your custom digital legal incorporation folder and compliance calendar are generated below.</p>
-                      </div>
-                    </div>
-
-                    {/* LARGE INTERACTIVE RUN STRESS TEST TRIGGER BUTTON */}
-                    <button
-                      onClick={runStressTest}
-                      className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer animate-pulse"
-                    >
-                      <Play className="w-4 h-4 fill-white text-white" />
-                      <span>Run stress test simulator</span>
-                    </button>
-                  </div>
-
-                  {/* TAB CONTROLLERS */}
-                  <div className="flex border-b border-slate-200 dark:border-slate-800 pb-px gap-1.5 overflow-x-auto scrollbar-none">
-                    {[
-                      { id: 'plan', label: '1. Pitch Deck', icon: Target },
-                      { id: 'legal', label: '2. Legal Blueprints', icon: Shield },
-                      { id: 'banking', label: '3. Action steps', icon: Building2 },
-                      { id: 'compliance', label: '4. FinCEN BOI & Tax Calendar', icon: Calendar },
-                      { id: 'growth', label: '5. Growth stacks', icon: Globe }
-                    ].map(tb => {
-                      const Icon = tb.icon;
-                      const active = activeTab === tb.id;
-                      return (
-                        <button
-                          key={tb.id}
-                          onClick={() => setActiveTab(tb.id as any)}
-                          className={cn(
-                            "px-3 py-1.5 rounded-t-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 border-t border-x cursor-pointer transition-all whitespace-nowrap",
-                            active
-                              ? "bg-slate-50 dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-slate-200 dark:border-slate-800 font-extrabold"
-                              : "bg-transparent text-slate-400 border-transparent hover:text-slate-700"
-                          )}
-                        >
-                          <Icon className="w-3 h-3" />
-                          <span>{tb.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* ACTIVE TAB OUTPUT PANEL */}
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 max-h-[320px] overflow-y-auto text-xs space-y-3 font-sans">
-                    
-                    {activeTab === 'plan' && (
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center border-b border-slate-250 dark:border-slate-800 pb-2">
-                          <span className="font-mono text-xs font-black text-slate-400 uppercase">OFFICIAL PITCH SHEET: {businessName.toUpperCase() || 'FINTECH'}</span>
-                          <button onClick={() => window.print()} className="flex items-center gap-1 text-xs text-indigo-500 font-bold uppercase hover:underline">
-                            <Printer className="w-3.5 h-3.5" /> Print Dossier
-                          </button>
-                        </div>
-                        
-                        <div className="space-y-3 leading-relaxed text-slate-700 dark:text-slate-300">
-                          <div>
-                            <strong className="block text-slate-900 dark:text-white text-xs font-black uppercase">Executive Pitch Summary</strong>
-                            <p className="text-xs mt-0.5">
-                              {businessType === 'fintech' ? (
-                                <>
-                                  {businessName || 'Your Fintech'} is a modern {finalLane} venture spearheaded by founder <strong>{founderName}</strong>. Based in {founderState}, we target the acute pain of <strong>{selectedCohort}</strong>, specifically addressing <strong>{finalProblem}</strong>. We leverage secure SDK connectors like {selectedApis.slice(0, 2).join(' & ')} to drive transaction rails, capturing value via a {monetization}.
-                                </>
-                              ) : (
-                                <>
-                                  {businessName || 'Your Business'} is a {finalLane} business founded to serve <strong>{selectedCohort}</strong>, specifically addressing <strong>{finalProblem}</strong>. Based in {founderState}, we use practical tools like {selectedApis.slice(0, 2).join(' & ')} to run operations smoothly, earning revenue through {monetization}.
-                                </>
-                              )}
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <div className="p-2.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850">
-                              <span className="text-xs font-bold text-slate-400 block uppercase">Market Opportunity (TAM)</span>
-                              <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 block mt-0.5">${(reachUsers * monthlyFee * 12 * 6.5).toLocaleString()}</span>
-                              <span className="text-xs text-slate-400 block mt-0.5">Base: {reachUsers.toLocaleString()} target customers</span>
-                            </div>
-                            <div className="p-2.5 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850">
-                              <span className="text-xs font-bold text-slate-400 block uppercase">Year-1 Revenue Projections</span>
-                              <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block mt-0.5">${stats.revenue.toLocaleString()}/yr ARR</span>
-                              <span className="text-xs text-slate-400 block mt-0.5">Acquisition Budget: ~${stats.cpa} CPA via {marketingChannel.split(' ')[0]}</span>
-                            </div>
-                          </div>
-
-                          <div className="border-t border-slate-150 dark:border-slate-850 pt-2 text-xs">
-                            <strong className="block text-slate-900 dark:text-white font-bold uppercase">Dynamic Financial 12-Month Pipeline Forecast</strong>
-                            <div className="flex gap-1.5 mt-1.5 items-end h-16 bg-slate-100 dark:bg-slate-950 p-2 rounded">
-                              {Array.from({ length: 12 }).map((_, i) => {
-                                const heightPercent = Math.min(100, Math.round(((i + 1) / 12) * 100));
-                                return (
-                                  <div key={i} className="flex-1 bg-gradient-to-t from-indigo-600 to-blue-500 rounded-xs" style={{ height: `${heightPercent}%` }} title={`Month ${i+1}`} />
-                                );
-                              })}
-                            </div>
-                            <span className="text-xs text-slate-400 block mt-1 text-center font-mono">ARR Pipeline Run-Rate: ${(stats.revenue).toLocaleString()} | Funding Strategy: {fundingStrategy}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {activeTab === 'legal' && (
-                      <div className="space-y-4 font-mono text-xs leading-relaxed">
-                        <div className="border-b border-slate-250 dark:border-slate-850 pb-2">
-                          <span className="font-mono text-xs font-black text-slate-400 uppercase">CUSTOM CORPORATE BLUEPRINT SHEET</span>
-                        </div>
-                        {structure === 'LLC' ? (
-                          <div className="bg-white dark:bg-slate-950 p-3 rounded border border-slate-200 dark:border-slate-850 whitespace-pre-wrap text-slate-650 dark:text-slate-350 select-all">
-{`LIMITED LIABILITY COMPANY OPERATING AGREEMENT OF: ${(businessName || 'FINTECH').toUpperCase()} LLC
-
-1. FORMATION: Organized in the State of ${filingState}.
-2. PRINCIPAL RESIDENCY OF FOUNDER: Sourced in ${founderState}.
-3. CHIEF OPERATING EXECUTIVE: ${founderName}.
-4. OPERATIONAL LANE: ${finalLane}.
-5. EQUITY & VESTING SCHEDULE: ${equitySplit}.
-6. TAX CLAUSE: Pass-through taxation structure default.
-7. COMPLIANCE OBLIGATION: Handled under virtual mailbox: ${hqType}.
-
-This document certifies that ${founderName} is registered as the sole/managing organizer of ${(businessName || 'FINTECH').toUpperCase()} LLC. Keep this file in secure PDF directories.`}
-                          </div>
-                        ) : structure === 'C-Corp' ? (
-                          <div className="bg-white dark:bg-slate-950 p-3 rounded border border-slate-200 dark:border-slate-850 whitespace-pre-wrap text-slate-650 dark:text-slate-350 select-all">
-{`CORPORATE BYLAWS OF: ${(businessName || 'FINTECH').toUpperCase()} CORPORATION
-
-1. INCORPORATION: Formed under the Delaware General Corporation Law.
-2. REGISTERED OFFICE: Registered agent physical address in Delaware.
-3. FOUNDER & BOARD SEAT: ${founderName} (Residing in ${founderState}).
-4. CAPITAL STOCK AUTHORIZED: 10,000,000 shares of common stock at $0.0001 par value.
-5. FOUNDER ALLOCATION: Sourced under vesting schedule: ${equitySplit}.
-6. STOCK PURCHASING SAFE note support: Activated under ${fundingStrategy}.
-
-These bylaws govern the internal administration of ${(businessName || 'FINTECH').toUpperCase()} CORPORATION, an active Delaware high-growth tech enterprise.`}
-                          </div>
-                        ) : (
-                          <div className="bg-white dark:bg-slate-950 p-3 rounded border border-slate-200 dark:border-slate-850 whitespace-pre-wrap text-slate-650 dark:text-slate-350 select-all">
-{`SOLO PROPRIETORSHIP CHARTER: ${(businessName || 'YOUR FINTECH').toUpperCase()}
-
-1. OPERATOR: ${founderName} (Residing in ${founderState}).
-2. JURISDICTION: Registered locally in ${founderState}.
-3. OPERATIONAL FOCUS: ${finalLane}.
-4. LIABILITY WARNING: Operational risks apply directly to personal savings.
-
-Sole proprietorships do not require state-level franchise fees but lack asset shields against financial chargebacks.`}
-                          </div>
-                        )}
-                        <div className="p-2.5 rounded bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-150 dark:border-indigo-900/40 text-xs text-indigo-700 dark:text-indigo-400 font-sans">
-                          <strong>Vesting Note:</strong> Incorporating standard 4-year vesting on shares protects early equity if a co-founder leaves before a year cliff. Standard corporate checking vaults (Mercury/Brex) demand these PDF bylaws for account opening validation.
-                        </div>
-                      </div>
-                    )}
-
-                    {activeTab === 'banking' && (
-                      <div className="space-y-3">
-                        <div className="border-b border-slate-250 dark:border-slate-850 pb-2 flex justify-between items-center">
-                          <span className="font-mono text-xs font-black text-slate-400 uppercase">ACTION INCORPORATION TIMELINE</span>
-                          <span className="text-xs font-mono text-emerald-500 bg-emerald-100 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded uppercase font-bold">100% Free Steps</span>
-                        </div>
-                        
-                        <div className="space-y-3 text-slate-700 dark:text-slate-300 text-xs">
-                          <div className="flex gap-2.5 items-start">
-                            <span className="w-5 h-5 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 font-mono font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">1</span>
-                            <div>
-                              <strong className="text-xs font-black text-slate-900 dark:text-white block">File Your Certificate on State Division Portals</strong>
-                              <p className="text-xs mt-0.5">
-                                Navigate to the official state corporations portal. Submit your customized Operating Agreement / Articles. Total fee: <strong>${STATE_PORTALS[filingState]?.cost}</strong>.
-                              </p>
-                              <a href={STATE_PORTALS[filingState]?.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 font-bold hover:underline inline-flex items-center gap-1 mt-1">
-                                Open official {STATE_PORTALS[filingState]?.name} <ExternalLink className="w-2.5 h-2.5" />
-                              </a>
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2.5 items-start border-t border-slate-150 dark:border-slate-850 pt-2">
-                            <span className="w-5 h-5 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 font-mono font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">2</span>
-                            <div>
-                              <strong className="text-xs font-black text-slate-900 dark:text-white block">Apply Free for IRS Employer Identification Number (EIN)</strong>
-                              <p className="text-xs mt-0.5">
-                                Do NOT pay commercial registration portals $150 to get an EIN. Secure it free in 5 minutes on IRS.gov. Your designated legal filer: <strong>{(businessName || 'Your Fintech').toUpperCase()} {structure === 'LLC' ? 'LLC' : 'INC'}</strong>.
-                              </p>
-                              <a href="https://www.irs.gov/businesses/small-businesses-self-employed/apply-for-an-employer-identification-number-ein-online" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 font-bold hover:underline inline-flex items-center gap-1 mt-1">
-                                Apply Free on IRS.gov <ExternalLink className="w-2.5 h-2.5" />
-                              </a>
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2.5 items-start border-t border-slate-150 dark:border-slate-850 pt-2">
-                            <span className="w-5 h-5 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 font-mono font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">3</span>
-                            <div>
-                              <strong className="text-xs font-black text-slate-900 dark:text-white block">Connect Startup Bank Checking Vaults</strong>
-                              <p className="text-xs mt-0.5">
-                                Traditional banks often freeze fintech software platforms. Instead, connect directly with digital startup-first banking hubs:
-                              </p>
-                              <div className="flex gap-2 mt-1.5">
-                                <a href="https://mercury.com" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 bg-slate-950 hover:bg-slate-900 text-white border border-slate-850 text-xs font-black uppercase rounded tracking-wider flex items-center gap-1">
-                                  Mercury Startup Banking <ExternalLink className="w-2 h-2" />
-                                </a>
-                                <a href="https://brex.com" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 bg-slate-950 hover:bg-slate-900 text-white border border-slate-850 text-xs font-black uppercase rounded tracking-wider flex items-center gap-1">
-                                  Brex Vault <ExternalLink className="w-2 h-2" />
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {activeTab === 'compliance' && (
-                      <div className="space-y-4">
-                        <div className="border-b border-slate-250 dark:border-slate-800 pb-2 flex justify-between items-center">
-                          <span className="font-mono text-xs font-black text-slate-400 uppercase">
-                            {businessType === 'fintech' ? '2026 STARTUP COMPLIANCE & FINCEN CALENDAR' : '2026 STARTUP COMPLIANCE & LICENSING CHECKLIST'}
-                          </span>
-                          <span className="text-xs font-mono text-rose-500 bg-rose-100 dark:bg-rose-950/50 px-1.5 py-0.5 rounded uppercase font-bold">Mandatory</span>
-                        </div>
-
-                        {/* FinCEN BOI Reporting Card */}
-                        <div className="p-3 bg-rose-50 dark:bg-rose-950/25 border border-rose-150 dark:border-rose-900/50 rounded-xl space-y-1.5">
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
-                            <strong className="text-xs text-rose-700 dark:text-rose-400 font-black">FinCEN Beneficial Ownership Information (BOI) Mandate</strong>
-                          </div>
-                          <p className="text-xs text-slate-650 dark:text-slate-300 leading-normal font-sans">
-                            As of <strong>January 1, 2024</strong>, the US Treasury requires all newly formed LLCs and Corporations to report their beneficial owners within <strong>90 days</strong> of registration. Failing to submit this free report carries civil penalties of up to <strong>$500 per day</strong>!
-                          </p>
-                          <div className="flex items-center gap-3 pt-1">
-                            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-800 dark:text-slate-200">
-                              <input 
-                                type="checkbox" 
-                                checked={boiChecked} 
-                                onChange={(e) => setBoiChecked(e.target.checked)} 
-                                className="rounded text-indigo-600 focus:ring-indigo-500"
-                              />
-                              I understand and will submit the BOI report on FinCEN.gov
-                            </label>
-                            <a href="https://boiefiling.fincen.gov/" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 font-bold hover:underline inline-flex items-center gap-0.5">
-                              File on FinCEN.gov <ExternalLink className="w-2 h-2" />
-                            </a>
-                          </div>
-                        </div>
-
-                        {businessType !== 'fintech' && (
-                          <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-150 dark:border-amber-900/50 rounded-xl space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-                              <strong className="text-xs text-amber-700 dark:text-amber-400 font-black">Local Business Licenses & Permits</strong>
-                            </div>
-                            <p className="text-xs text-slate-650 dark:text-slate-300 leading-normal font-sans">
-                              Depending on your business type, your city or county may require a <strong>general business license</strong>, and your industry may need extra permits (food handling, contractor's license, seller's permit for retail). Check with your local city clerk's office — most are quick and inexpensive to obtain.
-                            </p>
-                          </div>
-                        )}
-
-                        {/* State specific deadlines */}
-                        <div className="p-3 bg-slate-100 dark:bg-slate-950 rounded-xl border border-slate-250 dark:border-slate-850 space-y-2">
-                          <span className="text-xs font-black text-slate-400 uppercase block">State Franchise Tax & Filing Deadlines</span>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                            <div className="space-y-1">
-                              <span className="font-bold text-slate-800 dark:text-slate-200 block">Annual Franchise Tax Deadline</span>
-                              <p className="text-slate-500">{filingState === 'Delaware' ? 'June 1st (LLCs) or March 1st (Corps) annually.' : filingState === 'Florida' ? 'May 1st annually (brutal $400 penalty if late).' : 'Due on the anniversary of your filing date.'}</p>
-                            </div>
-                            <div className="space-y-1">
-                              <span className="font-bold text-slate-800 dark:text-slate-200 block">Franchise Cost Outline</span>
-                              <p className="text-slate-500">{STATE_PORTALS[filingState]?.franchiseTax}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {activeTab === 'growth' && (
-                      <div className="space-y-4">
-                        <div className="border-b border-slate-250 dark:border-slate-800 pb-2">
-                          <span className="font-mono text-xs font-black text-slate-450 uppercase">LAUNCHPAD DEVELOPER DIRECTORY</span>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700 dark:text-slate-300">
-                          <div className="p-2.5 bg-white dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-850 space-y-1">
-                            <span className="text-xs font-bold text-slate-450 uppercase block">Acquisition & CRM</span>
-                            <p className="text-xs text-slate-500">Essential services for analytics, campaigns, and customer metrics.</p>
-                            <div className="flex flex-wrap gap-1.5 pt-1">
-                              <a href="https://www.hubspot.com/startups" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-indigo-500 hover:underline">HubSpot for Startups</a>
-                              <span className="text-slate-300">&bull;</span>
-                              <a href="https://posthog.com" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-indigo-500 hover:underline">PostHog Open-source</a>
-                              <span className="text-slate-300">&bull;</span>
-                              <a href="https://segment.com" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-indigo-500 hover:underline">Segment CDP</a>
-                            </div>
-                          </div>
-
-                          <div className="p-2.5 bg-white dark:bg-slate-950 rounded border border-slate-200 dark:border-slate-850 space-y-1">
-                            <span className="text-xs font-bold text-slate-450 uppercase block">Developer Sandboxes</span>
-                            <p className="text-xs text-slate-500">Official developer sandbox key setup portals for FinTech codebases.</p>
-                            <div className="flex flex-wrap gap-1.5 pt-1">
-                              <a href="https://stripe.com/docs" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-500 hover:underline">Stripe Docs</a>
-                              <span className="text-slate-300">&bull;</span>
-                              <a href="https://plaid.com/docs" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-500 hover:underline">Plaid Sandbox</a>
-                              <span className="text-slate-300">&bull;</span>
-                              <a href="https://withpersona.com" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-blue-500 hover:underline">Persona KYC</a>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-150 dark:border-emerald-900/40 text-xs text-emerald-700 dark:text-emerald-400 font-sans">
-                          <strong>Active Credit Sandbox Grant:</strong> Apply for <strong>AWS Activate</strong> or <strong>Stripe Atlas</strong> to secure up to $5,000 in free cloud credits and automated incorporation pipelines.
-                        </div>
-                      </div>
-                    )}
-
-                  </div>
-                </div>
+                <BusinessSummary
+                  businessName={businessName || 'Your Fintech'}
+                  finalLane={finalLane}
+                  businessType={businessType}
+                  selectedCohort={selectedCohort}
+                  monetization={monetization}
+                  structure={structure === 'Solo' ? 'Sole Prop' : structure}
+                  filingState={filingState}
+                  fundingStrategy={fundingStrategy}
+                  onDownload={handleDownloadPlan}
+                  onStressTest={runStressTest}
+                  onStartOver={handleStartOver}
+                  onAdvancedMode={handleAdvancedMode}
+                />
               )}
 
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* SIDEBAR DYNAMIC TELEMETRY HUD */}
-        <div className="lg:col-span-4 space-y-4">
-          
-          {/* VENTURE METRICS HUD */}
-          <div className="bg-slate-100 dark:bg-slate-950 p-5 rounded-2xl border border-slate-250 dark:border-slate-900 space-y-4 shadow-3xs">
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-850 pb-2">
-              <Terminal className="w-4 h-4 text-slate-500" />
-              <span className="text-xs font-mono font-black text-slate-500 uppercase tracking-widest">Assembly Line Telemetry</span>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Founder Legal Identity</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white uppercase font-mono max-w-[130px] truncate">{founderName || 'Your Name'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Legal Entity</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white uppercase font-mono">{structure}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Jurisdiction</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white uppercase font-mono">{filingState}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">HQ Type</span>
-                <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px] font-mono">{hqType}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Funding Sourcing</span>
-                <span className="text-xs font-black text-slate-950 dark:text-indigo-400 truncate max-w-[130px] font-mono">{fundingStrategy.split(' ')[0]}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Target SOM Reach</span>
-                <span className="text-xs font-mono font-black text-blue-600 dark:text-blue-400">{reachUsers.toLocaleString()}</span>
-              </div>
-              
-              <div className="border-t border-slate-200 dark:border-slate-850 pt-2">
-                <span className="text-xs font-mono font-bold text-slate-450 uppercase block mb-1">Production SDK Rails</span>
-                <div className="flex flex-wrap gap-1">
-                  {selectedApis.map(api => (
-                    <span key={api} className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-900 text-slate-650 dark:text-slate-300 text-xs font-mono rounded border border-slate-250 dark:border-slate-800">
-                      {api.split(' ')[0]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* DYNAMIC ELEVATOR PITCH WRAPPER */}
-          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 p-5 rounded-2xl text-white space-y-3 shadow-md relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Sparkles className="w-24 h-24 text-white animate-pulse" />
-            </div>
-            
-            <span className="text-xs font-mono font-black text-indigo-300 tracking-widest uppercase block">Live Elevator Pitch</span>
-            <p className="text-xs text-slate-200 leading-relaxed italic">
-              {businessType === 'fintech' ? (
-                <>&ldquo;{businessName || 'Our Fintech'} is custom engineering a secure, modern <strong>{finalLane}</strong> platform specifically optimized for <strong>{selectedCohort}</strong>. Led by CEO <strong>{founderName}</strong>, we solve <strong>{finalProblem}</strong> using {selectedApis.length > 0 ? selectedApis.slice(0,2).map(x => x.split(' ')[0]).join(' & ') : 'fintech API modules'} and monetization from a <strong>{monetization.split(' ')[0]}</strong>.&rdquo;</>
-              ) : (
-                <>&ldquo;{businessName || 'Our Business'} is building a <strong>{finalLane}</strong> company for <strong>{selectedCohort}</strong>. Led by <strong>{founderName}</strong>, we solve <strong>{finalProblem}</strong> using {selectedApis.length > 0 ? selectedApis.slice(0,2).map(x => x.split(' ')[0]).join(' & ') : 'everyday business tools'} and make money through <strong>{monetization.split(' ')[0]}</strong>.&rdquo;</>
-              )}
-            </p>
-            <div className="flex items-center justify-between text-xs text-indigo-200 font-mono pt-1">
-              <span>LTV/CAC: 4.1x</span>
-              <span>SOM Cap: ${(reachUsers * monthlyFee * 12).toLocaleString()} ARR</span>
-            </div>
-          </div>
-
-          {/* EDUCATIONAL BOOKLET ADVICE CARD */}
-          <div className="p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-2xl space-y-2">
-            <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
-              <BookOpen className="w-4 h-4 text-emerald-500" />
-              <span className="text-xs font-black uppercase tracking-wider">Structuring Advice</span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              {structure === 'C-Corp' ? (
-                "A Delaware C-Corp is standard for institutional VC investments, allowing easy issuance of shares and SAFEs. Highly advised if seeking Seed Rounds."
-              ) : (
-                "LLCs feature pass-through tax returns, avoiding double-taxation of traditional corps. Best for bootstrapping, cashflow software, or solo operators."
-              )}
-            </p>
-          </div>
-        </div>
 
       </div>
 
