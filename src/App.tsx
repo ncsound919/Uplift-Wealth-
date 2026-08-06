@@ -38,6 +38,8 @@ const PublicProfile = lazy(() => import('./components/PublicProfile').then(m => 
 const CohortView = lazy(() => import('./components/CohortView').then(m => ({ default: m.CohortView })));
 const PricingPage = lazy(() => import('./components/PricingPage').then(m => ({ default: m.PricingPage })));
 const InstitutionalCurriculum = lazy(() => import('./components/InstitutionalCurriculum').then(m => ({ default: m.InstitutionalCurriculum })));
+const InstitutionPage = lazy(() => import('./components/InstitutionPage').then(m => ({ default: m.InstitutionPage })));
+const InstitutionDashboard = lazy(() => import('./components/InstitutionDashboard').then(m => ({ default: m.InstitutionDashboard })));
 const GamesHub = lazy(() => import('./components/GamesHub').then(m => ({ default: m.GamesHub })));
 const StandaloneGameView = lazy(() => import('./components/StandaloneGameView').then(m => ({ default: m.StandaloneGameView })));
 
@@ -70,7 +72,8 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
-  Users
+  Users,
+  Landmark
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { capture, identify, resetAnalytics } from './lib/analytics';
@@ -91,7 +94,7 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Sidebar Views and settings states
-  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'cohorts' | 'pricing' | 'institutional' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'cohorts' | 'pricing' | 'institutional' | 'institutions' | 'institution_dashboard' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -230,6 +233,14 @@ export default function App() {
       setActiveDirectGame(null);
     } else if (path === '/institutional') {
       setActiveView('institutional');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path === '/institutions') {
+      setActiveView('institutions');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path === '/institution-dashboard') {
+      setActiveView('institution_dashboard');
       setActiveModuleId(null);
       setActiveDirectGame(null);
     } else if (path === '/knowledge') {
@@ -695,6 +706,51 @@ export default function App() {
                 <span>Groups</span>
               </button>
 
+              {/* For Institutions */}
+              <button
+                onClick={() => {
+                  setActiveView('institutions');
+                  setActiveModuleId(null);
+                  setIsBuildingModule(false);
+                  setEditingModule(null);
+                  setActiveDirectGame(null);
+                  setIsMobileMenuOpen(false);
+                  navigate('/institutions');
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                  activeView === 'institutions'
+                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md"
+                    : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                )}
+              >
+                <Landmark className="w-4 h-4" />
+                <span>For Institutions</span>
+              </button>
+
+              {currentUser && (
+                <button
+                  onClick={() => {
+                    setActiveView('institution_dashboard');
+                    setActiveModuleId(null);
+                    setIsBuildingModule(false);
+                    setEditingModule(null);
+                    setActiveDirectGame(null);
+                    setIsMobileMenuOpen(false);
+                    navigate('/institution-dashboard');
+                  }}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                    activeView === 'institution_dashboard'
+                      ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md"
+                      : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  )}
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  <span>Institution Dashboard</span>
+                </button>
+              )}
+
               {/* 2. Learning Pathways */}
               <button
                 onClick={() => {
@@ -976,6 +1032,28 @@ export default function App() {
             >
               <PageMeta title="Institutional Curriculum" canonical="/institutional" />
               <InstitutionalCurriculum />
+            </motion.div>
+          ) : activeView === 'institutions' ? (
+            <motion.div
+              key="institutions"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="For Institutions" canonical="/institutions" />
+              <InstitutionPage currentTier={currentUser ? billingTier : 'guest'} onRequireAuth={() => setIsAuthModalOpen(true)} />
+            </motion.div>
+          ) : activeView === 'institution_dashboard' ? (
+            <motion.div
+              key="institution-dashboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="Institution Dashboard" canonical="/institution-dashboard" />
+              <InstitutionDashboard currentUserId={currentUser?.id} currentTier={currentUser ? billingTier : 'guest'} />
             </motion.div>
           ) : activeView === 'profile' ? (
             <motion.div

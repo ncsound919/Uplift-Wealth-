@@ -10,9 +10,9 @@ export function WealthBuilding() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-2 animate-fade-in">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-teal-800 to-emerald-900 p-6 md:p-10 text-white shadow-xl">
-        <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-emerald-400/5 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 p-6 md:p-10 text-white shadow-xl">
+        <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-indigo-500/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-indigo-400/5 blur-3xl" />
         <div className="relative">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-[10px] font-black uppercase tracking-wider">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -21,7 +21,7 @@ export function WealthBuilding() {
           <h2 className="mt-3 text-3xl md:text-4xl font-black tracking-tight text-white">
             Wealth Building
           </h2>
-          <p className="mt-2 text-sm md:text-base text-emerald-100/80 max-w-2xl leading-relaxed">
+          <p className="mt-2 text-sm md:text-base text-indigo-100/80 max-w-2xl leading-relaxed">
             {wealthChapters.length} paths to wealth — building credit, investing, real estate, business, hustles, and group economics on your terms.
           </p>
         </div>

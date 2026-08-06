@@ -12,3 +12,6 @@ coverage/
 supa.txt
 *.secret
 *.credentials
+
+.vercel
+.env*.local
