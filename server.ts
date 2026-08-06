@@ -39,6 +39,8 @@ import {
   leaveCohort,
   deleteCohort,
   cohortLeaderboard,
+  setCohortCurriculum,
+  cohortRoster,
 } from "./src/db/cohortOps";
 import {
   getEffectiveContent,
@@ -48,6 +50,7 @@ import {
   deleteOverride,
 } from "./src/db/contentOps";
 import { sendWelcomeEmail, sendWaitlistConfirmEmail, sendEmail, escapeHtml } from "./src/lib/email";
+import { PLANS, isStripeConfigured, createCheckoutSession, createPortalSession, verifyWebhookSignature } from "./src/lib/stripe";
 import type { DatabaseSchema } from "./src/db/types";
 
 dotenv.config({ quiet: true });
@@ -321,7 +324,7 @@ app.set('trust proxy', 1);
 // ---------------------------------------------------------------------------
 // 2. SECURITY HEADERS & CORS MIDDLEWARE
 // ---------------------------------------------------------------------------
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { (req as Request & { rawBody?: Buffer }).rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Minimal, safe security headers (no CSP — index.html already ships one).
@@ -1220,6 +1223,28 @@ app.delete('/api/cohorts/:id', authenticate, (req: AuthenticatedRequest, res: Re
   }
 });
 
+// Teacher sets the curriculum (module ids) for a cohort they own.
+app.put('/api/cohorts/:id/curriculum', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const { moduleIds } = req.body || {};
+  try {
+    const cohort = setCohortCurriculum(db, req.params.id, Array.isArray(moduleIds) ? moduleIds : [], req.user!.id, req.user!.role);
+    saveDatabase();
+    res.json({ success: true, cohort });
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
+// Teacher roster: per-member completion of the assigned modules.
+app.get('/api/cohorts/:id/roster', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const result = cohortRoster(db, req.params.id, req.user!.id, req.user!.role);
+    res.json(result);
+  } catch (err) {
+    opError(res, err);
+  }
+});
+
 // 6.7.8 NOTIFICATIONS (in-app + optional email)
 function notify(userId: string, type: 'reply' | 'cohort' | 'streak' | 'system', title: string, message: string) {
   if (!userId || !db.notifications) return;
@@ -1364,6 +1389,101 @@ app.put('/api/creator/applications/:id', authenticate, requireRole(['admin', 'in
   }
   saveDatabase();
   res.json({ success: true, application });
+});
+
+// 6.7.11 BILLING & SUBSCRIPTIONS
+app.get('/api/billing/plans', (req: Request, res: Response) => {
+  res.json({ plans: PLANS, stripeConfigured: isStripeConfigured() });
+});
+
+app.get('/api/billing/status', authenticate, (req: AuthenticatedRequest, res: Response) => {
+  const user = db.users[req.user!.id];
+  res.json({
+    tier: user?.subscriptionTier ?? 'free',
+    email: user?.email ?? '',
+    hasStripeCustomer: !!user?.stripeCustomerId,
+    stripeConfigured: isStripeConfigured(),
+  });
+});
+
+app.post('/api/billing/checkout', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+  const { tier } = req.body || {};
+  if (tier !== 'premium' && tier !== 'institutional') {
+    return res.status(400).json({ error: 'Choose premium or institutional.' });
+  }
+  const user = db.users[req.user!.id];
+  if (!user?.email) return res.status(400).json({ error: 'Add an email to your account before upgrading.' });
+  if (!isStripeConfigured()) {
+    return res.status(503).json({ error: 'Billing is not configured yet. Please try again soon.' });
+  }
+  try {
+    const base = `${req.protocol}://${req.get('host')}`;
+    const session = await createCheckoutSession({
+      tier,
+      email: user.email,
+      successUrl: `${base}/pricing?upgraded=true`,
+      cancelUrl: `${base}/pricing`,
+    });
+    res.json({ success: true, url: session.url });
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : 'Checkout failed.' });
+  }
+});
+
+app.post('/api/billing/portal', authenticate, async (req: AuthenticatedRequest, res: Response) => {
+  const user = db.users[req.user!.id];
+  if (!user?.stripeCustomerId || !isStripeConfigured()) {
+    return res.status(400).json({ error: 'No active subscription to manage.' });
+  }
+  try {
+    const base = `${req.protocol}://${req.get('host')}`;
+    const session = await createPortalSession(user.stripeCustomerId, `${base}/pricing`);
+    res.json({ success: true, url: session.url });
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : 'Portal failed.' });
+  }
+});
+
+app.post('/api/billing/webhook', (req: Request, res: Response) => {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const raw = (req as Request & { rawBody?: Buffer }).rawBody?.toString('utf-8') ?? '';
+  const signature = req.headers['stripe-signature'] as string | undefined;
+  if (!secret || !signature || !verifyWebhookSignature(raw, signature, secret)) {
+    return res.status(400).json({ error: 'Invalid signature.' });
+  }
+
+  let event: { type: string; data?: { object?: { id?: string; customer?: string; subscription?: string; metadata?: { tier?: string }; status?: string } } };
+  try {
+    event = JSON.parse(raw);
+  } catch {
+    return res.status(400).json({ error: 'Invalid payload.' });
+  }
+
+  const tier = event.data?.object?.metadata?.tier === 'institutional' ? 'institutional' : 'premium';
+  if (event.type === 'checkout.session.completed') {
+    const object = event.data?.object;
+    const email = object?.id ? '' : '';
+    const customerEmail = (event.data?.object as { customer_email?: string })?.customer_email;
+    if (customerEmail) {
+      const user = findUserByEmail(customerEmail);
+      if (user) {
+        user.subscriptionTier = tier;
+        user.stripeCustomerId = object?.customer;
+        user.stripeSubscriptionId = object?.subscription;
+        saveDatabase();
+        notify(user.id, 'system', 'Welcome to Premium!', 'Your Overlay Wealth subscription is active.');
+      }
+    }
+  } else if (event.type === 'customer.subscription.deleted') {
+    const subId = event.data?.object?.id;
+    const user = Object.values(db.users).find((u) => u.stripeSubscriptionId === subId);
+    if (user) {
+      user.subscriptionTier = 'free';
+      user.stripeSubscriptionId = undefined;
+      saveDatabase();
+    }
+  }
+  res.json({ received: true });
 });
 
 // 6.8 MARKET DATA PROXY WITH CACHING & SIMULATION (Alpha Vantage)

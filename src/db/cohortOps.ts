@@ -94,6 +94,46 @@ export function deleteCohort(
   return { deleted: true };
 }
 
+/** Teacher/owner assigns a curriculum (module ids) to a cohort. */
+export function setCohortCurriculum(
+  db: DatabaseSchema,
+  cohortId: string,
+  moduleIds: string[],
+  callerId: string,
+  callerRole: string
+): Cohort {
+  const cohort = db.cohorts.find((c) => c.id === cohortId);
+  if (!cohort) throw new Error('Cohort not found.');
+  const isAdmin = callerRole === 'admin' || callerRole === 'institution';
+  if (!isAdmin && cohort.ownerId !== callerId) throw new Error('Only the cohort owner can set the curriculum.');
+  cohort.moduleIds = (Array.isArray(moduleIds) ? moduleIds : []).map(String).slice(0, 20);
+  return cohort;
+}
+
+/** Per-member completion of the cohort's assigned modules (teacher roster). */
+export function cohortRoster(
+  db: DatabaseSchema,
+  cohortId: string,
+  callerId: string,
+  callerRole: string
+): { roster: Array<{ id: string; name: string; completedModules: string[]; xp: number }> } {
+  const cohort = db.cohorts.find((c) => c.id === cohortId);
+  if (!cohort) throw new Error('Cohort not found.');
+  const isAdmin = callerRole === 'admin' || callerRole === 'institution';
+  if (!isAdmin && cohort.ownerId !== callerId) throw new Error('Only the cohort owner can view the roster.');
+  const memberIds = new Set([...cohort.memberIds, cohort.ownerId]);
+  const roster = [...memberIds].map((id) => {
+    const p = db.progress[id];
+    return {
+      id,
+      name: db.users[id]?.name || 'Scholar',
+      completedModules: p?.completedModules ?? [],
+      xp: p?.xp ?? 0,
+    };
+  });
+  return { roster };
+}
+
 /** Leaderboard: cohort members sorted by XP then completed lessons. */
 export function cohortLeaderboard(
   db: DatabaseSchema,

@@ -35,6 +35,7 @@ const NotFound = lazy(() => import('./components/NotFound').then(m => ({ default
 const StudentProfile = lazy(() => import('./components/StudentProfile').then(m => ({ default: m.StudentProfile })));
 const PublicProfile = lazy(() => import('./components/PublicProfile').then(m => ({ default: m.PublicProfile })));
 const CohortView = lazy(() => import('./components/CohortView').then(m => ({ default: m.CohortView })));
+const PricingPage = lazy(() => import('./components/PricingPage').then(m => ({ default: m.PricingPage })));
 const GamesHub = lazy(() => import('./components/GamesHub').then(m => ({ default: m.GamesHub })));
 const StandaloneGameView = lazy(() => import('./components/StandaloneGameView').then(m => ({ default: m.StandaloneGameView })));
 
@@ -67,10 +68,12 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { capture, identify, resetAnalytics } from './lib/analytics';
+import { canAccess, isPremiumModule } from './lib/entitlements';
 import confetti from 'canvas-confetti';
 import { apiClient, UserProfile } from './lib/apiClient';
 
@@ -83,11 +86,13 @@ export default function App() {
   // Auth state
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => apiClient.getStoredUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [billingTier, setBillingTier] = useState<string>('free');
+  const [premiumLock, setPremiumLock] = useState<string | null>(null);
   const [certModuleId, setCertModuleId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Sidebar Views and settings states
-  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'cohorts' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'knowledge' | 'builder' | 'profile' | 'public_profile' | 'cohorts' | 'pricing' | 'game' | 'games' | 'donation' | 'architecture' | 'fintech_map' | 'business_builder' | 'glossary' | 'dots_article' | 'admin' | 'wealth_building' | 'wealth_credit' | 'wealth_investing' | 'wealth_real_estate' | 'wealth_business' | 'wealth_group_economics' | 'wealth_side_hustles' | 'wealth_emergency_fund' | 'not_found'>('dashboard');
   const [activeDirectGame, setActiveDirectGame] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -171,6 +176,17 @@ export default function App() {
     return () => window.removeEventListener('online', handleOnline);
   }, []);
 
+  // Billing tier for premium module gating.
+  useEffect(() => {
+    if (!apiClient.isAuthenticated) {
+      setBillingTier('free');
+      return;
+    }
+    apiClient.getBillingStatus()
+      .then((res) => setBillingTier(res.tier))
+      .catch(() => setBillingTier('free'));
+  }, [currentUser?.id]);
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -207,6 +223,10 @@ export default function App() {
       setActiveDirectGame(null);
     } else if (path === '/cohorts') {
       setActiveView('cohorts');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+    } else if (path === '/pricing') {
+      setActiveView('pricing');
       setActiveModuleId(null);
       setActiveDirectGame(null);
     } else if (path === '/knowledge') {
@@ -488,6 +508,17 @@ export default function App() {
       capture('module_complete', { moduleId });
       scheduleStatsSync();
     }
+  };
+
+  // Gate premium modules behind a paid tier; otherwise open the module.
+  const openModule = (id: string) => {
+    if (/^module-\d+$/.test(id) && isPremiumModule(id) && !canAccess(billingTier as 'free' | 'premium' | 'institutional', id)) {
+      setPremiumLock(id);
+      return;
+    }
+    setActiveModuleId(id);
+    const moduleNum = id.replace('module-', '');
+    navigate(`/module/${moduleNum}`);
   };
 
   const handleReset = () => {
@@ -925,6 +956,17 @@ export default function App() {
               <PageMeta title="Learning Cohorts" canonical="/cohorts" />
               <CohortView currentUserId={currentUser?.id} />
             </motion.div>
+          ) : activeView === 'pricing' ? (
+            <motion.div
+              key="pricing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <PageMeta title="Pricing" canonical="/pricing" />
+              <PricingPage currentTier={currentUser ? billingTier : 'guest'} onRequireAuth={() => setIsAuthModalOpen(true)} />
+            </motion.div>
           ) : activeView === 'profile' ? (
             <motion.div
               key="user-profile"
@@ -945,9 +987,7 @@ export default function App() {
                   gameTimeSeconds={gameTimeSeconds}
                   badges={badges}
                   onSelectModule={(id) => {
-                    setActiveModuleId(id);
-                    const moduleNum = id.replace('module-', '');
-                    navigate(`/module/${moduleNum}`);
+                    openModule(id);
                   }}
                 />
               </div>
@@ -1164,9 +1204,7 @@ export default function App() {
                     setActiveModuleId(null);
                     navigate('/article');
                   } else {
-                    setActiveModuleId(id);
-                    const moduleNum = id.replace('module-', '');
-                    navigate(`/module/${moduleNum}`);
+                    openModule(id);
                   }
                 }}
                 activeLevel={activeLevel}
@@ -1259,6 +1297,34 @@ export default function App() {
       <div className="fixed top-4 right-4 z-30">
         <NotificationCenter currentUserId={currentUser?.id} />
       </div>
+
+      {premiumLock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-white dark:bg-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-amber-500 text-white flex items-center justify-center">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white mt-4">Premium content</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              This expert module is part of Overlay Wealth Premium. Upgrade for all 15 modules, certificates, and classroom tools.
+            </p>
+            <div className="flex flex-col gap-2 mt-6">
+              <button
+                onClick={() => { setPremiumLock(null); setActiveView('pricing'); navigate('/pricing'); }}
+                className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-colors"
+              >
+                See pricing
+              </button>
+              <button
+                onClick={() => setPremiumLock(null)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer transition-colors"
+              >
+                Not now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

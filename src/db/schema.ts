@@ -27,6 +27,9 @@ export const users = pgTable('users', {
   profilePublic: boolean('profile_public').notNull().default(false),
   creatorVerified: boolean('creator_verified').notNull().default(false),
   creatorBio: text('creator_bio'),
+  subscriptionTier: text('subscription_tier').notNull().default('free'),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
@@ -112,6 +115,7 @@ export const cohorts = pgTable('cohorts', {
   createdAt: text('created_at').notNull(),
   memberIds: jsonb('member_ids').$type<string[]>().notNull().default([]),
   inviteCode: text('invite_code').notNull(),
+  moduleIds: jsonb('module_ids').$type<string[]>().notNull().default([]),
 });
 
 export const notifications = pgTable('notifications', {

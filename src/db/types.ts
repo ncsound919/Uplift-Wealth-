@@ -23,6 +23,10 @@ export interface StoredUser {
   /** Verified educator (set by an admin after approving a creator application). */
   creatorVerified?: boolean;
   creatorBio?: string;
+  /** Billing tier. Free by default; upgraded via Stripe Checkout webhook. */
+  subscriptionTier?: 'free' | 'premium' | 'institutional';
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
 }
 
 export interface StoredProgress {
@@ -107,6 +111,8 @@ export interface Cohort {
   createdAt: string;
   memberIds: string[];
   inviteCode: string;
+  /** Curriculum: module ids assigned by the teacher/owner (classroom mode). */
+  moduleIds?: string[];
 }
 
 export type NotificationType = 'reply' | 'cohort' | 'streak' | 'system';

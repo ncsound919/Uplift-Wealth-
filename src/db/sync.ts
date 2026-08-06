@@ -16,8 +16,8 @@ function json(value: unknown): string {
 
 export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<void> {
   await runner.query(
-    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version, profile_public, creator_verified, creator_bio)
-     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13,$14)
+    `INSERT INTO users (id, name, role, track, avatar, badges, streak_days, last_active, email, password_hash, token_version, profile_public, creator_verified, creator_bio, subscription_tier, stripe_customer_id, stripe_subscription_id)
+     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
      ON CONFLICT (id) DO UPDATE SET
        name = EXCLUDED.name,
        role = EXCLUDED.role,
@@ -31,8 +31,11 @@ export async function syncUser(runner: DbQueryRunner, u: StoredUser): Promise<vo
        token_version = EXCLUDED.token_version,
        profile_public = EXCLUDED.profile_public,
        creator_verified = EXCLUDED.creator_verified,
-       creator_bio = EXCLUDED.creator_bio`,
-    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0, u.profilePublic ?? false, u.creatorVerified ?? false, u.creatorBio ?? null]
+       creator_bio = EXCLUDED.creator_bio,
+       subscription_tier = EXCLUDED.subscription_tier,
+       stripe_customer_id = EXCLUDED.stripe_customer_id,
+       stripe_subscription_id = EXCLUDED.stripe_subscription_id`,
+    [u.id, u.name, u.role, u.track, u.avatar ?? null, json(u.badges), u.streakDays, u.lastActive, u.email ?? null, u.passwordHash ?? null, u.tokenVersion ?? 0, u.profilePublic ?? false, u.creatorVerified ?? false, u.creatorBio ?? null, u.subscriptionTier ?? 'free', u.stripeCustomerId ?? null, u.stripeSubscriptionId ?? null]
   );
 }
 
@@ -128,14 +131,15 @@ export async function syncReport(runner: DbQueryRunner, r: Report): Promise<void
 
 export async function syncCohort(runner: DbQueryRunner, c: Cohort): Promise<void> {
   await runner.query(
-    `INSERT INTO cohorts (id, name, type, description, owner_id, created_at, member_ids, invite_code)
-     VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8)
+    `INSERT INTO cohorts (id, name, type, description, owner_id, created_at, member_ids, invite_code, module_ids)
+     VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9::jsonb)
      ON CONFLICT (id) DO UPDATE SET
        name = EXCLUDED.name,
        type = EXCLUDED.type,
        description = EXCLUDED.description,
-       member_ids = EXCLUDED.member_ids`,
-    [c.id, c.name, c.type, c.description ?? null, c.ownerId, c.createdAt, json(c.memberIds), c.inviteCode]
+       member_ids = EXCLUDED.member_ids,
+       module_ids = EXCLUDED.module_ids`,
+    [c.id, c.name, c.type, c.description ?? null, c.ownerId, c.createdAt, json(c.memberIds), c.inviteCode, json(c.moduleIds ?? [])]
   );
 }
 
@@ -247,6 +251,9 @@ interface UserRow {
   profile_public?: boolean;
   creator_verified?: boolean;
   creator_bio?: string | null;
+  subscription_tier?: string;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
 }
 
 interface ProgressRow {
@@ -330,6 +337,7 @@ interface CohortRow {
   created_at: string;
   member_ids: string[];
   invite_code: string;
+  module_ids?: string[];
 }
 
 interface NotificationRow {
@@ -406,6 +414,9 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
       profilePublic: r.profile_public ?? false,
       creatorVerified: r.creator_verified ?? false,
       creatorBio: r.creator_bio ?? undefined,
+      subscriptionTier: (r.subscription_tier ?? 'free') as StoredUser['subscriptionTier'],
+      stripeCustomerId: r.stripe_customer_id ?? undefined,
+      stripeSubscriptionId: r.stripe_subscription_id ?? undefined,
     };
   }
 
@@ -496,6 +507,7 @@ export async function loadFullDb(runner: DbQueryRunner): Promise<DatabaseSchema>
     createdAt: r.created_at,
     memberIds: r.member_ids ?? [],
     inviteCode: r.invite_code,
+    moduleIds: r.module_ids ?? [],
   }));
 
   const notifications: DatabaseSchema['notifications'] = notificationRows.map((r) => ({

@@ -481,6 +481,17 @@ class ApiClient {
     return this.request<{ success: boolean; deleted: boolean }>(`/api/cohorts/${encodeURIComponent(id)}`, { method: 'DELETE' });
   }
 
+  public setCohortCurriculum(id: string, moduleIds: string[]) {
+    return this.request<{ success: boolean; cohort: CohortView }>(`/api/cohorts/${encodeURIComponent(id)}/curriculum`, {
+      method: 'PUT',
+      body: JSON.stringify({ moduleIds }),
+    });
+  }
+
+  public getCohortRoster(id: string) {
+    return this.request<{ roster: Array<{ id: string; name: string; completedModules: string[]; xp: number }> }>(`/api/cohorts/${encodeURIComponent(id)}/roster`);
+  }
+
   // Notifications
   public getNotifications() {
     return this.request<{ notifications: NotificationView[]; unreadCount: number }>('/api/notifications');
@@ -540,6 +551,26 @@ class ApiClient {
       body: JSON.stringify({ status }),
     });
   }
+
+  // Billing
+  public getBillingPlans() {
+    return this.request<{ plans: BillingPlan[]; stripeConfigured: boolean }>('/api/billing/plans');
+  }
+
+  public getBillingStatus() {
+    return this.request<{ tier: string; email: string; hasStripeCustomer: boolean; stripeConfigured: boolean }>('/api/billing/status');
+  }
+
+  public startCheckout(tier: 'premium' | 'institutional') {
+    return this.request<{ success: boolean; url: string | null }>('/api/billing/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ tier }),
+    });
+  }
+
+  public openBillingPortal() {
+    return this.request<{ success: boolean; url: string | null }>('/api/billing/portal', { method: 'POST' });
+  }
 }
 
 export interface ThreadView {
@@ -587,6 +618,7 @@ export interface CohortView {
   createdAt: string;
   memberIds: string[];
   inviteCode: string;
+  moduleIds?: string[];
   ownerName: string;
   memberCount: number;
 }
@@ -626,6 +658,14 @@ export interface ContentRevisionView {
   version: number;
   updatedBy: string;
   updatedAt: string;
+}
+
+export interface BillingPlan {
+  id: 'free' | 'premium' | 'institutional';
+  name: string;
+  monthly: number;
+  description: string;
+  features: string[];
 }
 
 export const apiClient = new ApiClient();

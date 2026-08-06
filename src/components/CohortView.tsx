@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Users, Plus, Loader2, Trophy, LogIn, LogOut, Trash2, Copy } from 'lucide-react';
+import { Users, Plus, Loader2, Trophy, LogIn, LogOut, Trash2, Copy, BookOpen, Save } from 'lucide-react';
 import { apiClient, type CohortView, type CohortMember } from '../lib/apiClient';
+import { courseModules } from '../data/courseData';
 import { cn } from '../lib/utils';
 
 const COHORT_TYPES = [
@@ -21,6 +22,9 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [selected, setSelected] = useState<{ cohort: CohortView; members: CohortMember[] } | null>(null);
+  const [curriculum, setCurriculum] = useState<string[]>([]);
+  const [roster, setRoster] = useState<Array<{ id: string; name: string; completedModules: string[]; xp: number }>>([]);
+  const [savingCurriculum, setSavingCurriculum] = useState(false);
 
   const refresh = useCallback(() => {
     setLoading(true);
@@ -36,9 +40,27 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
     try {
       const res = await apiClient.getCohort(id);
       setSelected(res);
+      setCurriculum(res.cohort.moduleIds ?? []);
       setError(null);
+      if (res.cohort.ownerId === currentUserId) {
+        apiClient.getCohortRoster(id).then((r) => setRoster(r.roster)).catch(() => {});
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not open cohort.');
+    }
+  };
+
+  const saveCurriculum = async () => {
+    if (!selected) return;
+    setSavingCurriculum(true);
+    try {
+      const res = await apiClient.setCohortCurriculum(selected.cohort.id, curriculum);
+      setSelected((prev) => (prev ? { ...prev, cohort: res.cohort } : prev));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save curriculum.');
+    } finally {
+      setSavingCurriculum(false);
     }
   };
 
@@ -189,6 +211,49 @@ export function CohortView({ currentUserId }: { currentUserId?: string }) {
               </div>
             ))}
           </div>
+
+          {selected.cohort.ownerId === currentUserId && (
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                <BookOpen className="w-3.5 h-3.5" /> Teacher · Curriculum
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {courseModules.map((mod) => (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    onClick={() => setCurriculum((prev) => (prev.includes(mod.id) ? prev.filter((x) => x !== mod.id) : [...prev, mod.id]))}
+                    className={cn('px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors border',
+                      curriculum.includes(mod.id)
+                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/40'
+                        : 'text-slate-500 border-slate-200 dark:border-slate-800 hover:border-slate-300')}
+                  >
+                    {mod.title}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <button onClick={saveCurriculum} disabled={savingCurriculum} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer transition-colors disabled:opacity-50">
+                  <Save className="w-3 h-3" /> {savingCurriculum ? 'Saving…' : 'Save curriculum'}
+                </button>
+              </div>
+
+              {roster.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Roster · assigned module completion</span>
+                  {roster.map((r) => {
+                    const done = curriculum.filter((mid) => r.completedModules.includes(mid));
+                    return (
+                      <div key={r.id} className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-slate-600 dark:text-slate-300">{r.name}</span>
+                        <span className="text-slate-400">{done.length} / {curriculum.length} assigned</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
