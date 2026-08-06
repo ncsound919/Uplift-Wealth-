@@ -26,11 +26,27 @@ const PLANS = [
 ];
 
 async function api(path, params = {}) {
-  const body = new URLSearchParams(params).toString();
+  const body = new URLSearchParams();
+  const entries = Array.isArray(params) ? params : Object.entries(params);
+  for (const [k, v] of entries) {
+    if (v !== undefined && v !== '') body.set(k, String(v));
+  }
   const res = await fetch(`${STRIPE_API}${path}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    body: body.toString(),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Stripe ${res.status} ${path}: ${text.slice(0, 300)}`);
+  }
+  return res.json();
+}
+
+async function apiGet(path) {
+  const res = await fetch(`${STRIPE_API}${path}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${key}` },
   });
   if (!res.ok) {
     const text = await res.text();
@@ -40,11 +56,12 @@ async function api(path, params = {}) {
 }
 
 async function findPrice(productName, amount, interval) {
-  const products = await api('/products/search', { query: `name:"${productName}"` });
+  const products = await apiGet(`/products/search?query=${encodeURIComponent(`name:"${productName}"`)}`);
   const product = products.data?.[0];
   if (!product) return null;
-  const prices = await api('/prices/search', { query: `product:"${product.id}"` });
-  return prices.data.find((p) => p.unit_amount === amount && p.recurring?.interval === interval) || null;
+  // List prices for the product (avoids the price-search quoting pitfalls).
+  const prices = await apiGet(`/prices?product=${product.id}&limit=100`);
+  return (prices.data || []).find((p) => p.unit_amount === amount && p.recurring?.interval === interval) || null;
 }
 
 async function main() {
@@ -58,7 +75,7 @@ async function main() {
       const created = await api('/prices', {
         currency: 'usd',
         unit_amount: String(plan.amount),
-        recurring: { interval: plan.interval },
+        'recurring[interval]': plan.interval,
         product: product.id,
       });
       price = created;
@@ -69,10 +86,12 @@ async function main() {
 
   if (webhookUrl) {
     try {
-      const hook = await api('/webhook_endpoints', {
-        url: webhookUrl,
-        enabled_events: ['checkout.session.completed', 'customer.subscription.deleted', 'invoice.payment_failed'],
-      });
+      const hook = await api('/webhook_endpoints', [
+        ['url', webhookUrl],
+        ['enabled_events[]', 'checkout.session.completed'],
+        ['enabled_events[]', 'customer.subscription.deleted'],
+        ['enabled_events[]', 'invoice.payment_failed'],
+      ]);
       console.log(`[stripe:provision] Webhook endpoint created: ${hook.url}`);
       console.log(`[stripe:provision] Set STRIPE_WEBHOOK_SECRET to: ${hook.secret}`);
     } catch (err) {
