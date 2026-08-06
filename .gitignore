@@ -8,3 +8,7 @@ coverage/
 .env*
 !.env.example
 *.tsbuildinfo
+# credentials / secrets — never commit
+supa.txt
+*.secret
+*.credentials
