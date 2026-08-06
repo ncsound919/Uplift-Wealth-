@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { MarkCompleteButton } from './MarkCompleteButton';
-import { CompoundGrowthVisualizer } from './tools/CompoundGrowthVisualizer';
 import { CreditActionPlan } from './tools/CreditActionPlan';
 import { RealEstateAnalyzer } from './tools/RealEstateAnalyzer';
 import { BusinessViabilityCalculator } from './tools/BusinessViabilityCalculator';
@@ -67,14 +66,6 @@ describe('useChapterCompletion', () => {
 });
 
 describe('tools', () => {
-  it('CompoundGrowthVisualizer renders', () => {
-    render(<CompoundGrowthVisualizer />);
-    expect(screen.getByText(/Compound Growth Visualizer/i)).toBeInTheDocument();
-  });
-  it('CompoundGrowthVisualizer compact renders', () => {
-    render(<CompoundGrowthVisualizer compact />);
-    expect(screen.getByText(/\$100/)).toBeInTheDocument();
-  });
   it('CreditActionPlan renders', () => {
     render(<CreditActionPlan />);
     expect(screen.getByText(/Credit Action Plan/i)).toBeInTheDocument();
@@ -221,41 +212,6 @@ describe('ChapterShell', () => {
 
 describe('tool interactions', () => {
   beforeEach(() => localStorage.clear());
-
-  describe('CompoundGrowthVisualizer', () => {
-    it('updates starting amount input', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('100'), { target: { value: '5000' } });
-      expect(screen.getByDisplayValue('5000')).toBeInTheDocument();
-    });
-    it('updates monthly contribution input', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('200'), { target: { value: '500' } });
-      expect(screen.getByDisplayValue('500')).toBeInTheDocument();
-    });
-    it('updates return rate input', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('8'), { target: { value: '12' } });
-      expect(screen.getByDisplayValue('12')).toBeInTheDocument();
-    });
-    it('updates years input', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('30'), { target: { value: '10' } });
-      expect(screen.getByDisplayValue('10')).toBeInTheDocument();
-    });
-    it('shows $0 result for zero inputs', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('100'), { target: { value: '0' } });
-      fireEvent.change(screen.getByDisplayValue('200'), { target: { value: '0' } });
-      fireEvent.change(screen.getByDisplayValue('8'), { target: { value: '0' } });
-      expect(screen.getByText('$0')).toBeInTheDocument();
-    });
-    it('shows milestone for large starting amount', () => {
-      render(<CompoundGrowthVisualizer />);
-      fireEvent.change(screen.getByDisplayValue('100'), { target: { value: '1000000' } });
-      expect(screen.getByText(/You reached/)).toBeInTheDocument();
-    });
-  });
 
   describe('CreditActionPlan', () => {
     it('updates current score input', () => {

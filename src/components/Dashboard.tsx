@@ -111,10 +111,13 @@ export function Dashboard({
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-amber-400/8 blur-[110px]" />
 
         <div className="relative">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black text-slate-900 dark:text-white tracking-tight leading-[1.05]">
-            Build the Wealth <span className="font-serif-accent italic text-gradient-emerald-gold">Your Family Deserves</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tight leading-[1.02]">
+            Money Matters
           </h1>
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
+          <div className="font-display text-2xl md:text-4xl font-black tracking-tight text-gradient-cool mt-2">
+            Overlay Wealth
+          </div>
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
             An easy, step-by-step guide to how modern money works: from digital payments and bank apps to stocks, crypto, and starting your own app.
           </p>
         </div>

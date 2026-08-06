@@ -133,6 +133,13 @@
     background-clip: text;
     color: transparent;
   }
+  /* Cool gradient text (teal -> indigo) for the Overlay Wealth wordmark */
+  .text-gradient-cool {
+    background-image: linear-gradient(115deg, #38bdf8, #6366f1 55%, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   /* Subtle premium card lift on hover */
   .card-hover {
     @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5;

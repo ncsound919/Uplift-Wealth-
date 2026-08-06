@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Printer, GraduationCap, Users, BookOpen, Award, ArrowLeft } from 'lucide-react';
+import { Printer, GraduationCap, Users, BookOpen, Award, ArrowLeft, Compass, ClipboardList, Link2 } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { courseModules } from '../data/courseData';
 import { LECTURE_CLASSES } from '../data/lectureLibrary';
+import { classroomMaterials } from '../data/institutionalCurriculum';
 
 export function InstitutionalCurriculum() {
   const navigate = useNavigate();
@@ -10,13 +11,17 @@ export function InstitutionalCurriculum() {
   const moduleRows = useMemo(() => courseModules.map((m) => {
     const lecture = LECTURE_CLASSES.find((c) => c.moduleId === m.id);
     const gameTypes = [...new Set(m.lessons.map((l) => l.gameType).filter(Boolean))];
+    const materials = classroomMaterials[m.id];
     return {
       id: m.id,
-      title: m.title,
+      title: m.title.replace(/^\d+\.\s*/, ''),
       description: m.description,
       lessons: m.lessons.length,
       lecture: lecture?.title,
       game: gameTypes[0] || null,
+      instructorDirection: materials?.instructorDirection ?? '',
+      worksheet: materials?.worksheet ?? '',
+      references: materials?.references ?? [],
     };
   }), []);
 
@@ -67,22 +72,55 @@ export function InstitutionalCurriculum() {
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-500" /> Curriculum — {courseModules.length} modules · {totalLessons} lessons
           </h2>
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3">
             {moduleRows.map((m) => (
-              <div key={m.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-3.5">
+              <div key={m.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-black uppercase tracking-widest text-slate-400">Module {m.id.replace('module-', '')}</div>
-                    <div className="text-sm font-black text-slate-900 dark:text-white mt-0.5">{m.title}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white flex items-center justify-center font-black">
+                      {m.id.replace('module-', '')}
+                    </div>
+                    <div>
+                      <div className="text-sm font-black text-slate-900 dark:text-white">{m.title}</div>
+                      {m.lecture && <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Instructor lecture: {m.lecture}</div>}
+                    </div>
                   </div>
                   <div className="text-right shrink-0">
                     {m.game && <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-[10px] font-black uppercase">Game</span>}
                     <div className="text-[10px] text-slate-400 mt-1">{m.lessons} lessons</div>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{m.description}</p>
-                {m.lecture && (
-                  <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 font-bold">Instructor lecture: {m.lecture}</div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">{m.description}</p>
+
+                {m.instructorDirection && (
+                  <div className="mt-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+                      <Compass className="w-3 h-3" /> Instructor direction
+                    </div>
+                    <p className="text-xs text-emerald-900 dark:text-emerald-100 mt-1 leading-relaxed">{m.instructorDirection}</p>
+                  </div>
+                )}
+
+                {m.worksheet && (
+                  <div className="mt-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      <ClipboardList className="w-3 h-3" /> Student worksheet
+                    </div>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">{m.worksheet}</p>
+                  </div>
+                )}
+
+                {m.references.length > 0 && (
+                  <div className="mt-2 rounded-lg bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-700 dark:text-indigo-400">
+                      <Link2 className="w-3 h-3" /> References
+                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {m.references.map((r) => (
+                        <li key={r} className="text-[11px] text-indigo-900 dark:text-indigo-200 leading-relaxed">• {r}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             ))}

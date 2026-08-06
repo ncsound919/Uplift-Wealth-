@@ -11,7 +11,8 @@ describe('InstitutionalCurriculum', () => {
     render(<InstitutionalCurriculum />);
     expect(screen.getByText('Institutional Classroom Curriculum')).toBeInTheDocument();
     expect(screen.getByText(/Curriculum — 16 modules/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Module \d+/).length).toBeGreaterThan(10);
+    expect(screen.getAllByText(/Instructor direction/).length).toBeGreaterThan(10);
+    expect(screen.getAllByText(/Student worksheet/).length).toBeGreaterThan(10);
   });
 
   it('includes the download/print CTA', () => {

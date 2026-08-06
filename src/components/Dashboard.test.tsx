@@ -38,8 +38,8 @@ describe('Dashboard', () => {
       <Dashboard modules={mockModules} completedModules={[]} completedLessons={[]} onSelectModule={() => {}} activeLevel="beginner" onSelectLevel={() => {}}
         xp={0} streak={0} badges={[]} completedLessonsCount={0} />
     );
-    expect(screen.getByText(/Build the Wealth/)).toBeInTheDocument();
-    expect(screen.getByText(/Your Family Deserves/)).toBeInTheDocument();
+    expect(screen.getByText('Money Matters')).toBeInTheDocument();
+    expect(screen.getByText('Overlay Wealth')).toBeInTheDocument();
   });
 
   it('renders module count in subtext', () => {

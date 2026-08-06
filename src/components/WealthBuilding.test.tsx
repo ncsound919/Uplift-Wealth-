@@ -24,10 +24,6 @@ vi.mock('../hooks/useChapterCompletion', () => ({
   }),
 }));
 
-vi.mock('./wealth/tools/CompoundGrowthVisualizer', () => ({
-  CompoundGrowthVisualizer: () => <div>Compound Growth Visualizer</div>,
-}));
-
 describe('WealthBuilding', () => {
   beforeEach(() => {
     vi.clearAllMocks();

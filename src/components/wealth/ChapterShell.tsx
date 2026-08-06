@@ -11,7 +11,7 @@ import { rehypeGlossaryHighlight, GlossaryTermSpan } from './GlossaryInline';
 
 interface Props {
   chapter: WealthChapter;
-  tool: ReactNode;
+  tool?: ReactNode;
 }
 
 export function ChapterShell({ chapter, tool }: Props) {
@@ -63,9 +63,11 @@ export function ChapterShell({ chapter, tool }: Props) {
         </Markdown>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
-        {tool}
-      </div>
+      {tool && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+          {tool}
+        </div>
+      )}
 
       <MarkCompleteButton chapterId={chapter.id} isComplete={isComplete(chapter.id)} onToggle={markComplete} />
     </div>
