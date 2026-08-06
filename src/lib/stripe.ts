@@ -28,7 +28,7 @@ export const PLANS: Plan[] = [
   {
     id: 'premium',
     name: 'Premium',
-    monthly: 19,
+    monthly: 10,
     description: 'Everything, including expert modules and certificates.',
     features: ['All 15 modules', 'Certificates of completion', 'Review cards (spaced repetition)', 'Early access to new tools'],
   },

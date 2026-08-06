@@ -244,7 +244,7 @@ Phase 0 (Trust & Durability)
 ### Task 4.2 â€” Monetization
 **Files:** `src/lib/stripe.ts` (new), `src/components/PricingPage.tsx` (new), `src/components/BillingPortal.tsx` (new), `server.ts`, `src/db/schema.ts`
 
-- [ ] Stripe SDK: free tier (modules 0â€“5) / premium `$19/mo` (all modules, certificates, review cards) / institutional `$99/mo` (50 seats, admin, cohorts)
+- [ ] Stripe SDK: free tier (modules 0â€“5) / premium `$10/mo` (all modules, certificates, review cards) / institutional `$99/mo` (50 seats, admin, cohorts)
 - [ ] Paywall + "Upgrade to Premium" modal; `/pricing` comparison page
 - [ ] Migrate the donations link to a real Stripe Checkout session (`STRIPE_DONATION_LINK` already exists â€” formalize it)
 - [ ] Webhooks: `checkout.session.completed`, `subscription.deleted`, `invoice.payment_failed`

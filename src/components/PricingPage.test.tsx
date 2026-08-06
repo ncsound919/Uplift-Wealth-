@@ -12,7 +12,7 @@ vi.mock('../lib/apiClient', () => ({ apiClient: mocks }));
 
 const plans = [
   { id: 'free', name: 'Free', monthly: 0, description: 'Start', features: ['Modules 0-5'] },
-  { id: 'premium', name: 'Premium', monthly: 19, description: 'Everything', features: ['All modules'] },
+  { id: 'premium', name: 'Premium', monthly: 10, description: 'Everything', features: ['All modules'] },
   { id: 'institutional', name: 'Institutional', monthly: 99, description: 'Classrooms', features: ['50 seats'] },
 ];
 
@@ -25,7 +25,7 @@ describe('PricingPage', () => {
     expect(await screen.findByText('Premium')).toBeInTheDocument();
     expect(screen.getByText('Institutional')).toBeInTheDocument();
     expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.getByText('$19')).toBeInTheDocument();
+    expect(screen.getByText('$10')).toBeInTheDocument();
   });
 
   it('marks the current plan', async () => {

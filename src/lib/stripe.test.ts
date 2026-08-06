@@ -13,7 +13,7 @@ describe('stripe helper', () => {
 
   it('defines the three tiers', () => {
     expect(PLANS.map((p) => p.id)).toEqual(['free', 'premium', 'institutional']);
-    expect(PLANS.find((p) => p.id === 'premium')!.monthly).toBe(19);
+    expect(PLANS.find((p) => p.id === 'premium')!.monthly).toBe(10);
   });
 
   it('isStripeConfigured reflects the secret', () => {
