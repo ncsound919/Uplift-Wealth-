@@ -13,6 +13,29 @@ export interface AuthUser {
   role: 'student' | 'builder' | 'institution' | 'admin';
 }
 
+/** Authenticated user plus the refresh-token version used for revocation.
+ *  Bumping a user's tokenVersion invalidates every refresh token issued
+ *  before the bump (used by logout). */
+export interface RefreshTokenPayload extends AuthUser {
+  tokenVersion: number;
+}
+
+/** Anonymous/guest identity. Fixed id + student role only — never elevated.
+ *  Elevated roles are granted exclusively by a signed access token. */
+export const GUEST_USER: AuthUser = { id: 'demo-student-01', role: 'student' };
+
+/** Resolve the authenticated user from an optional bearer token.
+ *  Without a valid token the caller is treated as the anonymous guest.
+ *  Spoofable headers (X-User-Id / X-User-Role / ?userId) are deliberately
+ *  ignored so they cannot escalate privileges or impersonate other users. */
+export function resolveRequestUser(bearerToken: string | null | undefined): AuthUser {
+  if (bearerToken) {
+    const verified = verifyAccessToken(bearerToken);
+    if (verified) return verified;
+  }
+  return GUEST_USER;
+}
+
 const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL = '7d';
 const BCRYPT_ROUNDS = 10;
@@ -49,8 +72,8 @@ export function signAccessToken(user: AuthUser): string {
   return jwt.sign({ type: 'access', ...user }, getAccessSecret(), { expiresIn: ACCESS_TOKEN_TTL });
 }
 
-export function signRefreshToken(user: AuthUser): string {
-  return jwt.sign({ type: 'refresh', ...user, jti: newTokenId() }, getRefreshSecret(), {
+export function signRefreshToken(user: AuthUser, tokenVersion = 0): string {
+  return jwt.sign({ type: 'refresh', ...user, tv: tokenVersion, jti: newTokenId() }, getRefreshSecret(), {
     expiresIn: REFRESH_TOKEN_TTL,
   });
 }
@@ -68,12 +91,14 @@ export function verifyAccessToken(token: string): AuthUser | null {
   }
 }
 
-/** Returns the authenticated user or null when the refresh token is invalid. */
-export function verifyRefreshToken(token: string): AuthUser | null {
+/** Returns the user + token version, or null when the refresh token is invalid. */
+export function verifyRefreshToken(token: string): RefreshTokenPayload | null {
   try {
-    const payload = jwt.verify(token, getRefreshSecret()) as { type?: string; id?: string; role?: AuthUser['role'] };
+    const payload = jwt.verify(token, getRefreshSecret()) as {
+      type?: string; id?: string; role?: AuthUser['role']; tv?: number;
+    };
     if (payload && payload.type === 'refresh' && typeof payload.id === 'string' && payload.role) {
-      return { id: payload.id, role: payload.role };
+      return { id: payload.id, role: payload.role, tokenVersion: payload.tv ?? 0 };
     }
     return null;
   } catch {

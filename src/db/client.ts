@@ -54,6 +54,7 @@ export async function ensureTables(): Promise<void> {
         last_active text NOT NULL,
         email text,
         password_hash text,
+        token_version integer DEFAULT 0 NOT NULL,
         created_at text DEFAULT to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') NOT NULL
       );
       CREATE TABLE IF NOT EXISTS progress (

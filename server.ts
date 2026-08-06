@@ -8,8 +8,8 @@ import {
   verifyPassword,
   signAccessToken,
   signRefreshToken,
-  verifyAccessToken,
   verifyRefreshToken,
+  resolveRequestUser,
   userIdFromEmail,
   isValidEmail,
   REFRESH_COOKIE_NAME,
@@ -31,6 +31,13 @@ const PORT = Number(process.env.PORT) || 3000;
 const START_TIME = Date.now();
 const DIST_READY = fs.existsSync(path.join(process.cwd(), 'dist', 'index.html'));
 const effectiveEnv = process.env.NODE_ENV || (DIST_READY ? 'production' : 'development');
+
+// Fail fast: in production, forging tokens must be impossible. Refuse to boot
+// without explicit JWT secrets rather than silently using dev-only defaults.
+if (effectiveEnv === 'production' && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+  console.error('[Security] JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must both be set in production. Refusing to start.');
+  process.exit(1);
+}
 
 // Error tracking (optional — no-op without SENTRY_DSN).
 if (process.env.SENTRY_DSN) {
@@ -354,18 +361,7 @@ export interface AuthenticatedRequest extends Request {
 function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = (req.headers.authorization as string) || '';
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  const verified = bearer ? verifyAccessToken(bearer) : null;
-
-  if (verified) {
-    req.user = { id: verified.id, role: verified.role };
-  } else {
-    // Guest / legacy fallback: header- or query-driven identity keeps the
-    // anonymous demo session and pre-auth integrations working until Phase 0.3
-    // makes the server the source of truth.
-    const userId = (req.headers['x-user-id'] as string) || (req.query.userId as string) || 'demo-student-01';
-    const userRole = (req.headers['x-user-role'] as 'student' | 'builder' | 'institution' | 'admin') || 'student';
-    req.user = { id: userId, role: userRole };
-  }
+  req.user = resolveRequestUser(bearer);
 
   // Ensure user exists in DB
   if (!db.users[req.user.id]) {
@@ -455,16 +451,18 @@ app.post('/api/auth/register', rateLimiter(5, 60000), async (req: Request, res: 
 
   const passwordHash = await hashPassword(password);
   const id = userIdFromEmail(cleanEmail);
+  const cleanName = typeof name === 'string' ? name.trim().slice(0, 100) : '';
   db.users[id] = {
     id,
     email: cleanEmail,
     passwordHash,
-    name: name ? String(name).trim() : cleanEmail.split('@')[0],
+    name: cleanName || cleanEmail.split('@')[0],
     role: 'student',
     track: 'all',
     badges: ['pioneer_scholar'],
     streakDays: 1,
-    lastActive: new Date().toISOString()
+    lastActive: new Date().toISOString(),
+    tokenVersion: 0
   };
   saveDatabase();
 
@@ -473,7 +471,7 @@ app.post('/api/auth/register', rateLimiter(5, 60000), async (req: Request, res: 
   void sendWelcomeEmail(cleanEmail, registeredName).catch(() => {});
 
   const token = signAccessToken({ id, role: 'student' });
-  setRefreshCookie(res, signRefreshToken({ id, role: 'student' }));
+  setRefreshCookie(res, signRefreshToken({ id, role: 'student' }, db.users[id].tokenVersion ?? 0));
   res.status(201).json({ success: true, token, user: { ...db.users[id], email: cleanEmail } });
 });
 
@@ -494,7 +492,7 @@ app.post('/api/auth/login', rateLimiter(5, 60000), async (req: Request, res: Res
   }
 
   const token = signAccessToken({ id: user.id, role: user.role });
-  setRefreshCookie(res, signRefreshToken({ id: user.id, role: user.role }));
+  setRefreshCookie(res, signRefreshToken({ id: user.id, role: user.role }, user.tokenVersion ?? 0));
   res.json({ success: true, token, user: { ...user, email: cleanEmail } });
 });
 
@@ -521,20 +519,24 @@ app.post('/api/auth/google', rateLimiter(5, 60000), (req: Request, res: Response
 
   const user = db.users[userId];
   const token = signAccessToken({ id: userId, role: user.role });
-  setRefreshCookie(res, signRefreshToken({ id: userId, role: user.role }));
+  setRefreshCookie(res, signRefreshToken({ id: userId, role: user.role }, user.tokenVersion ?? 0));
   res.json({ success: true, token, user: { ...user, email: cleanEmail } });
 });
 
-app.post('/api/auth/refresh', (req: Request, res: Response) => {
+app.post('/api/auth/refresh', rateLimiter(10, 60000), (req: Request, res: Response) => {
   const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
   const verified = refreshToken ? verifyRefreshToken(refreshToken) : null;
   if (!verified) {
     return res.status(401).json({ error: 'Session expired. Please sign in again.' });
   }
   const stored = db.users[verified.id];
+  // Reject refresh tokens issued before the user's last logout (revocation).
+  if (stored && (stored.tokenVersion ?? 0) !== verified.tokenVersion) {
+    return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+  }
   const role = stored ? stored.role : verified.role;
   const token = signAccessToken({ id: verified.id, role });
-  setRefreshCookie(res, signRefreshToken({ id: verified.id, role }));
+  setRefreshCookie(res, signRefreshToken({ id: verified.id, role }, stored?.tokenVersion ?? verified.tokenVersion));
   res.json({
     success: true,
     token,
@@ -559,6 +561,17 @@ app.get('/api/auth/me', authenticate, (req: AuthenticatedRequest, res: Response)
 });
 
 app.post('/api/auth/logout', (req: Request, res: Response) => {
+  // Revoke all outstanding refresh tokens for this user by bumping the token
+  // version embedded in the refresh token (best-effort).
+  const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+  const verified = refreshToken ? verifyRefreshToken(refreshToken) : null;
+  if (verified) {
+    const stored = db.users[verified.id];
+    if (stored) {
+      stored.tokenVersion = (stored.tokenVersion ?? 0) + 1;
+      saveDatabase();
+    }
+  }
   clearRefreshCookie(res);
   res.json({ success: true, message: 'Successfully logged out.' });
 });
@@ -701,7 +714,7 @@ app.put('/api/progress/stats', authenticate, (req: AuthenticatedRequest, res: Re
     lastActive: new Date().toISOString()
   };
   if (typeof streakDays === 'number' && Number.isFinite(streakDays)) user.streakDays = Math.max(0, Math.round(streakDays));
-  if (Array.isArray(badges)) user.badges = badges.map(String);
+  if (Array.isArray(badges)) user.badges = badges.map(String).slice(0, 50).map(b => b.slice(0, 100));
   user.lastActive = new Date().toISOString();
   db.users[userId] = user;
 
@@ -713,8 +726,8 @@ app.post('/api/progress/lesson', authenticate, (req: AuthenticatedRequest, res: 
   const userId = req.user!.id;
   const { lessonId, moduleId, stats } = req.body;
 
-  if (!lessonId || typeof lessonId !== 'string') {
-    return res.status(400).json({ error: 'Missing required lessonId string.' });
+  if (!lessonId || typeof lessonId !== 'string' || lessonId.length > 200) {
+    return res.status(400).json({ error: 'Missing or invalid lessonId.' });
   }
 
   const userProgress = db.progress[userId] || {
@@ -738,7 +751,7 @@ app.post('/api/progress/lesson', authenticate, (req: AuthenticatedRequest, res: 
     const user = db.users[userId];
     if (user) {
       if (typeof stats.streakDays === 'number' && Number.isFinite(stats.streakDays)) user.streakDays = Math.max(0, Math.round(stats.streakDays));
-      if (Array.isArray(stats.badges)) user.badges = stats.badges.map(String);
+      if (Array.isArray(stats.badges)) user.badges = stats.badges.map(String).slice(0, 50).map(b => b.slice(0, 100));
     }
   }
 
@@ -912,7 +925,8 @@ app.post('/api/waitlist', rateLimiter(10, 60000), (req: Request, res: Response) 
   const cleanEmail = email.toLowerCase().trim();
   const already = (db.waitlist ?? []).find((w) => w.email === cleanEmail);
   if (!already) {
-    db.waitlist.push({ email: cleanEmail, source: source || 'website', createdAt: new Date().toISOString() });
+    const cleanSource = typeof source === 'string' && source.trim() ? source.trim().slice(0, 100) : 'website';
+    db.waitlist.push({ email: cleanEmail, source: cleanSource, createdAt: new Date().toISOString() });
     saveDatabase();
   }
 

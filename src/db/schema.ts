@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   lastActive: text('last_active').notNull(),
   email: text('email'),
   passwordHash: text('password_hash'),
+  tokenVersion: integer('token_version').notNull().default(0),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

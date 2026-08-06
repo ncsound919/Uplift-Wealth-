@@ -16,6 +16,8 @@ export interface StoredUser {
   lastActive: string;
   email?: string;
   passwordHash?: string;
+  /** Bumped on logout to revoke all outstanding refresh tokens. */
+  tokenVersion?: number;
 }
 
 export interface StoredProgress {

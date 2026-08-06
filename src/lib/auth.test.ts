@@ -6,6 +6,8 @@ import {
   signRefreshToken,
   verifyAccessToken,
   verifyRefreshToken,
+  resolveRequestUser,
+  GUEST_USER,
   userIdFromEmail,
   isValidEmail,
   getAccessSecret,
@@ -66,7 +68,12 @@ describe('auth: JWT access tokens', () => {
 describe('auth: JWT refresh tokens', () => {
   it('signs and verifies a refresh token', () => {
     const token = signRefreshToken(USER);
-    expect(verifyRefreshToken(token)).toEqual(USER);
+    expect(verifyRefreshToken(token)).toEqual({ ...USER, tokenVersion: 0 });
+  });
+
+  it('embeds and returns the token version', () => {
+    const token = signRefreshToken(USER, 7);
+    expect(verifyRefreshToken(token)).toEqual({ ...USER, tokenVersion: 7 });
   });
 
   it('does not accept an access token as a refresh token', () => {
@@ -81,6 +88,30 @@ describe('auth: JWT refresh tokens', () => {
 
   it('returns null for an invalid refresh token', () => {
     expect(verifyRefreshToken('garbage')).toBeNull();
+  });
+});
+
+describe('auth: resolveRequestUser', () => {
+  it('returns the guest identity when no token is provided', () => {
+    expect(resolveRequestUser(undefined)).toEqual(GUEST_USER);
+    expect(resolveRequestUser('')).toEqual(GUEST_USER);
+    expect(resolveRequestUser(null)).toEqual(GUEST_USER);
+  });
+
+  it('returns the guest identity for a tampered/garbage token', () => {
+    expect(resolveRequestUser('not-a-real-jwt')).toEqual(GUEST_USER);
+    expect(resolveRequestUser(signAccessToken(USER).slice(0, -4) + 'aaaa')).toEqual(GUEST_USER);
+  });
+
+  it('returns the token user for a valid access token', () => {
+    expect(resolveRequestUser(signAccessToken(USER))).toEqual(USER);
+  });
+
+  it('never elevates a guest to an admin role', () => {
+    const resolved = resolveRequestUser(null);
+    expect(resolved.role).not.toBe('admin');
+    expect(resolved.role).not.toBe('institution');
+    expect(resolved.id).toBe('demo-student-01');
   });
 });
 
