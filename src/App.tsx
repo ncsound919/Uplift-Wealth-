@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+﻿import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { Dashboard } from './components/Dashboard';
 import { PageMeta } from './components/PageMeta';
@@ -127,13 +127,13 @@ export default function App() {
       dots_article: 'Connecting The Dots',
       admin: 'Admin Dashboard',
       wealth_building: 'Wealth Building',
-      wealth_credit: 'Wealth Building — Credit Mastery',
-      wealth_investing: 'Wealth Building — Investing & IRAs',
-      wealth_real_estate: 'Wealth Building — Real Estate',
-      wealth_business: 'Wealth Building — Business',
-      wealth_group_economics: 'Wealth Building — Group Economics',
-      wealth_side_hustles: 'Wealth Building — Side Hustles & Gig Income',
-      wealth_emergency_fund: 'Wealth Building — Cash Flow & Emergency Fund',
+      wealth_credit: 'Wealth Building â€” Credit Mastery',
+      wealth_investing: 'Wealth Building â€” Investing & IRAs',
+      wealth_real_estate: 'Wealth Building â€” Real Estate',
+      wealth_business: 'Wealth Building â€” Business',
+      wealth_group_economics: 'Wealth Building â€” Group Economics',
+      wealth_side_hustles: 'Wealth Building â€” Side Hustles & Gig Income',
+      wealth_emergency_fund: 'Wealth Building â€” Cash Flow & Emergency Fund',
     };
     capture('page_view', { path: location.pathname, title: titles[activeView] || activeView });
   }, [activeView, location.pathname]);
@@ -200,7 +200,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Sync URL → state on initial load and browser back/forward
+  // Sync URL â†’ state on initial load and browser back/forward
   useEffect(() => {
     const path = location.pathname;
     const match = path.match(/^\/module\/(\d+)$/);
@@ -575,7 +575,7 @@ export default function App() {
 
 
   return (
-    <div className={cn("min-h-screen font-sans flex flex-col md:flex-row transition-colors duration-200", isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900")}>
+    <div className={cn("min-h-screen font-sans flex flex-col md:flex-row transition-colors duration-200 bg-app", isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900")}>
       
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
@@ -667,7 +667,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'profile'
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -689,7 +689,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'cohorts'
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -711,7 +711,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'dashboard' && !activeDirectGame
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -733,7 +733,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'glossary'
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -755,7 +755,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'business_builder'
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -777,7 +777,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'donation'
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -800,7 +800,7 @@ export default function App() {
               className={cn(
                 "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                 activeView === 'games'
-                  ? "bg-blue-600 text-white shadow-sm"
+                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                   : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
               )}
             >
@@ -1091,37 +1091,37 @@ export default function App() {
             </motion.div>
           ) : activeView === 'wealth_credit' ? (
             <motion.div key="wealth-credit" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Credit Mastery" canonical="/wealth-building/credit" />
+              <PageMeta title="Wealth Building â€” Credit Mastery" canonical="/wealth-building/credit" />
               <CreditMastery />
             </motion.div>
           ) : activeView === 'wealth_investing' ? (
             <motion.div key="wealth-investing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Investing & IRAs" canonical="/wealth-building/investing" />
+              <PageMeta title="Wealth Building â€” Investing & IRAs" canonical="/wealth-building/investing" />
               <InvestingIRAs />
             </motion.div>
           ) : activeView === 'wealth_real_estate' ? (
             <motion.div key="wealth-realestate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Real Estate" canonical="/wealth-building/real-estate" />
+              <PageMeta title="Wealth Building â€” Real Estate" canonical="/wealth-building/real-estate" />
               <RealEstate />
             </motion.div>
           ) : activeView === 'wealth_business' ? (
             <motion.div key="wealth-business" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Business" canonical="/wealth-building/business" />
+              <PageMeta title="Wealth Building â€” Business" canonical="/wealth-building/business" />
               <BusinessBuilding />
             </motion.div>
           ) : activeView === 'wealth_group_economics' ? (
             <motion.div key="wealth-groupecon" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Group Economics" canonical="/wealth-building/group-economics" />
+              <PageMeta title="Wealth Building â€” Group Economics" canonical="/wealth-building/group-economics" />
               <GroupEconomics />
             </motion.div>
           ) : activeView === 'wealth_side_hustles' ? (
             <motion.div key="wealth-sidehustles" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Side Hustles & Gig Income" canonical="/wealth-building/side-hustles" />
+              <PageMeta title="Wealth Building â€” Side Hustles & Gig Income" canonical="/wealth-building/side-hustles" />
               <SideHustles />
             </motion.div>
           ) : activeView === 'wealth_emergency_fund' ? (
             <motion.div key="wealth-emergencyfund" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>
-              <PageMeta title="Wealth Building — Cash Flow & Emergency Fund" canonical="/wealth-building/emergency-fund" />
+              <PageMeta title="Wealth Building â€” Cash Flow & Emergency Fund" canonical="/wealth-building/emergency-fund" />
               <EmergencyFund />
             </motion.div>
           ) : isBuildingModule || editingModule ? (
@@ -1277,7 +1277,7 @@ export default function App() {
                 </div>
               ) : (
                 <div className="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-100 flex items-center justify-center shrink-0 shadow-sm text-white dark:text-indigo-600 font-black text-sm">
-                  ✓
+                  âœ“
                 </div>
               )}
               <div className="flex-1 min-w-0">

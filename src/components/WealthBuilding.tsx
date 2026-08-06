@@ -11,15 +11,21 @@ export function WealthBuilding() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-2 animate-fade-in">
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-amber-500 text-white text-xs font-black uppercase tracking-wider">
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>Personal Wealth</span>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-amber-500 p-6 md:p-10 text-white shadow-xl">
+        <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-72 w-72 rounded-full bg-amber-300/10 blur-3xl" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 border border-white/25 text-[10px] font-black uppercase tracking-wider">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Personal Wealth</span>
+          </div>
+          <h2 className="mt-3 text-3xl md:text-4xl font-black tracking-tight text-gradient-brand">
+            Wealth Building
+          </h2>
+          <p className="mt-2 text-sm md:text-base text-white/85 max-w-2xl leading-relaxed">
+            {wealthChapters.length} paths to wealth — building credit, investing, real estate, business, hustles, and group economics on your terms.
+          </p>
         </div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white">Wealth Building</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-2xl">
-          {wealthChapters.length} paths to wealth — building credit, investing, real estate, business, hustles, and group economics on your terms.
-        </p>
       </div>
 
       <div className="bg-gradient-to-r from-emerald-50 to-amber-50 dark:from-emerald-950/30 dark:to-amber-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

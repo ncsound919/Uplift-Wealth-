@@ -152,6 +152,13 @@ async function runPgSync() {
 
 function syncToPostgres() {
   if (!isDbConfigured()) return;
+  // Serverless (Vercel): function instances are short-lived, so a debounce
+  // timer can freeze before firing and drop the write. Sync immediately — the
+  // in-flight pg I/O keeps the event loop alive until it completes.
+  if (process.env.VERCEL === '1') {
+    void runPgSync();
+    return;
+  }
   if (pgSyncQueued) return;
   const now = Date.now();
   if (now - lastPgSyncAt >= PG_SYNC_INTERVAL_MS) {
