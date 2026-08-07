@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
-        include: ['src/**/*.{ts,tsx}'],
+        include: ['src/**/*.{ts,tsx}', 'server.ts'],
         exclude: [
           'src/test/**',
           'src/e2e/**',
@@ -86,6 +86,14 @@ export default defineConfig(({ mode }) => {
           lines: 80,
           functions: 80,
           branches: 80,
+          // server.ts is a large Express integration surface tested via
+          // src/test/server*.test.ts; hold it to the institution-system floor.
+          'server.ts': {
+            statements: 75,
+            lines: 75,
+            functions: 75,
+            branches: 75,
+          },
         },
       },
     },

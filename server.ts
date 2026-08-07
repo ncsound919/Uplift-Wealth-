@@ -84,7 +84,7 @@ if (process.env.SENTRY_DSN) {
 // ---------------------------------------------------------------------------
 // 1. DATA PERSISTENCE ENGINE (File-backed with Atomic Synchronous Memory Store)
 // ---------------------------------------------------------------------------
-const DATA_DIR = path.join(process.cwd(), '.data');
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), '.data');
 const DB_FILE = path.join(DATA_DIR, 'store.json');
 
 const initialDb: DatabaseSchema = {
