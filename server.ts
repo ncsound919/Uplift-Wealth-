@@ -208,12 +208,13 @@ function initDatabase() {
       // On Vercel serverless, saveDatabase() → syncToPostgres() immediately
       // opens a Postgres connection. That must NOT happen at module load —
       // a cold start would spend its whole execution budget on the DB and
-      // Vercel returns 500 for every request. Defer it; the in-memory default
-      // serves requests and Postgres catches up in the background.
+      // Vercel returns 500 for every request. Defer it well past the first
+      // response so the function serves immediately; Postgres catches up
+      // later. The in-memory default serves the first requests.
       if (process.env.VERCEL === '1') {
         setTimeout(() => {
           try { saveDatabase(); } catch (e) { console.warn('[DB Engine] deferred init failed:', e); }
-        }, 0);
+        }, Number(process.env.DRAYMOND_DB_DEFER_MS) || 10000);
       } else {
         saveDatabase();
       }
@@ -291,7 +292,9 @@ function initDatabase() {
     // Serverless cold-start safety: never spend the execution budget on DB
     // hydration at module load. Defer so the function responds immediately.
     if (process.env.VERCEL === '1') {
-      setTimeout(() => { void hydrate(); }, 0);
+      // Defer hydration well past the first response so cold starts serve
+      // immediately. DB catches up in the background after the budget is free.
+      setTimeout(() => { void hydrate(); }, Number(process.env.DRAYMOND_DB_DEFER_MS) || 10000);
     } else {
       void hydrate();
     }
