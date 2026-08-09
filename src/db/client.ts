@@ -23,7 +23,17 @@ export function getPool(): Pool {
       throw new Error('DATABASE_URL is not set. Configure PostgreSQL before using the DB pool.');
     }
     const max = Number(process.env.DATABASE_POOL_SIZE) || 10;
-    pool = new Pool({ connectionString: process.env.DATABASE_URL, max });
+    // Serverless safety: a slow/unreachable DB must fail fast, not eat the
+    // function's execution budget (Vercel returns 500 when cold start exceeds
+    // ~5s). connectionTimeoutMillis bounds the connect attempt; statement_timeout
+    // bounds any single query. Both are overridable via env.
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max,
+      connectionTimeoutMillis: Number(process.env.PG_CONNECT_TIMEOUT_MS) || 3000,
+      statement_timeout: Number(process.env.PG_STATEMENT_TIMEOUT_MS) || 8000,
+      idleTimeoutMillis: Number(process.env.PG_IDLE_TIMEOUT_MS) || 10000,
+    });
     pool.on('error', (err) => {
       console.error('[DB] idle client error:', err);
     });

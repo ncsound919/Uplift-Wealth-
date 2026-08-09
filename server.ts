@@ -205,7 +205,18 @@ function initDatabase() {
       const raw = fs.readFileSync(DB_FILE, 'utf-8');
       db = normalizeDb(JSON.parse(raw));
     } else {
-      saveDatabase();
+      // On Vercel serverless, saveDatabase() → syncToPostgres() immediately
+      // opens a Postgres connection. That must NOT happen at module load —
+      // a cold start would spend its whole execution budget on the DB and
+      // Vercel returns 500 for every request. Defer it; the in-memory default
+      // serves requests and Postgres catches up in the background.
+      if (process.env.VERCEL === '1') {
+        setTimeout(() => {
+          try { saveDatabase(); } catch (e) { console.warn('[DB Engine] deferred init failed:', e); }
+        }, 0);
+      } else {
+        saveDatabase();
+      }
     }
   } catch (err) {
     console.warn('[DB Engine] Failed loading store.json, using in-memory default:', err);
@@ -215,7 +226,7 @@ function initDatabase() {
   // hydrate from it (overlaying on top of the local file so nothing local is
   // lost), then push the merged state back to both stores.
   if (isDbConfigured()) {
-    void (async () => {
+    const hydrate = async () => {
       try {
         await runMigrations();
         await ensureTables();
@@ -276,7 +287,14 @@ function initDatabase() {
       } catch (err) {
         console.warn('[DB Engine] Postgres unavailable; continuing with file store:', err);
       }
-    })();
+    };
+    // Serverless cold-start safety: never spend the execution budget on DB
+    // hydration at module load. Defer so the function responds immediately.
+    if (process.env.VERCEL === '1') {
+      setTimeout(() => { void hydrate(); }, 0);
+    } else {
+      void hydrate();
+    }
   }
 }
 
