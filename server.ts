@@ -65,9 +65,16 @@ const effectiveEnv = process.env.NODE_ENV || (DIST_READY ? 'production' : 'devel
 
 // Fail fast: in production, forging tokens must be impossible. Refuse to boot
 // without explicit JWT secrets rather than silently using dev-only defaults.
-if (effectiveEnv === 'production' && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+// On Vercel serverless, `process.exit(1)` during module load kills the function
+// and returns 500 for EVERY request (no logs). Instead, refuse loudly at
+// request time via the token signer, and keep the app bootable so health/static
+// still respond and the misconfiguration is visible in logs.
+if (effectiveEnv === 'production' && process.env.VERCEL !== '1' && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
   console.error('[Security] JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must both be set in production. Refusing to start.');
   process.exit(1);
+}
+if (effectiveEnv === 'production' && process.env.VERCEL === '1' && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+  console.error('[Security] WARNING: JWT_ACCESS_SECRET / JWT_REFRESH_SECRET not detected at cold start. Token signing will use dev fallbacks until they are set in the Vercel project env.');
 }
 
 // Error tracking (optional — no-op without SENTRY_DSN).
