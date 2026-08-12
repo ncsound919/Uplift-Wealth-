@@ -15,3 +15,7 @@ supa.txt
 
 .vercel
 .env*.local
+
+# Nested standalone app (own mobile/web scope)
+/Trading-Sim-Platform-main/
+

@@ -10,11 +10,13 @@ import {
   signRefreshToken,
   verifyRefreshToken,
   resolveRequestUser,
+  GUEST_USER,
   userIdFromEmail,
   isValidEmail,
   REFRESH_COOKIE_NAME,
   REFRESH_COOKIE_MAX_AGE,
 } from "./src/lib/auth";
+import { isSupabaseAuthEnabled, verifySupabaseToken, syncProfile, signInWithSupabase, signUpWithSupabase, refreshSupabaseSession } from "./src/lib/supabaseAuth";
 import { isDbConfigured, ensureTables, query } from "./src/db/client";
 import { syncFullDb, loadFullDb } from "./src/db/sync";
 import { runMigrations } from "./src/db/migrate";
@@ -481,23 +483,38 @@ export interface AuthenticatedRequest extends Request {
 function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = (req.headers.authorization as string) || '';
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  req.user = resolveRequestUser(bearer);
 
-  // Ensure user exists in DB
-  if (!db.users[req.user.id]) {
-    db.users[req.user.id] = {
-      id: req.user.id,
-      name: 'Scholar User',
-      role: req.user.role,
-      track: 'all',
-      badges: ['pioneer_scholar'],
-      streakDays: 1,
-      lastActive: new Date().toISOString()
-    };
-    saveDatabase();
+  const applyUser = (user: { id: string; role: 'student' | 'builder' | 'institution' | 'admin' }) => {
+    req.user = user;
+
+    // Ensure user exists in DB
+    if (!db.users[req.user.id]) {
+      db.users[req.user.id] = {
+        id: req.user.id,
+        name: 'Scholar User',
+        role: req.user.role,
+        track: 'all',
+        badges: ['pioneer_scholar'],
+        streakDays: 1,
+        lastActive: new Date().toISOString()
+      };
+      saveDatabase();
+    }
+
+    next();
+  };
+
+  if (isSupabaseAuthEnabled()) {
+    // Supabase mode: verify the shared project's session token (async). Invalid
+    // tokens fall back to the anonymous guest, never to an elevated role.
+    if (!bearer) return applyUser(GUEST_USER);
+    verifySupabaseToken(bearer)
+      .then((user) => applyUser(user ?? GUEST_USER))
+      .catch(() => applyUser(GUEST_USER));
+    return;
   }
 
-  next();
+  applyUser(resolveRequestUser(bearer));
 }
 
 function requireRole(allowedRoles: Array<'student' | 'builder' | 'institution' | 'admin'>) {
@@ -564,6 +581,30 @@ app.post('/api/auth/register', rateLimiter(5, 60000), async (req: Request, res: 
   if (!password || typeof password !== 'string' || password.length < 8) {
     return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
   }
+
+  // Supabase mode: create the account in the shared project so the same
+  // credentials work on Health, Justice, and the hub.
+  if (isSupabaseAuthEnabled()) {
+    const session = await signUpWithSupabase(email, password, name);
+    if (!session) {
+      return res.status(409).json({ error: 'An account with this email may already exist. Try signing in.' });
+    }
+    setRefreshCookie(res, session.refreshToken ?? '');
+    db.users[session.user.id] = {
+      id: session.user.id,
+      email,
+      name: session.user.name,
+      role: 'student',
+      track: 'all',
+      badges: ['pioneer_scholar'],
+      streakDays: 1,
+      lastActive: new Date().toISOString(),
+      tokenVersion: 0
+    };
+    saveDatabase();
+    return res.status(201).json({ success: true, token: session.token, user: { ...db.users[session.user.id], email } });
+  }
+
   const cleanEmail = email.toLowerCase().trim();
   if (findUserByEmail(cleanEmail)) {
     return res.status(409).json({ error: 'An account with this email already exists.' });
@@ -599,6 +640,28 @@ app.post('/api/auth/login', rateLimiter(5, 60000), async (req: Request, res: Res
   const { email, password } = req.body || {};
   if (!isValidEmail(email)) {
     return res.status(400).json({ error: 'A valid email is required.' });
+  }
+
+  // Supabase mode: authenticate against the shared project.
+  if (isSupabaseAuthEnabled()) {
+    const session = await signInWithSupabase(email, String(password || ''));
+    if (!session) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+    setRefreshCookie(res, session.refreshToken ?? '');
+    db.users[session.user.id] = {
+      id: session.user.id,
+      email,
+      name: session.user.name,
+      role: 'student',
+      track: 'all',
+      badges: ['pioneer_scholar'],
+      streakDays: 1,
+      lastActive: new Date().toISOString(),
+      tokenVersion: 0
+    };
+    saveDatabase();
+    return res.json({ success: true, token: session.token, user: { ...db.users[session.user.id], email } });
   }
 
   const cleanEmail = email.toLowerCase().trim();
@@ -643,8 +706,37 @@ app.post('/api/auth/google', rateLimiter(5, 60000), (req: Request, res: Response
   res.json({ success: true, token, user: { ...user, email: cleanEmail } });
 });
 
-app.post('/api/auth/refresh', rateLimiter(10, 60000), (req: Request, res: Response) => {
+app.post('/api/auth/refresh', rateLimiter(10, 60000), async (req: Request, res: Response) => {
   const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
+
+  // Supabase mode: rotate the refresh token against the shared project.
+  if (isSupabaseAuthEnabled()) {
+    if (!refreshToken) {
+      return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+    }
+    const session = await refreshSupabaseSession(refreshToken);
+    if (!session) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+    }
+    setRefreshCookie(res, session.refreshToken ?? '');
+    const stored = db.users[session.user.id];
+    const role = stored ? stored.role : session.user.role;
+    const user = stored
+      ? { ...stored, email: stored.email || session.user.email || '' }
+      : {
+          id: session.user.id,
+          name: session.user.name,
+          role,
+          track: 'all',
+          badges: ['pioneer_scholar'],
+          streakDays: 1,
+          lastActive: new Date().toISOString(),
+          email: session.user.email || ''
+        };
+    return res.json({ success: true, token: session.token, user });
+  }
+
   const verified = refreshToken ? verifyRefreshToken(refreshToken) : null;
   if (!verified) {
     return res.status(401).json({ error: 'Session expired. Please sign in again.' });
@@ -681,6 +773,12 @@ app.get('/api/auth/me', authenticate, (req: AuthenticatedRequest, res: Response)
 });
 
 app.post('/api/auth/logout', (req: Request, res: Response) => {
+  // Supabase mode: the refresh cookie is the Supabase refresh token; clearing
+  // it ends the Wealth session (other properties keep their own sessions).
+  if (isSupabaseAuthEnabled()) {
+    clearRefreshCookie(res);
+    return res.json({ success: true, message: 'Successfully logged out.' });
+  }
   // Revoke all outstanding refresh tokens for this user by bumping the token
   // version embedded in the refresh token (best-effort).
   const refreshToken = getCookie(req, REFRESH_COOKIE_NAME);
