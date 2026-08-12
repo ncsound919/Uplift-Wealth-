@@ -44,6 +44,8 @@ async function boot() {
   process.env.VERCEL = '1';
   process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
   const mod = await import('../../server');
+  // Legacy JWT auth path (supabase mode is covered in supabaseAuth.test.ts).
+  process.env.AUTH_MODE = 'legacy';
   server = mod.default.listen(0);
   await new Promise<void>((r) => server.once('listening', r));
   baseUrl = `http://127.0.0.1:${(server.address() as { port: number }).port}`;

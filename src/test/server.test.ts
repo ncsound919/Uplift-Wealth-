@@ -36,6 +36,10 @@ interface Res {
 async function boot() {
   process.env.VERCEL = '1';
   const mod = await import('../../server');
+  // These suites exercise the legacy bcrypt+JWT auth path; keep them hermetic
+  // even when .env.local sets AUTH_MODE=supabase. Supabase-mode behavior is
+  // covered separately by src/lib/supabaseAuth.test.ts.
+  process.env.AUTH_MODE = 'legacy';
   server = mod.default.listen(0);
   await new Promise<void>((r) => server.once('listening', r));
   const addr = server.address() as { port: number };

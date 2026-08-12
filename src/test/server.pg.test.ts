@@ -68,7 +68,14 @@ let baseUrl = '';
 describe('server (Postgres hydration & dual-write)', () => {
   beforeAll(async () => {
     process.env.VERCEL = '1';
+    // server.ts defers DB hydration 10s when VERCEL=1 (cold-start safety).
+    // This suite needs the mocked hydration to run immediately so the merged
+    // Postgres fixtures (th-pg, coh-pg, ...) are reachable in the assertions.
+    // Note: 0 is falsy in `Number(x) || 10000`, so use a tiny non-zero value.
+    process.env.DRAYMOND_DB_DEFER_MS = '1';
     const mod = await import('../../server');
+    // Legacy JWT auth path (supabase mode is covered in supabaseAuth.test.ts).
+    process.env.AUTH_MODE = 'legacy';
     // Allow the async hydration block inside initDatabase() to settle.
     await new Promise((r) => setTimeout(r, 50));
     server = mod.default.listen(0);
