@@ -679,31 +679,11 @@ app.post('/api/auth/login', rateLimiter(5, 60000), async (req: Request, res: Res
   res.json({ success: true, token, user: { ...user, email: cleanEmail } });
 });
 
-app.post('/api/auth/google', rateLimiter(5, 60000), (req: Request, res: Response) => {
-  const { email } = req.body || {};
-  if (!isValidEmail(email)) {
-    return res.status(400).json({ error: 'A valid email is required.' });
-  }
-  const cleanEmail = email.toLowerCase().trim();
-  const userId = userIdFromEmail(cleanEmail, 'usr-google');
-  if (!db.users[userId]) {
-    db.users[userId] = {
-      id: userId,
-      email: cleanEmail,
-      name: cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
-      role: 'student',
-      track: 'all',
-      badges: ['pioneer_scholar', 'google_sso_verified'],
-      streakDays: 3,
-      lastActive: new Date().toISOString()
-    };
-    saveDatabase();
-  }
-
-  const user = db.users[userId];
-  const token = signAccessToken({ id: userId, role: user.role });
-  setRefreshCookie(res, signRefreshToken({ id: userId, role: user.role }, user.tokenVersion ?? 0));
-  res.json({ success: true, token, user: { ...user, email: cleanEmail } });
+// Google SSO was removed: the previous implementation minted valid sessions
+// for ANY submitted email with zero credential verification. Re-introduce only
+// with real server-side ID-token verification against GOOGLE_CLIENT_ID.
+app.post('/api/auth/google', rateLimiter(5, 60000), (_req: Request, res: Response) => {
+  res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
 });
 
 app.post('/api/auth/refresh', rateLimiter(10, 60000), async (req: Request, res: Response) => {
@@ -866,7 +846,10 @@ app.get('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Resp
 
 app.put('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
-  const { name, track, role, avatar, profilePublic } = req.body;
+  // `role` is deliberately NOT accepted here: client-supplied roles would be a
+  // self-service privilege escalation path. Role changes go through the
+  // admin-only endpoint below.
+  const { name, track, avatar, profilePublic } = req.body;
 
   const current = db.users[userId] || {
     id: userId,
@@ -880,7 +863,6 @@ app.put('/api/user/profile', authenticate, (req: AuthenticatedRequest, res: Resp
 
   if (name && typeof name === 'string') current.name = name.trim().slice(0, 100);
   if (track && typeof track === 'string' && ['beginner', 'intermediate', 'advanced', 'all'].includes(track)) current.track = track;
-  if (role && ['student', 'builder', 'institution', 'admin'].includes(role)) current.role = role;
   if (avatar && typeof avatar === 'string' && avatar.length < 2048) current.avatar = avatar;
   if (typeof profilePublic === 'boolean') current.profilePublic = profilePublic;
 

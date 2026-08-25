@@ -61,9 +61,9 @@ describe('AuthModal', () => {
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it('shows Google sign-in button with default email', () => {
+  it('does not render a Google sign-in button (unverified SSO removed)', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    expect(screen.getByText(/Continue with Google/)).toBeInTheDocument();
+    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
   });
 
   it('toggles to signup mode', () => {
@@ -135,22 +135,22 @@ describe('AuthModal', () => {
     });
   });
 
-  it('calls loginWithGoogle on Google button click', async () => {
-    mockLoginWithGoogle.mockResolvedValue({ user: { id: 'u1', name: 'Test User' } });
+  it('does not call the removed Google SSO flow', async () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    fireEvent.click(screen.getByText(/Continue with Google/));
-    await waitFor(() => {
-      expect(mockLoginWithGoogle).toHaveBeenCalled();
-    });
+    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
+    expect(mockLoginWithGoogle).not.toHaveBeenCalled();
   });
 
-  it('calls onSuccess after Google sign-in', async () => {
-    mockLoginWithGoogle.mockResolvedValue({ user: { id: 'u1', name: 'Google User' } });
+  it('never invokes the removed Google flow on success paths', async () => {
+    mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'Test User' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    fireEvent.click(screen.getByText(/Continue with Google/));
+    fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
     await waitFor(() => {
-      expect(mockOnSuccess).toHaveBeenCalledWith({ id: 'u1', name: 'Google User' });
+      expect(mockOnSuccess).toHaveBeenCalled();
     });
+    expect(mockLoginWithGoogle).not.toHaveBeenCalled();
   });
 
   it('shows error message on login failure', async () => {
@@ -171,11 +171,9 @@ describe('AuthModal', () => {
     expect(await screen.findByText('Authentication failed. Please try again.')).toBeInTheDocument();
   });
 
-  it('shows error message on Google sign-in failure', async () => {
-    mockLoginWithGoogle.mockRejectedValue(new Error('Google SSO failed.'));
+  it('shows no Google error path (flow removed)', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    fireEvent.click(screen.getByText(/Continue with Google/));
-    expect(await screen.findByText('Google SSO failed.')).toBeInTheDocument();
+    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
   });
 
   it('calls register with name on signup', async () => {

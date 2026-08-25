@@ -10,6 +10,8 @@
  * Idempotent: existing products/prices are reused by name. Prints the price
  * IDs to paste into STRIPE_PRICE_PREMIUM / STRIPE_PRICE_INSTITUTIONAL.
  */
+import fs from 'node:fs';
+
 const STRIPE_API = 'https://api.stripe.com/v1';
 
 const key = process.env.STRIPE_SECRET_KEY;
@@ -92,7 +94,10 @@ async function main() {
         ['enabled_events[]', 'invoice.payment_failed'],
       ]);
       console.log(`[stripe:provision] Webhook endpoint created: ${hook.url}`);
-      console.log(`[stripe:provision] Set STRIPE_WEBHOOK_SECRET to: ${hook.secret}`);
+      // Secret is written to a local file instead of stdout — shells and CI
+      // logs persist command output, which would leak the signing secret.
+      fs.writeFileSync('stripe-webhook-secret.txt', hook.secret, { encoding: 'utf8', mode: 0o600 });
+      console.log('[stripe:provision] Webhook secret written to stripe-webhook-secret.txt (add it to your env, then delete the file)');
     } catch (err) {
       console.warn(`[stripe:provision] Could not create webhook (may already exist): ${err.message}`);
     }

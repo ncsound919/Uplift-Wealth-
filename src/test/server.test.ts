@@ -108,13 +108,9 @@ describe('server (core flows)', () => {
     expect(unknown.status).toBe(401);
   });
 
-  it('google SSO creates a user and returns a token', async () => {
+  it('google SSO is disabled (no unverified session minting)', async () => {
     const r = await req('POST', '/api/auth/google', { body: { email: 'sso.user@test.dev' } });
-    expect(r.status).toBe(200);
-    expect(r.json.success).toBe(true);
-    expect(r.headers.get('set-cookie')).toContain('ow_refresh=');
-    const bad = await req('POST', '/api/auth/google', { body: { email: 'not-an-email' } });
-    expect(bad.status).toBe(400);
+    expect(r.status).toBe(503);
   });
 
   it('refresh exchanges a valid refresh cookie for a new token', async () => {

@@ -157,12 +157,10 @@ describe('apiClient', () => {
     expect(localStorage.getItem('hacu_auth_token')).toBe('new-token');
   });
 
-  it('loginWithGoogle sends POST and stores token/user on success', async () => {
-    const mockRes = { success: true, token: 'google-token', user: { id: 'u2', name: 'G User', role: 'student', track: 'all', badges: [], streakDays: 0, lastActive: new Date().toISOString() } };
-    vi.mocked(fetch).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockRes) } as any);
-    const result = await apiClient.loginWithGoogle('guser@example.com');
-    expect(result.success).toBe(true);
-    expect(localStorage.getItem('hacu_auth_token')).toBe('google-token');
+  it('loginWithGoogle surfaces the disabled-SSO error without storing a token', async () => {
+    vi.mocked(fetch).mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({ error: 'Google sign-in is not configured on this deployment.' }) } as any);
+    await expect(apiClient.loginWithGoogle('guser@example.com')).rejects.toThrow();
+    expect(localStorage.getItem('hacu_auth_token')).toBeNull();
   });
 
   it('logout clears stored tokens', async () => {

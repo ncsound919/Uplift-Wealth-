@@ -40,14 +40,27 @@ const ACCESS_TOKEN_TTL = '15m';
 const REFRESH_TOKEN_TTL = '7d';
 const BCRYPT_ROUNDS = 10;
 
-/** JWT secrets. Real values must be set in production env; dev fallbacks keep
- *  local runs working without configuration. Never commit real secrets. */
+/** JWT secrets. Dev fallbacks exist ONLY for local development. In production
+ *  (NODE_ENV=production, including Vercel serverless) missing secrets throw at
+ *  request time — known open-source constants must never sign real tokens. */
+function productionSecretsRequired(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
 export function getAccessSecret(): string {
-  return process.env.JWT_ACCESS_SECRET || 'overlay-dev-access-secret';
+  if (process.env.JWT_ACCESS_SECRET) return process.env.JWT_ACCESS_SECRET;
+  if (productionSecretsRequired()) {
+    throw new Error('[Security] JWT_ACCESS_SECRET must be set in production.');
+  }
+  return 'overlay-dev-access-secret';
 }
 
 export function getRefreshSecret(): string {
-  return process.env.JWT_REFRESH_SECRET || 'overlay-dev-refresh-secret';
+  if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET;
+  if (productionSecretsRequired()) {
+    throw new Error('[Security] JWT_REFRESH_SECRET must be set in production.');
+  }
+  return 'overlay-dev-refresh-secret';
 }
 
 export async function hashPassword(password: string): Promise<string> {

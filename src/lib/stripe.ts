@@ -105,12 +105,16 @@ export async function createPortalSession(customerId: string, returnUrl: string)
   return { url: data.url };
 }
 
-/** Verify a Stripe webhook signature (HMAC-SHA256 over the raw body). */
+/** Verify a Stripe webhook signature (HMAC-SHA256 over the raw body).
+ *  Enforces a ±5-minute timestamp window so captured payloads cannot be
+ *  replayed indefinitely (Stripe's own recommended tolerance). */
 export function verifyWebhookSignature(payload: string, signatureHeader: string, secret: string): boolean {
   const parts = signatureHeader.split(',');
   const timestamp = parts.find((p) => p.startsWith('t='))?.slice(2);
   const signatures = parts.filter((p) => p.startsWith('v1=')).map((p) => p.slice(3));
   if (!timestamp || signatures.length === 0) return false;
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return false;
   const signedPayload = `${timestamp}.${payload}`;
   const expected = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex');
   return signatures.some((sig) => {
