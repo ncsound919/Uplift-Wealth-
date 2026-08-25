@@ -1634,8 +1634,12 @@ app.get('/api/alphavantage/query', async (req, res) => {
   // If real API key is configured and not 'demo', attempt live Alpha Vantage request
   if (apiKey && apiKey !== 'demo') {
     try {
-      const queryString = new URLSearchParams(req.query as Record<string, string>).toString();
-      const response = await fetch(`https://www.alphavantage.co/query?${queryString}`);
+      // FIX: apikey must be appended — previously the live path sent requests
+      // without it, guaranteeing rejection and silently falling through to the
+      // synthetic generator below (fake data served as real quotes).
+      const params = new URLSearchParams(req.query as Record<string, string>);
+      params.set('apikey', apiKey);
+      const response = await fetch(`https://www.alphavantage.co/query?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
         if (!data['Note'] && !data['Error Message'] && !data['Information']) {
@@ -1678,7 +1682,7 @@ app.get('/api/alphavantage/query', async (req, res) => {
         '5. volume': volume.toString()
       };
     }
-    const result = { 'Time Series (Daily)': timeSeries };
+    const result = { 'Time Series (Daily)': timeSeries, simulated: true };
     setCache(cacheKey, result, 300000);
     return res.json(result);
   }
@@ -1707,7 +1711,7 @@ app.get('/api/alphavantage/query', async (req, res) => {
         '5. volume': volume.toString()
       };
     }
-    const result = { [key]: timeSeries };
+    const result = { [key]: timeSeries, simulated: true };
     setCache(cacheKey, result, 120000);
     return res.json(result);
   }
@@ -1716,6 +1720,7 @@ app.get('/api/alphavantage/query', async (req, res) => {
     const change = (Math.random() - 0.45) * 4.5;
     const price = base + change;
     const result = {
+      simulated: true,
       'Global Quote': {
         '01. symbol': symbol,
         '02. open': base.toFixed(2),
@@ -1735,6 +1740,7 @@ app.get('/api/alphavantage/query', async (req, res) => {
   if (func === 'SMA') {
     const period = req.query.time_period || '20';
     const result = {
+      simulated: true,
       'Technical Analysis: SMA': {
         [new Date().toISOString().split('T')[0]]: {
           SMA: (base * (1 + (Math.random() - 0.5) * 0.03)).toFixed(2)
@@ -1746,6 +1752,7 @@ app.get('/api/alphavantage/query', async (req, res) => {
 
   if (func === 'RSI') {
     const result = {
+      simulated: true,
       'Technical Analysis: RSI': {
         [new Date().toISOString().split('T')[0]]: {
           RSI: (45 + Math.random() * 25).toFixed(2)
