@@ -1,13 +1,26 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
-  "functions": {
-    "api/index.ts": { "maxDuration": 30 }
-  },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "api/index.ts" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
-  ]
+﻿{
+    "$schema":  "https://openapi.vercel.sh/vercel.json",
+    "buildCommand":  "npm run build",
+    "outputDirectory":  "dist",
+    "framework":  "vite",
+    "functions":  {
+                      "api/index.ts":  {
+                                           "maxDuration":  30
+                                       }
+                  },
+    "rewrites":  [
+                     {
+                         "source":  "/api/(.*)",
+                         "destination":  "api/index.ts"
+                     },
+                     {
+                         "source":  "/((?!api/).*)",
+                         "destination":  "/index.html"
+                     }
+                 ],
+    "git":  {
+                "deploymentEnabled":  {
+                                          "dependabot/*":  false
+                                      }
+            }
 }
