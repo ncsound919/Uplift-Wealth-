@@ -22,7 +22,7 @@ export function PublicProfile() {
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-6">
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/home')}
         className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back to dashboard

@@ -14,7 +14,7 @@ export function NotFound() {
         This page doesn't exist. It may have moved or the link might be incorrect.
       </p>
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/home')}
         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm"
       >
         <ArrowLeft className="w-4 h-4" />

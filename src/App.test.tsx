@@ -210,7 +210,7 @@ describe('App', () => {
   beforeEach(() => {
     vi.useRealTimers();
     localStorage.clear();
-    currentPath.value = '/';
+    currentPath.value = '/home';
     apiClientMock.getStoredUser.mockReturnValue(null);
     apiClientMock.getProgress.mockResolvedValue({ completedLessons: [], completedModules: [] });
     apiClientMock.saveLessonProgress.mockResolvedValue(undefined);
@@ -1112,5 +1112,37 @@ const getGamesButton = () => {
 
     await act(async () => { await new Promise((r) => setTimeout(r, 700)); });
     expect(screen.queryByTestId('certificate-mock')).not.toBeInTheDocument();
+  });
+
+  // ─── Public Landing & Site Guide ─────────────────────────────────────
+
+  it('renders the public landing page at the root path', async () => {
+    await renderAt('/');
+    expect(screen.getByRole('heading', { name: /master modern money/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /enter the app/i }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/What is Overlay Wealth/i)).toBeInTheDocument();
+  });
+
+  it('entering the app from the landing page navigates to /home', async () => {
+    await renderAt('/');
+    const enterButton = screen.getAllByRole('button', { name: /enter the app/i })[0];
+    fireEvent.click(enterButton);
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
+  });
+
+  it('renders the site guide at /guide with back navigation', async () => {
+    await renderAt('/guide');
+    expect(screen.getByRole('heading', { name: /how to use overlay wealth/i })).toBeInTheDocument();
+    expect(screen.getByText(/The Tools/i)).toBeInTheDocument();
+    const backButtons = screen.getAllByRole('button', { name: /back to app|enter the app/i });
+    expect(backButtons.length).toBeGreaterThan(0);
+    fireEvent.click(backButtons[0]);
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
+  });
+
+  it('shows the site guide link in the app sidebar', async () => {
+    await renderApp();
+    fireEvent.click(screen.getByText(/Site Guide/i));
+    expect(mockNavigate).toHaveBeenCalledWith('/guide');
   });
 });

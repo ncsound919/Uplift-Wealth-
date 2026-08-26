@@ -31,6 +31,6 @@ describe('NotFound', () => {
   it('navigates to dashboard on button click', () => {
     render(<NotFound />);
     fireEvent.click(screen.getByText('Back to Dashboard'));
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 });

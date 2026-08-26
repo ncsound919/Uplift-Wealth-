@@ -1,6 +1,8 @@
 ﻿import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { Dashboard } from './components/Dashboard';
+import { LandingPage } from './components/LandingPage';
+import { SiteGuide } from './components/SiteGuide';
 import { PageMeta } from './components/PageMeta';
 import { SearchModal } from './components/SearchModal';
 import { NotificationCenter } from './components/NotificationCenter';
@@ -73,7 +75,8 @@ import {
   ChevronDown,
   ChevronUp,
   Users,
-  Landmark
+  Landmark,
+  BookOpen
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { capture, identify, resetAnalytics } from './lib/analytics';
@@ -318,6 +321,12 @@ export default function App() {
       setActiveView('wealth_emergency_fund');
       setActiveModuleId(null);
       setActiveDirectGame(null);
+    } else if (path === '/home' || path === '/guide') {
+      setActiveView('dashboard');
+      setActiveModuleId(null);
+      setActiveDirectGame(null);
+      setIsBuildingModule(false);
+      setEditingModule(null);
     } else if (path !== '/' && path !== '/profile' && path !== '/knowledge' && path !== '/architecture' && path !== '/glossary' && path !== '/business-builder' && path !== '/map' && path !== '/donate' && path !== '/article' && path !== '/builder' && path !== '/progress' && path !== '/games' && !path.startsWith('/module/') && !path.startsWith('/game/') && !path.startsWith('/wealth-building/')) {
       setActiveView('not_found');
       setActiveModuleId(null);
@@ -549,7 +558,7 @@ export default function App() {
     setActiveView('dashboard');
     setActiveDirectGame(null);
     setGameTimeSeconds(0);
-    navigate('/');
+    navigate('/home');
   };
 
   const handleSaveCustomModule = (savedModule: Module) => {
@@ -581,6 +590,15 @@ export default function App() {
   const filteredModules = allModules.filter(m => m.level === activeLevel);
 
   const currentLevel = Math.floor(Math.sqrt(xp / 100)) + 1;
+
+  // Public marketing/landing and guide pages render without the app chrome.
+  const path = location.pathname;
+  if (path === '/') {
+    return <LandingPage onEnter={() => navigate('/home')} />;
+  }
+  if (path === '/guide') {
+    return <SiteGuide onBack={() => navigate('/home')} />;
+  }
 
 
   return (
@@ -760,7 +778,7 @@ export default function App() {
                   setEditingModule(null);
                   setActiveDirectGame(null);
                   setIsMobileMenuOpen(false);
-                  navigate('/');
+                  navigate('/home');
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
@@ -951,6 +969,21 @@ export default function App() {
             <BarChart3 className="w-3 h-3" />
             <span>Admin</span>
           </button>
+
+          {/* Site Guide Link */}
+          <button
+            onClick={() => {
+              setActiveView('dashboard');
+              setActiveModuleId(null);
+              setActiveDirectGame(null);
+              setIsMobileMenuOpen(false);
+              navigate('/guide');
+            }}
+            className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+          >
+            <BookOpen className="w-3 h-3" />
+            <span>Site Guide</span>
+          </button>
         </div>
       </aside>
 
@@ -987,7 +1020,7 @@ export default function App() {
               transition={{ duration: 0.25 }}
             >
               <PageMeta title={activeDirectGame === 'trading' ? 'Stock Market Simulator' : activeDirectGame === 'underwriting' ? 'Alternative Lending Sim' : activeDirectGame === 'parametric' ? 'Parametric Insurance Sim' : activeDirectGame === 'fraud' ? 'Compliance Screener' : 'FinTech Pop Quiz'} description="Interactive educational game." ogType="game" />
-              <StandaloneGameView activeDirectGame={activeDirectGame} onAddXp={(amount, reason) => addXp(amount, reason)} onBackToDashboard={() => { setActiveView('dashboard'); setActiveDirectGame(null); navigate('/'); }} />
+              <StandaloneGameView activeDirectGame={activeDirectGame} onAddXp={(amount, reason) => addXp(amount, reason)} onBackToDashboard={() => { setActiveView('dashboard'); setActiveDirectGame(null); navigate('/home'); }} />
             </motion.div>
           ) : activeView === 'public_profile' ? (
             <motion.div
@@ -1100,7 +1133,7 @@ export default function App() {
               transition={{ duration: 0.25 }}
             >
               <PageMeta title="Support" canonical="/donate" />
-              <DonationView onBackToDashboard={() => { setActiveView('dashboard'); navigate('/'); }} />
+              <DonationView onBackToDashboard={() => { setActiveView('dashboard'); navigate('/home'); }} />
             </motion.div>
           ) : activeView === 'architecture' ? (
             <motion.div
