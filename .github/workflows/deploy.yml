@@ -23,12 +23,18 @@ jobs:
       url: https://overlay-wealth.onrender.com
     steps:
       - name: Trigger Render Deploy Hook
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
         run: |
           curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
           echo "Render deploy triggered"
 
+      - name: Skip Render (no hook configured)
+        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        run: echo "RENDER_DEPLOY_HOOK not set — skipping Render deploy (Vercel is primary)"
+
   smoke-test:
     name: Post-deploy Smoke Test
+    if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
     needs: deploy
     runs-on: ubuntu-latest
     steps:
