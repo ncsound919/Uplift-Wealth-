@@ -58,12 +58,20 @@ describe('stripe helper', () => {
   it('verifyWebhookSignature accepts a valid signature and rejects a bad one', () => {
     const secret = 'whsec_test';
     const payload = '{"type":"checkout.session.completed"}';
-    const timestamp = '1700000000';
+    const timestamp = String(Math.floor(Date.now() / 1000));
     const signed = require('crypto').createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex');
     const header = `t=${timestamp},v1=${signed}`;
     expect(verifyWebhookSignature(payload, header, secret)).toBe(true);
     expect(verifyWebhookSignature(payload, header + 'x', secret)).toBe(true); // extra sigs tolerated
     expect(verifyWebhookSignature('tampered', header, secret)).toBe(false);
     expect(verifyWebhookSignature(payload, `t=${timestamp},v1=deadbeef`, secret)).toBe(false);
+  });
+
+  it('verifyWebhookSignature rejects replayed signatures outside the 5-minute window', () => {
+    const secret = 'whsec_test';
+    const payload = '{"type":"checkout.session.completed"}';
+    const timestamp = '1700000000'; // Nov 2023 — far outside the tolerance
+    const signed = require('crypto').createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex');
+    expect(verifyWebhookSignature(payload, `t=${timestamp},v1=${signed}`, secret)).toBe(false);
   });
 });
