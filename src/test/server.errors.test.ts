@@ -109,11 +109,6 @@ describe('server (edge cases, validation, errors)', () => {
 
   it('stats endpoint ignores malformed numeric fields', async () => {
     const r = await req('PUT', '/api/progress/stats', { body: { xp: 'lots', gameTimeSeconds: -5, streakDays: 'x', badges: 'not-an-array' } });
-    // Debug: CI on ubuntu (Node 22) intermittently returns undefined xp when run with --coverage
-    // Log the full response when the assertion would fail so the CI log shows the cause.
-    if (typeof r.json?.xp !== 'number') {
-      console.warn('[stats-malformed-debug] status', r.status, 'json', JSON.stringify(r.json).slice(0, 1000));
-    }
     expect(r.status).toBe(200);
     expect(typeof r.json.xp).toBe('number');
     expect(typeof r.json.gameTimeSeconds).toBe('number');

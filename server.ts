@@ -1085,7 +1085,15 @@ app.put('/api/progress/stats', authenticate, (req: AuthenticatedRequest, res: Re
   db.users[userId] = user;
 
   saveDatabase();
-  res.json({ xp: userProgress.xp, gameTimeSeconds: userProgress.gameTimeSeconds, streakDays: user.streakDays, badges: user.badges });
+  // Ensure the response always contains numeric fields even when the request
+  // supplied malformed values and the stored progress was never initialized
+  // with numbers (e.g. GUEST_USER on a fresh in-memory DB in CI).
+  res.json({
+    xp: typeof userProgress.xp === 'number' && Number.isFinite(userProgress.xp) ? userProgress.xp : 0,
+    gameTimeSeconds: typeof userProgress.gameTimeSeconds === 'number' && Number.isFinite(userProgress.gameTimeSeconds) ? userProgress.gameTimeSeconds : 0,
+    streakDays: typeof user.streakDays === 'number' && Number.isFinite(user.streakDays) ? user.streakDays : 0,
+    badges: Array.isArray(user.badges) ? user.badges : [],
+  });
 });
 
 app.post('/api/progress/lesson', authenticate, (req: AuthenticatedRequest, res: Response) => {
