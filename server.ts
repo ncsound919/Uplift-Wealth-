@@ -17,6 +17,7 @@ import {
   REFRESH_COOKIE_MAX_AGE,
 } from "./src/lib/auth";
 import { isSupabaseAuthEnabled, verifySupabaseToken, syncProfile, signInWithSupabase, signUpWithSupabase, refreshSupabaseSession } from "./src/lib/supabaseAuth";
+import { createClient } from "@supabase/supabase-js";
 import { isDbConfigured, ensureTables, query } from "./src/db/client";
 import { syncFullDb, loadFullDb } from "./src/db/sync";
 import { runMigrations } from "./src/db/migrate";
@@ -684,6 +685,138 @@ app.post('/api/auth/login', rateLimiter(5, 60000), async (req: Request, res: Res
 // with real server-side ID-token verification against GOOGLE_CLIENT_ID.
 app.post('/api/auth/google', rateLimiter(5, 60000), (_req: Request, res: Response) => {
   res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
+});
+
+function getSupabaseBrowserEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  return url && anon ? { url, anon } : null;
+}
+
+// OAuth redirectTo may never be derived from an untrusted Origin header:
+// only accept the request origin when it is explicitly allow-listed,
+// otherwise fall back to the first configured origin (or localhost in dev).
+function resolveCallbackOrigin(req: Request): string {
+  const origin = (req.headers.origin as string) || '';
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGINS.includes('*'))) {
+    return origin;
+  }
+  if (ALLOWED_ORIGINS.length > 0 && !ALLOWED_ORIGINS.includes('*')) {
+    return ALLOWED_ORIGINS[0];
+  }
+  return `http://localhost:${PORT}`;
+}
+
+// Initiate a real Google OAuth flow against the shared Supabase project.
+// The server performs the redirect (never trusts a client-submitted email).
+app.post('/api/auth/google/oauth', rateLimiter(10, 60000), async (req: Request, res: Response) => {
+  if (!isSupabaseAuthEnabled()) {
+    return res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
+  }
+  const env = getSupabaseBrowserEnv();
+  if (!env) return res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
+  const origin = resolveCallbackOrigin(req);
+  const client = createClient(env.url, env.anon, {
+    auth: { persistSession: false, autoRefreshToken: false, flowType: 'pkce' },
+  });
+  const { data, error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${origin}/auth/callback` },
+  });
+  if (error || !data.url) {
+    return res.status(400).json({ error: error?.message || 'Could not start Google sign-in.' });
+  }
+  res.json({ url: data.url });
+});
+
+// Exchange the OAuth code for a verified session from the shared project and
+// mint the Wealth session cookie + token.
+app.post('/api/auth/google/callback', rateLimiter(10, 60000), async (req: Request, res: Response) => {
+  const { code } = req.body || {};
+  if (!isSupabaseAuthEnabled() || typeof code !== 'string' || !code) {
+    return res.status(400).json({ error: 'Invalid sign-in callback.' });
+  }
+  const env = getSupabaseBrowserEnv();
+  if (!env) return res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
+  const client = createClient(env.url, env.anon, {
+    auth: { persistSession: false, autoRefreshToken: false, flowType: 'pkce' },
+  });
+  try {
+    const { data, error } = await client.auth.exchangeCodeForSession(code);
+    if (error || !data.session) {
+      return res.status(401).json({ error: error?.message || 'Invalid or expired sign-in.' });
+    }
+    const session = data.session;
+    const email = session.user.email ?? '';
+    setRefreshCookie(res, session.refresh_token);
+    db.users[session.user.id] = {
+      id: session.user.id,
+      email,
+      name: (session.user.user_metadata?.member_name as string) || email.split('@')[0] || 'Scholar User',
+      role: 'student',
+      track: 'all',
+      badges: ['pioneer_scholar'],
+      streakDays: 1,
+      lastActive: new Date().toISOString(),
+      tokenVersion: 0
+    };
+    saveDatabase();
+    res.json({ success: true, token: session.access_token, user: { ...db.users[session.user.id], email } });
+  } catch {
+    res.status(500).json({ error: 'Could not complete Google sign-in.' });
+  }
+});
+
+// Google/OAuth callback exchange: the SPA completes Supabase's OAuth flow in
+// the browser, then exchanges the resulting session for a Wealth-issued token.
+// We rotate the refresh token through the shared project so identity is real
+// and verified (never minted from an unverified email).
+app.post('/api/auth/supabase-token', rateLimiter(10, 60000), async (req: Request, res: Response) => {
+  if (!isSupabaseAuthEnabled()) {
+    return res.status(503).json({ error: 'Supabase sign-in is not configured on this deployment.' });
+  }
+  const { accessToken, refreshToken } = req.body || {};
+  const session = typeof refreshToken === 'string' && refreshToken
+    ? await refreshSupabaseSession(refreshToken)
+    : null;
+
+  if (session) {
+    setRefreshCookie(res, session.refreshToken ?? '');
+    db.users[session.user.id] = {
+      id: session.user.id,
+      email: session.user.email ?? '',
+      name: session.user.name,
+      role: session.user.role,
+      track: 'all',
+      badges: ['pioneer_scholar'],
+      streakDays: 1,
+      lastActive: new Date().toISOString(),
+      tokenVersion: 0
+    };
+    saveDatabase();
+    return res.json({ success: true, token: session.token, user: { ...db.users[session.user.id], email: session.user.email } });
+  }
+
+  // Fallback: verify the raw access token directly against the shared project.
+  const verified = typeof accessToken === 'string' && accessToken ? await verifySupabaseToken(accessToken) : null;
+  if (!verified) {
+    return res.status(401).json({ error: 'Invalid or expired session.' });
+  }
+  const token = signAccessToken({ id: verified.id, role: verified.role });
+  setRefreshCookie(res, signRefreshToken({ id: verified.id, role: verified.role }));
+  db.users[verified.id] = {
+    id: verified.id,
+    email: '',
+    name: 'Scholar User',
+    role: verified.role,
+    track: 'all',
+    badges: ['pioneer_scholar'],
+    streakDays: 1,
+    lastActive: new Date().toISOString(),
+    tokenVersion: 0
+  };
+  saveDatabase();
+  res.json({ success: true, token, user: { ...db.users[verified.id], email: '' } });
 });
 
 app.post('/api/auth/refresh', rateLimiter(10, 60000), async (req: Request, res: Response) => {

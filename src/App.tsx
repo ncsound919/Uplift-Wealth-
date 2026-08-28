@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router';
 import { Dashboard } from './components/Dashboard';
 import { LandingPage } from './components/LandingPage';
 import { SiteGuide } from './components/SiteGuide';
+import { LegalPage } from './components/LegalPages';
+import { AuthCallback } from './components/AuthCallback';
 import { PageMeta } from './components/PageMeta';
 import { SearchModal } from './components/SearchModal';
 import { NotificationCenter } from './components/NotificationCenter';
@@ -321,7 +323,7 @@ export default function App() {
       setActiveView('wealth_emergency_fund');
       setActiveModuleId(null);
       setActiveDirectGame(null);
-    } else if (path === '/home' || path === '/guide') {
+    } else if (path === '/home' || path === '/guide' || path === '/auth/callback' || path === '/privacy' || path === '/terms') {
       setActiveView('dashboard');
       setActiveModuleId(null);
       setActiveDirectGame(null);
@@ -598,6 +600,15 @@ export default function App() {
   }
   if (path === '/guide') {
     return <SiteGuide onBack={() => navigate('/home')} />;
+  }
+  if (path === '/privacy') {
+    return <LegalPage kind="privacy" onBack={() => navigate('/home')} />;
+  }
+  if (path === '/terms') {
+    return <LegalPage kind="terms" onBack={() => navigate('/home')} />;
+  }
+  if (path === '/auth/callback') {
+    return <AuthCallback onSuccess={(u) => setCurrentUser(u)} />;
   }
 
 

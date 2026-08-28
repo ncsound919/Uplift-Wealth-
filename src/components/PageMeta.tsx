@@ -16,7 +16,7 @@ export function PageMeta({
   ogType = 'website',
 }: PageMetaProps) {
   const fullTitle = `${title} — Overlay Wealth`;
-  const baseUrl = 'https://overlay365.org';
+  const baseUrl = 'https://uplift-wealth.vercel.app';
 
   return (
     <Helmet>

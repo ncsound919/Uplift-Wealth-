@@ -29,7 +29,7 @@ describe('PageMeta', () => {
   it('renders canonical link when canonical prop is provided', () => {
     renderWithHelmet(<PageMeta title="Page" canonical="/test-page" />);
     const link = document.querySelector('link[rel="canonical"]');
-    expect(link?.getAttribute('href')).toBe('https://overlay365.org/test-page');
+    expect(link?.getAttribute('href')).toBe('https://uplift-wealth.vercel.app/test-page');
   });
 
   it('does not render canonical link when canonical is not provided', () => {
@@ -41,7 +41,7 @@ describe('PageMeta', () => {
   it('renders with custom ogImage', () => {
     renderWithHelmet(<PageMeta title="OG" ogImage="/custom.png" />);
     const ogImage = document.querySelector('meta[property="og:image"]');
-    expect(ogImage?.getAttribute('content')).toBe('https://overlay365.org/custom.png');
+    expect(ogImage?.getAttribute('content')).toBe('https://uplift-wealth.vercel.app/custom.png');
   });
 
   it('renders with custom ogType', () => {
@@ -53,7 +53,7 @@ describe('PageMeta', () => {
   it('renders og:url with base url when no canonical', () => {
     renderWithHelmet(<PageMeta title="Base URL" />);
     const ogUrl = document.querySelector('meta[property="og:url"]');
-    expect(ogUrl?.getAttribute('content')).toBe('https://overlay365.org');
+    expect(ogUrl?.getAttribute('content')).toBe('https://uplift-wealth.vercel.app');
   });
 
   it('renders twitter card summary_large_image', () => {

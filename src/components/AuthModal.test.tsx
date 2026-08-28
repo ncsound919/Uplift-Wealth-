@@ -61,9 +61,9 @@ describe('AuthModal', () => {
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it('does not render a Google sign-in button (unverified SSO removed)', () => {
+  it('renders a Google sign-in button (real Supabase OAuth)', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Continue with Google/)).toBeInTheDocument();
   });
 
   it('toggles to signup mode', () => {
@@ -135,13 +135,29 @@ describe('AuthModal', () => {
     });
   });
 
-  it('does not call the removed Google SSO flow', async () => {
+  it('starts Google OAuth by calling /api/auth/google/oauth', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ url: 'https://accounts.google.com/o/oauth2/v2/auth?x=y' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    const assignSpy = vi.fn();
+    vi.stubGlobal('location', { ...window.location, href: '', assign: assignSpy });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
-    expect(mockLoginWithGoogle).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText(/Continue with Google/));
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/auth/google/oauth'));
+      expect(call).toBeTruthy();
+    });
+    vi.unstubAllGlobals();
   });
 
-  it('never invokes the removed Google flow on success paths', async () => {
+  it('shows an error when Google OAuth cannot start', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ error: 'Google sign-in is not configured on this deployment.' }) }));
+    render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+    fireEvent.click(screen.getByText(/Continue with Google/));
+    expect(await screen.findByText(/not configured/i)).toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it('never invokes the legacy unverified Google flow on success paths', async () => {
     mockLoginWithEmail.mockResolvedValue({ user: { id: 'u1', name: 'Test User' } });
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
     fireEvent.change(screen.getByPlaceholderText('name@example.com'), { target: { value: 'ncsound919@gmail.com' } });
@@ -171,9 +187,10 @@ describe('AuthModal', () => {
     expect(await screen.findByText('Authentication failed. Please try again.')).toBeInTheDocument();
   });
 
-  it('shows no Google error path (flow removed)', () => {
+  it('keeps email sign-in available alongside Google', () => {
     render(<AuthModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
-    expect(screen.queryByText(/Continue with Google/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Continue with Google/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
   it('calls register with name on signup', async () => {

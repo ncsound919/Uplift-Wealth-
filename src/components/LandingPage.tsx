@@ -151,6 +151,10 @@ export function LandingPage({ onEnter }: LandingPageProps) {
         <div className="mb-2 flex items-center justify-center gap-4">
           <a href="/guide" className="hover:text-blue-600">Site Guide</a>
           <span>&middot;</span>
+          <a href="/privacy" className="hover:text-blue-600">Privacy</a>
+          <span>&middot;</span>
+          <a href="/terms" className="hover:text-blue-600">Terms</a>
+          <span>&middot;</span>
           <button onClick={onEnter} className="hover:text-blue-600 cursor-pointer">Enter the App</button>
         </div>
         Overlay Wealth &middot; Interactive Financial Literacy

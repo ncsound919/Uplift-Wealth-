@@ -368,6 +368,32 @@ class ApiClient {
     return res;
   }
 
+  public async loginWithSupabaseToken(accessToken: string, refreshToken?: string) {
+    const res = await this.request<{ success: boolean; token: string; user: UserProfile }>('/api/auth/supabase-token', {
+      method: 'POST',
+      body: JSON.stringify({ accessToken, refreshToken })
+    });
+    if (res.token && res.user) {
+      this.token = res.token;
+      this.setUserId(res.user.id);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hacu_auth_token', res.token);
+        localStorage.setItem('hacu_user_data', JSON.stringify(res.user));
+      }
+    }
+    return res;
+  }
+
+  /** Store an already-issued session (e.g. after an OAuth callback). */
+  public setStoredSession(token: string, user: UserProfile) {
+    this.token = token;
+    this.setUserId(user.id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hacu_auth_token', token);
+      localStorage.setItem('hacu_user_data', JSON.stringify(user));
+    }
+  }
+
   public async logout() {
     try {
       await this.request('/api/auth/logout', { method: 'POST' });
