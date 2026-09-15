@@ -16,7 +16,7 @@ import {
   REFRESH_COOKIE_NAME,
   REFRESH_COOKIE_MAX_AGE,
 } from "./src/lib/auth";
-import { isSupabaseAuthEnabled, verifySupabaseToken, syncProfile, signInWithSupabase, signUpWithSupabase, refreshSupabaseSession } from "./src/lib/supabaseAuth";
+import { isSupabaseAuthEnabled, verifySupabaseToken, syncProfile, signInWithSupabase, signUpWithSupabase, refreshSupabaseSession, isEcosystemAuthConfigured, verifyEcosystemToken, getEcosystemUser } from "./src/lib/supabaseAuth";
 import { createClient } from "@supabase/supabase-js";
 import { isDbConfigured, ensureTables, query } from "./src/db/client";
 import { syncFullDb, loadFullDb } from "./src/db/sync";
@@ -515,6 +515,16 @@ function authenticate(req: AuthenticatedRequest, res: Response, next: NextFuncti
     return;
   }
 
+  // Ecosystem shared identity (additive): when ECOSYSTEM_SUPABASE_* is
+  // configured, a valid ecosystem token identifies the caller even in legacy
+  // AUTH_MODE. Anything else falls through to the legacy path unchanged.
+  if (bearer && isEcosystemAuthConfigured()) {
+    verifyEcosystemToken(bearer)
+      .then((eco) => applyUser(eco ?? resolveRequestUser(bearer)))
+      .catch(() => applyUser(resolveRequestUser(bearer)));
+    return;
+  }
+
   applyUser(resolveRequestUser(bearer));
 }
 
@@ -688,8 +698,18 @@ app.post('/api/auth/google', rateLimiter(5, 60000), (_req: Request, res: Respons
 });
 
 function getSupabaseBrowserEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  // The ecosystem (shared) project is the single IdP; its anon key drives the
+  // PKCE OAuth flow. Legacy NEXT_PUBLIC_SUPABASE_* / SUPABASE_* remain fallbacks.
+  const url =
+    process.env.NEXT_PUBLIC_ECOSYSTEM_SUPABASE_URL ||
+    process.env.ECOSYSTEM_SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL;
+  const anon =
+    process.env.NEXT_PUBLIC_ECOSYSTEM_SUPABASE_ANON_KEY ||
+    process.env.ECOSYSTEM_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY;
   return url && anon ? { url, anon } : null;
 }
 
@@ -707,6 +727,30 @@ function resolveCallbackOrigin(req: Request): string {
   return `http://localhost:${PORT}`;
 }
 
+// PKCE code-verifier must survive across the two stateless server requests
+// (OAuth initiation + code exchange). supabase-js stores the verifier in the
+// auth storage adapter, so we back it with a cookie that the browser carries
+// through the OAuth redirect and back. Without this the exchange fails with
+// "PKCE code verifier not found in storage" (see @supabase/ssr guidance).
+function createCookieStorage(req: Request, res: Response) {
+  const map: Record<string, string> = {};
+  (req.headers.cookie || '').split(';').forEach((part) => {
+    const idx = part.indexOf('=');
+    if (idx > -1) map[part.slice(0, idx).trim()] = decodeURIComponent(part.slice(idx + 1).trim());
+  });
+  const write = (name: string, value: string, maxAge?: number) => {
+    res.append(
+      'Set-Cookie',
+      `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Secure${maxAge !== undefined ? `; Max-Age=${maxAge}` : ''}`
+    );
+  };
+  return {
+    getItem: (key: string) => Promise.resolve(map[key] ?? null),
+    setItem: (key: string, value: string) => Promise.resolve(write(key, value)),
+    removeItem: (key: string) => Promise.resolve(write(key, '', 0)),
+  };
+}
+
 // Initiate a real Google OAuth flow against the shared Supabase project.
 // The server performs the redirect (never trusts a client-submitted email).
 app.post('/api/auth/google/oauth', rateLimiter(10, 60000), async (req: Request, res: Response) => {
@@ -717,7 +761,7 @@ app.post('/api/auth/google/oauth', rateLimiter(10, 60000), async (req: Request, 
   if (!env) return res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
   const origin = resolveCallbackOrigin(req);
   const client = createClient(env.url, env.anon, {
-    auth: { persistSession: false, autoRefreshToken: false, flowType: 'pkce' },
+    auth: { persistSession: true, autoRefreshToken: false, flowType: 'pkce', detectSessionInUrl: false, storage: createCookieStorage(req, res) },
   });
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
@@ -739,7 +783,7 @@ app.post('/api/auth/google/callback', rateLimiter(10, 60000), async (req: Reques
   const env = getSupabaseBrowserEnv();
   if (!env) return res.status(503).json({ error: 'Google sign-in is not configured on this deployment.' });
   const client = createClient(env.url, env.anon, {
-    auth: { persistSession: false, autoRefreshToken: false, flowType: 'pkce' },
+    auth: { persistSession: true, autoRefreshToken: false, flowType: 'pkce', detectSessionInUrl: false, storage: createCookieStorage(req, res) },
   });
   try {
     const { data, error } = await client.auth.exchangeCodeForSession(code);
@@ -883,6 +927,22 @@ app.get('/api/auth/me', authenticate, (req: AuthenticatedRequest, res: Response)
     lastActive: new Date().toISOString()
   };
   res.json({ user: { ...user, email: user.email || '' } });
+});
+
+// --- ECOSYSTEM SHARED AUTH WHOAMI (additive; existing routes untouched) ---
+// Verifies the caller's ecosystem Supabase access token directly against the
+// shared auth-only project. 503 when ECOSYSTEM_SUPABASE_* is not configured,
+// 401 when the token is invalid/expired. Minimal claims only (no PII beyond
+// id/email). Wealth keeps its own database; this project is identity only.
+app.get('/api/auth/ecosystem/me', async (req: Request, res: Response) => {
+  if (!isEcosystemAuthConfigured()) {
+    return res.status(503).json({ error: 'Ecosystem auth not configured' });
+  }
+  const h = (req.headers.authorization as string) || '';
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  const user = await getEcosystemUser(m ? m[1] : '');
+  if (!user) return res.status(401).json({ error: 'Invalid or expired session' });
+  res.json({ id: user.id, email: user.email, appMetadata: user.appMetadata, userMetadata: user.userMetadata });
 });
 
 app.post('/api/auth/logout', (req: Request, res: Response) => {

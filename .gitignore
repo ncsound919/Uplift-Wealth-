@@ -19,3 +19,6 @@ supa.txt
 # Nested standalone app (own mobile/web scope)
 /Trading-Sim-Platform-main/
 
+
+# Credentials accidentally saved with a space in the name
+docs/sup sec.txt

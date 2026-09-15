@@ -34,6 +34,16 @@ vi.mock('./lib/apiClient', () => ({
   apiClient: apiClientMock,
 }));
 
+// Ecosystem login renders nothing when unconfigured — keep the sidebar hermetic
+// so /Sign In/i assertions don't collide with the "Sign in with Google
+// (Ecosystem)" button when the developer's .env.local has VITE_ECOSYSTEM_* set.
+vi.mock('./lib/ecosystemAuth', () => ({
+  ecosystemSupabase: null,
+  isEcosystemAuthConfigured: false,
+  signInWithGoogle: vi.fn(),
+  signOutEcosystem: vi.fn(),
+}));
+
 vi.mock('./lib/analytics', () => ({ capture: vi.fn(), identify: vi.fn(), resetAnalytics: vi.fn() }));
 
 vi.mock('./data/courseData', () => ({

@@ -11,6 +11,7 @@ import { NotificationCenter } from './components/NotificationCenter';
 import { OfflineBanner } from './components/OfflineBanner';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { AuthModal } from './components/AuthModal';
+import { EcosystemLogin } from './components/EcosystemLogin';
 import { Certificate } from './components/Certificate';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingFallback } from './components/LoadingFallback';
@@ -685,6 +686,11 @@ export default function App() {
                 <span>Sign In</span>
               </button>
             )}
+          </div>
+
+          {/* Ecosystem shared identity (renders nothing until configured). */}
+          <div className="flex items-center px-1 pt-1">
+            <EcosystemLogin onLinked={setCurrentUser} />
           </div>
 
           {/* Navigation Menus */}

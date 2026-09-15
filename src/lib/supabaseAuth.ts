@@ -27,15 +27,25 @@ export function isSupabaseAuthEnabled(): boolean {
 
 /** True when the shared Supabase project env vars are present. */
 export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(adminUrl() && adminKey());
+}
+
+/** Shared-project URL (ecosystem IdP preferred; legacy SUPABASE_URL fallback). */
+function adminUrl(): string | undefined {
+  return process.env.ECOSYSTEM_SUPABASE_URL || process.env.SUPABASE_URL;
+}
+
+/** Shared-project service-role key (ecosystem-prefixed preferred). */
+function adminKey(): string | undefined {
+  return process.env.ECOSYSTEM_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 }
 
 let _admin: SupabaseClient | null = null;
 
 /** Service-role client for token verification + profile writes (bypasses RLS). */
 export function getSupabaseAdmin(): SupabaseClient | null {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = adminUrl();
+  const key = adminKey();
   if (!url || !key) return null;
   if (!_admin) {
     _admin = createClient(url, key, {
@@ -148,4 +158,71 @@ function mapSession(data: {
       role,
     },
   };
+}
+
+// --- ECOSYSTEM SHARED AUTH (Overlay365 identity, auth-only) -----------------
+// The ecosystem Supabase project is the single Google/identity IdP; Wealth
+// keeps its own database. Tokens are verified with the anon key directly
+// against `<ECOSYSTEM_SUPABASE_URL>/auth/v1/user` (8s timeout) — no
+// service-role secret needed. Env (never committed):
+//   ECOSYSTEM_SUPABASE_URL=https://<ref>.supabase.co
+//   ECOSYSTEM_SUPABASE_ANON_KEY=<anon key>
+// Unset → every helper below is inert and existing AUTH_MODE behavior is
+// unchanged (additive migration path).
+
+/** True when the shared ecosystem project env vars are present. */
+export function isEcosystemAuthConfigured(): boolean {
+  return Boolean(process.env.ECOSYSTEM_SUPABASE_URL && process.env.ECOSYSTEM_SUPABASE_ANON_KEY);
+}
+
+export interface EcosystemUser {
+  id: string;
+  email: string | null;
+  appMetadata: unknown;
+  userMetadata: unknown;
+}
+
+/**
+ * Verify an ecosystem Supabase access token against the shared project.
+ * Returns the minimal user claims, or null when unconfigured/absent/invalid.
+ */
+export async function getEcosystemUser(accessToken: string): Promise<EcosystemUser | null> {
+  if (!isEcosystemAuthConfigured() || !accessToken) return null;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const r = await fetch(`${process.env.ECOSYSTEM_SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        apikey: process.env.ECOSYSTEM_SUPABASE_ANON_KEY as string,
+        Authorization: `Bearer ${accessToken}`,
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!r.ok) return null;
+    const user = await r.json();
+    if (!user || typeof user.id !== 'string') return null;
+    return {
+      id: user.id,
+      email: user.email ?? null,
+      appMetadata: user.app_metadata,
+      userMetadata: user.user_metadata,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Map an ecosystem identity to Wealth's AuthUser shape. Role comes from the
+ * user's `role` user_metadata, defaulting to `student`. Null when the token
+ * is absent/invalid or the ecosystem project is unconfigured.
+ */
+export async function verifyEcosystemToken(bearerToken: string): Promise<AuthUser | null> {
+  const user = await getEcosystemUser(bearerToken);
+  if (!user) return null;
+  const metaRole = (user.userMetadata as Record<string, unknown> | undefined)?.role as string | undefined;
+  const role: AuthUser['role'] =
+    metaRole && ALLOWED_ROLES.includes(metaRole as AuthUser['role']) ? (metaRole as AuthUser['role']) : 'student';
+  return { id: user.id, role };
 }
