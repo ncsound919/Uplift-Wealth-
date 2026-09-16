@@ -18,7 +18,10 @@ export async function signInWithGoogle() {
   if (!ecosystemSupabase) return { error: 'Ecosystem auth not configured' };
   const { data, error } = await ecosystemSupabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin },
+    // Land on the app shell, not the marketing root: the ecosystem client is
+    // only mounted in the app, so it must be the page that captures the
+    // returned session fragment and links it into a Wealth session.
+    options: { redirectTo: `${window.location.origin}/home` },
   });
   if (error) return { error: error.message };
   if (data?.url) window.location.href = data.url;
