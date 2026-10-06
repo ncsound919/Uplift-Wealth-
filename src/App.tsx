@@ -619,11 +619,11 @@ export default function App() {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
         <div className="flex items-center">
-          <div className="w-6 h-6 bg-slate-900 dark:bg-blue-600 rounded-md flex items-center justify-center text-white mr-2 shadow-sm">
+          <div className="w-6 h-6 bg-slate-900 dark:bg-accent rounded-md flex items-center justify-center text-white mr-2 shadow-sm">
             <GraduationCap className="w-3.5 h-3.5" />
           </div>
           <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">
-            Overlay<span className="text-blue-600">Wealth</span>
+            Overlay<span className="text-accent">Wealth</span>
           </span>
         </div>
         <button
@@ -650,7 +650,7 @@ export default function App() {
               <img src="/overlay-logo-192.png" alt="Overlay Wealth" className="w-7 h-7 rounded-lg object-contain mr-2 shadow-sm" />
               <div>
                 <h1 className="text-sm font-black font-display tracking-tight text-slate-900 dark:text-white leading-none">Overlay</h1>
-                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Wealth</span>
+                <span className="text-xs font-bold text-accent uppercase tracking-widest">Wealth</span>
               </div>
             </div>
             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-500 transition-colors">
@@ -680,7 +680,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-xs"
+                className="px-2 py-1 rounded bg-accent hover:bg-accent/90 text-on-accent text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-xs"
               >
                 <LogIn className="w-3 h-3" />
                 <span>Sign In</span>
@@ -755,7 +755,7 @@ export default function App() {
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                   activeView === 'institutions'
-                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md"
+                    ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                     : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
               >
@@ -777,7 +777,7 @@ export default function App() {
                   className={cn(
                     "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
                     activeView === 'institution_dashboard'
-                      ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md"
+                      ? "bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-md"
                       : "text-slate-600 dark:text-slate-450 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   )}
                 >
@@ -951,7 +951,7 @@ export default function App() {
                             transition={{ duration: 0.15, ease: "easeOut" }}
                             className="flex items-center gap-1.5"
                           >
-                            <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                            <Moon className="w-3.5 h-3.5 text-accent" />
                             <span>Dark Mode</span>
                           </motion.div>
                         )}
@@ -981,7 +981,7 @@ export default function App() {
               setActiveDirectGame(null);
               navigate('/admin');
             }}
-            className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-slate-400 hover:text-accent transition-colors cursor-pointer"
           >
             <BarChart3 className="w-3 h-3" />
             <span>Admin</span>
@@ -996,7 +996,7 @@ export default function App() {
               setIsMobileMenuOpen(false);
               navigate('/guide');
             }}
-            className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-1 py-1.5 text-xs font-bold text-slate-400 hover:text-accent transition-colors cursor-pointer"
           >
             <BookOpen className="w-3 h-3" />
             <span>Site Guide</span>
@@ -1014,6 +1014,7 @@ export default function App() {
 
       {/* Main Content Workspace */}
       <main id="main-content" role="main" aria-label="Course content" className="flex-1 h-screen overflow-y-auto px-4 md:px-8 py-8 md:py-10">
+        <div className="mx-auto w-full max-w-[1400px]">
         <ErrorBoundary>
         <Suspense fallback={<LoadingFallback label="Loading module..." />}>
         <AnimatePresence mode="wait">
@@ -1363,6 +1364,7 @@ export default function App() {
         </AnimatePresence>
         </Suspense>
         </ErrorBoundary>
+        </div>
       </main>
 
       {/* Google and Email Auth Modal */}
@@ -1409,11 +1411,11 @@ export default function App() {
               className="bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-950 border border-slate-800 dark:border-slate-200 shadow-xl rounded-2xl p-4 flex items-center gap-3.5 pointer-events-auto backdrop-blur-md"
             >
               {toast.points ? (
-                <div className="w-10 h-10 rounded-xl bg-blue-600 dark:bg-blue-100 flex items-center justify-center shrink-0 shadow-sm text-white dark:text-blue-600 font-black text-sm">
+                <div className="w-10 h-10 rounded-xl bg-accent dark:bg-accent/15 flex items-center justify-center shrink-0 shadow-sm text-on-accent dark:text-accent font-black text-sm">
                   +{toast.points}
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-100 flex items-center justify-center shrink-0 shadow-sm text-white dark:text-indigo-600 font-black text-sm">
+                <div className="w-10 h-10 rounded-xl bg-accent dark:bg-accent/15 flex items-center justify-center shrink-0 shadow-sm text-on-accent dark:text-accent font-black text-sm">
                   âœ“
                 </div>
               )}

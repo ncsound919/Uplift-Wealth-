@@ -239,7 +239,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                 onChange={(e) => setStartupName(e.target.value)}
                 placeholder="e.g., Payflow, Earned, LedgerShield"
                 disabled={evaluated}
-                className="w-full text-sm px-4 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
+                className="w-full text-sm px-4 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent disabled:opacity-60"
               />
             </div>
 
@@ -251,7 +251,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                   value={vertical}
                   onChange={(e) => setVertical(e.target.value)}
                   disabled={evaluated}
-                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent bg-white"
                 >
                   <option value="payments">Payments & Remittances</option>
                   <option value="neobank">Neobanking (BaaS)</option>
@@ -268,7 +268,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                   value={targetMarket}
                   onChange={(e) => setTargetMarket(e.target.value)}
                   disabled={evaluated}
-                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent bg-white"
                 >
                   <option value="gig-workers">Gig Economy Workers</option>
                   <option value="underbanked">Underbanked / Immigrant Communities</option>
@@ -288,7 +288,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                 placeholder="Explain what friction your platform removes..."
                 rows={2}
                 disabled={evaluated}
-                className="w-full text-sm p-3 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
+                className="w-full text-sm p-3 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent disabled:opacity-60"
               />
             </div>
 
@@ -300,7 +300,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                   value={revenueModel}
                   onChange={(e) => setRevenueModel(e.target.value)}
                   disabled={evaluated}
-                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent bg-white"
                 >
                   <option value="interchange">Card Interchange Fees (0.5% - 2%)</option>
                   <option value="subscription">SaaS Monthly Subscription Fees</option>
@@ -315,7 +315,7 @@ export function CapstoneCanvas({ onComplete }: CapstoneCanvasProps) {
                   value={regulatoryPath}
                   onChange={(e) => setRegulatoryPath(e.target.value)}
                   disabled={evaluated}
-                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full text-sm px-3 py-2.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-accent bg-white"
                 >
                   <option value="baas">Sponsor Bank BaaS Partnership</option>
                   <option value="charter">Full Commercial Bank Charter (FDIC)</option>

@@ -4,7 +4,51 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ---------------------------------------------------------------------------
+   Shared Overlay theme tokens (same contract as the hub). Wealth keeps its
+   emerald accent. Light is the base; `.dark` overrides.
+   --------------------------------------------------------------------------- */
+:root {
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --ink: #0f172a;
+  --muted: rgba(15, 23, 42, 0.62);
+  --faint: rgba(15, 23, 42, 0.42);
+  --line: rgba(15, 23, 42, 0.10);
+  --line-strong: rgba(15, 23, 42, 0.18);
+  --accent: #059669;
+  --accent-soft: rgba(5, 150, 105, 0.12);
+  --on-accent: #ffffff;
+}
+
+.dark {
+  --canvas: #020617;
+  --surface: #0f172a;
+  --surface-2: #1e293b;
+  --ink: #f1f5f9;
+  --muted: rgba(241, 245, 249, 0.62);
+  --faint: rgba(241, 245, 249, 0.42);
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.20);
+  --accent: #10b981;
+  --accent-soft: rgba(16, 185, 129, 0.14);
+  --on-accent: #052e16;
+}
+
 @theme {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-display: 'Bricolage Grotesque', sans-serif;
   --font-serif-accent: 'Instrument Serif', Georgia, serif;
@@ -135,7 +179,7 @@
   }
   /* Cool gradient text (teal -> indigo) for the Overlay Wealth wordmark */
   .text-gradient-cool {
-    background-image: linear-gradient(115deg, #38bdf8, #6366f1 55%, #22d3ee);
+    background-image: linear-gradient(115deg, #34d399, #10b981 55%, #059669);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -189,7 +233,7 @@
     @apply bg-transparent text-slate-50 p-0 text-[13px] border-none shadow-none;
   }
   .markdown-body blockquote {
-    @apply border-l-4 border-blue-500 pl-5 italic text-slate-600 dark:text-slate-400 bg-blue-50/50 dark:bg-blue-950/20 py-3 pr-4 rounded-r-2xl mb-6;
+    @apply border-l-4 border-emerald-500 pl-5 italic text-slate-600 dark:text-slate-400 bg-emerald-50/50 dark:bg-emerald-950/20 py-3 pr-4 rounded-r-2xl mb-6;
   }
   .markdown-body img {
     @apply rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 my-6;
@@ -197,7 +241,7 @@
 
   /* Focus visibility for keyboard navigation */
   *:focus-visible {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
@@ -208,8 +252,8 @@
     left: 16px;
     z-index: 9999;
     padding: 12px 20px;
-    background: #3b82f6;
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
     font-weight: 700;
     font-size: 14px;
     border-radius: 8px;
@@ -231,4 +275,21 @@
   .animate-pulse, .motion-safe\:animate-bounce {
     animation: none !important;
   }
+}
+
+/* ---------- Typography polish ---------- */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Tinted elevation helper (inherits the emerald accent hue) */
+@utility shadow-accent {
+  box-shadow: 0 18px 50px -18px color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+/* ---------- Press feedback: one treatment app-wide ---------- */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.98);
 }

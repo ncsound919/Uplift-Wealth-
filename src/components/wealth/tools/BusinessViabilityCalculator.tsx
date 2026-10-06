@@ -14,7 +14,7 @@ export function BusinessViabilityCalculator() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Briefcase className="w-5 h-5 text-purple-500" />
+        <Briefcase className="w-5 h-5 text-accent" />
         <h3 className="font-black text-sm text-slate-900 dark:text-white">Business Viability Calculator</h3>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -27,7 +27,7 @@ export function BusinessViabilityCalculator() {
         <div><label className="text-xs font-bold uppercase text-slate-500 block mb-1">CAC ($)</label>
           <input type="number" value={cac} onChange={e => setCac(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold" min={0} step={5} /></div>
       </div>
-      <div className="bg-purple-50 dark:bg-purple-950/30 rounded-2xl p-5 border border-purple-100 dark:border-purple-900/50 space-y-2">
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
         <div className="flex justify-between"><span className="text-xs font-bold text-slate-500">Break-even</span>
           <span className="text-lg font-black text-slate-900 dark:text-white">{breakEven === Infinity ? 'Not reached' : `${breakEven} months`}</span></div>
         <div className="flex justify-between"><span className="text-xs font-bold text-slate-500">Year 1 Profit</span>

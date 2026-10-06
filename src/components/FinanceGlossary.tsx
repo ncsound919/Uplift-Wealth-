@@ -878,7 +878,7 @@ export function FinanceGlossary() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search terms, definitions, or real-world examples (e.g. FedNow, Interchange, FICO, Blockchain)..."
-            className="w-full bg-slate-950/90 border border-indigo-800/60 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+            className="w-full bg-slate-950/90 border border-indigo-800/60 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent shadow-inner"
           />
           {searchQuery && (
             <button

@@ -37,7 +37,7 @@ export function StandaloneGameView({ activeDirectGame, onAddXp, onBackToDashboar
     <div className="max-w-7xl mx-auto space-y-6 p-2">
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-900 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent/10 dark:bg-accent/15 text-accent border border-accent/20 text-xs font-black uppercase tracking-wider">
             <span>EDUCATIONAL GAME TERMINAL</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white">Interactive Educational Game Workspace</h2>

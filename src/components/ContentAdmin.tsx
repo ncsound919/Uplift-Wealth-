@@ -109,7 +109,7 @@ export function ContentAdmin() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={18}
-            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-mono leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:outline-hidden resize-y"
+            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-mono leading-relaxed focus:ring-2 focus:ring-accent focus:outline-hidden resize-y"
           />
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-400">{lesson?.title}</span>

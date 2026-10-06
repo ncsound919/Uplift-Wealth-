@@ -136,6 +136,9 @@ export class AlphaVantageClient {
             regularMarketVolume: volume,
             bid: price - 0.02,
             ask: price + 0.02,
+            // Carry the server's provenance so the UI can label live vs simulated
+            // honestly (the server returns simulated:true when no provider key).
+            simulated: data.simulated === true,
           };
           this.setCache(cacheKey, quote, ttl);
           return quote;
@@ -330,6 +333,8 @@ export interface StockQuote {
   bid?: number;
   ask?: number;
   regularMarketVolume?: number;
+  /** True when the server synthesized this quote (no live provider key). */
+  simulated?: boolean;
 }
 
 export interface OHLCPoint {

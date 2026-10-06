@@ -154,7 +154,7 @@ export function KnowledgeBase() {
             placeholder="Search fintech terminology..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-white rounded-lg pl-9 pr-3 py-2 text-xs font-semibold shadow-2xs transition-all outline-none"
+            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 focus:border-accent dark:focus:border-accent focus:bg-white dark:focus:bg-slate-900 text-slate-900 dark:text-white rounded-lg pl-9 pr-3 py-2 text-xs font-semibold shadow-2xs transition-all outline-none"
           />
           {searchQuery && (
             <button

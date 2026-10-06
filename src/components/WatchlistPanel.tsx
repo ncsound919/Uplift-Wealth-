@@ -15,20 +15,33 @@ interface MarketDataStatus {
 export function useMarketDataStatus(): MarketDataStatus {
   const [status, setStatus] = useState<MarketDataStatus>({
     mode: 'simulated',
-    provider: 'Simulation',
+    provider: 'Random Walk Simulation',
     apiKeyPresent: false,
     lastUpdated: null,
   });
 
   useEffect(() => {
-    const apiKey = (import.meta as any).env?.VITE_ALPHA_VANTAGE_API_KEY;
-    const hasRealKey = apiKey && apiKey !== 'demo' && apiKey.length > 0;
-    setStatus({
-      mode: hasRealKey ? 'live' : 'simulated',
-      provider: hasRealKey ? 'Alpha Vantage' : 'Random Walk Simulation',
-      apiKeyPresent: !!hasRealKey,
-      lastUpdated: null,
-    });
+    // The badge must reflect what the SERVER actually serves, not a client-side
+    // env key that has nothing to do with the server's provider key. Probe one
+    // quote and read its `simulated` provenance flag.
+    let cancelled = false;
+    if (typeof fetch !== 'function') return;
+    alphaVantage
+      .getQuote('SPY')
+      .then((q) => {
+        if (cancelled) return;
+        const live = q.simulated !== true;
+        setStatus({
+          mode: live ? 'live' : 'simulated',
+          provider: live ? 'Alpha Vantage' : 'Random Walk Simulation',
+          apiKeyPresent: live,
+          lastUpdated: new Date().toISOString(),
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setStatus({ mode: 'error', provider: 'Error', apiKeyPresent: false, lastUpdated: null });
+      });
+    return () => { cancelled = true; };
   }, []);
 
   return status;
@@ -132,7 +145,7 @@ export function WatchlistPanel() {
                       value={newSymbol}
                       onChange={(e) => setNewSymbol(e.target.value.toUpperCase())}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 dark:text-white uppercase outline-none focus:border-blue-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 dark:text-white uppercase outline-none focus:border-accent"
                       autoFocus
                     />
                     <div className="flex gap-2">

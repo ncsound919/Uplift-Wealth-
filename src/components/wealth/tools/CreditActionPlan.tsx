@@ -12,7 +12,7 @@ export function CreditActionPlan() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <CreditCard className="w-5 h-5 text-blue-500" />
+        <CreditCard className="w-5 h-5 text-accent" />
         <h3 className="font-black text-sm text-slate-900 dark:text-white">Credit Action Plan</h3>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -23,7 +23,7 @@ export function CreditActionPlan() {
         <div><label className="text-xs font-bold uppercase text-slate-500 block mb-1">Monthly Budget</label>
           <input type="number" value={monthlyBudget} onChange={e => setMonthlyBudget(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold" min={0} /></div>
       </div>
-      <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-5 border border-blue-100 dark:border-blue-900/50 space-y-2">
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
         <div className="flex justify-between"><span className="text-xs font-bold text-slate-500">Time to target</span>
           <span className="text-lg font-black text-slate-900 dark:text-white">{months} months</span></div>
         <div className="flex justify-between"><span className="text-xs font-bold text-slate-500">Target utilization</span>

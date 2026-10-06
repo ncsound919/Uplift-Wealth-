@@ -163,7 +163,7 @@ export function DiscussionThread({ moduleId, lessonId, currentUserId, onRequireA
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Start a discussion…"
             maxLength={120}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm focus:ring-2 focus:ring-accent focus:outline-hidden"
           />
           <textarea
             value={body}
@@ -171,7 +171,7 @@ export function DiscussionThread({ moduleId, lessonId, currentUserId, onRequireA
             placeholder="Share what you learned or what you're wondering…"
             maxLength={4000}
             rows={3}
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm resize-none focus:ring-2 focus:ring-accent focus:outline-hidden"
           />
           <div className="flex justify-end">
             <button
@@ -270,7 +270,7 @@ function ReplyBox({ onReply }: { onReply: (text: string) => void }) {
         onChange={(e) => setText(e.target.value)}
         placeholder="Write a reply…"
         maxLength={2000}
-        className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+        className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-xs focus:ring-2 focus:ring-accent focus:outline-hidden"
       />
       <button type="submit" disabled={!text.trim()} className="px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-white text-white dark:text-slate-950 text-[11px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
         Reply

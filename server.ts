@@ -54,6 +54,7 @@ import {
 } from "./src/db/contentOps";
 import { sendWelcomeEmail, sendWaitlistConfirmEmail, sendEmail, escapeHtml } from "./src/lib/email";
 import { PLANS, isStripeConfigured, createCheckoutSession, createPortalSession, verifyWebhookSignature } from "./src/lib/stripe";
+import { postLedgerEvent } from "./src/lib/ledger";
 import type { DatabaseSchema } from "./src/db/types";
 
 dotenv.config({ quiet: true });
@@ -1777,7 +1778,7 @@ app.post('/api/billing/portal', authenticate, async (req: AuthenticatedRequest, 
   }
 });
 
-app.post('/api/billing/webhook', (req: Request, res: Response) => {
+app.post('/api/billing/webhook', async (req: Request, res: Response) => {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const raw = (req as Request & { rawBody?: Buffer }).rawBody?.toString('utf-8') ?? '';
   const signature = req.headers['stripe-signature'] as string | undefined;
@@ -1785,7 +1786,24 @@ app.post('/api/billing/webhook', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid signature.' });
   }
 
-  let event: { type: string; data?: { object?: { id?: string; customer?: string; subscription?: string; metadata?: { tier?: string }; status?: string } } };
+  let event: {
+    id?: string;
+    type: string;
+    data?: {
+      object?: {
+        id?: string;
+        customer?: string;
+        subscription?: string;
+        customer_email?: string;
+        metadata?: { tier?: string };
+        status?: string;
+        payment_status?: string;
+        amount_total?: number;
+        amount_paid?: number;
+        billing_reason?: string;
+      };
+    };
+  };
   try {
     event = JSON.parse(raw);
   } catch {
@@ -1796,17 +1814,49 @@ app.post('/api/billing/webhook', (req: Request, res: Response) => {
   const tier = 'institutional';
   if (event.type === 'checkout.session.completed') {
     const object = event.data?.object;
-    const email = object?.id ? '' : '';
-    const customerEmail = (event.data?.object as { customer_email?: string })?.customer_email;
-    if (customerEmail) {
+    // Only grant entitlements / post revenue once funds are actually settled.
+    // checkout.session.completed also fires for async/delayed methods with
+    // payment_status 'unpaid'; granting on that was a revenue + entitlement bug.
+    const paid = object?.payment_status === 'paid';
+    const customerEmail = object?.customer_email;
+    if (paid && customerEmail) {
       const user = findUserByEmail(customerEmail);
       if (user) {
+        const wasInstitutional = user.subscriptionTier === tier;
         user.subscriptionTier = tier;
         user.stripeCustomerId = object?.customer;
         user.stripeSubscriptionId = object?.subscription;
         saveDatabase();
-        notify(user.id, 'system', 'Welcome to Premium!', 'Your Overlay Wealth subscription is active.');
+        // Idempotent: notify only on the real state change, so a Stripe retry
+        // (same event re-delivered) does not re-notify.
+        if (!wasInstitutional) {
+          notify(user.id, 'system', 'Welcome to Premium!', 'Your Overlay Wealth subscription is active.');
+        }
       }
+    }
+    if (paid && object?.id && typeof object.amount_total === 'number') {
+      await postLedgerEvent({
+        kind: 'charge.settled',
+        id: object.id,
+        amountCents: object.amount_total,
+        memo: 'overlay wealth institutional subscription',
+      });
+    }
+  } else if (event.type === 'invoice.paid') {
+    // Renewals only: the initial invoice (subscription_create) is already
+    // captured by checkout.session.completed, so skip it to avoid double-posting.
+    const object = event.data?.object;
+    if (
+      object?.id &&
+      object.billing_reason !== 'subscription_create' &&
+      typeof object.amount_paid === 'number'
+    ) {
+      await postLedgerEvent({
+        kind: 'charge.settled',
+        id: object.id,
+        amountCents: object.amount_paid,
+        memo: `overlay wealth renewal (${object.billing_reason ?? 'cycle'})`,
+      });
     }
   } else if (event.type === 'customer.subscription.deleted') {
     const subId = event.data?.object?.id;
@@ -2110,7 +2160,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 async function startServer() {
   if (effectiveEnv === 'production') {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    // Never serve the bundled server or any sourcemap: the build drops server.cjs
+    // (and previously server.cjs.map, which leaked the full source). Static
+    // serving is for client assets only; anything non-client 404s.
+    app.use((req, res, next) => {
+      if (/\.(cjs|map)$/i.test(req.path)) return res.status(404).end();
+      next();
+    });
+    app.use(express.static(distPath, { dotfiles: 'ignore' }));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

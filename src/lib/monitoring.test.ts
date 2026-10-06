@@ -71,10 +71,12 @@ describe('monitoring', () => {
 
   it('can be called multiple times without error', async () => {
     const { initMonitoring } = await import('./monitoring');
+    const Sentry = await import('@sentry/react');
     initMonitoring();
     initMonitoring();
     initMonitoring();
-    expect(true).toBe(true);
+    // No DSN configured: repeated calls must stay no-ops, not throw nor init Sentry.
+    expect(Sentry.init).not.toHaveBeenCalled();
   });
 
   describe('with Sentry DSN configured', () => {

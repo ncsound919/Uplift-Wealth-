@@ -103,21 +103,21 @@ export function Dashboard({
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-12">
       
-      {/* Title Header */}
-      <div className="relative text-center pt-10 pb-6 space-y-5">
+      {/* Title Header — de-centred for an asymmetric hero */}
+      <div className="relative text-left pt-10 pb-6 space-y-5">
         {/* Ambient glows */}
         <div className="pointer-events-none absolute left-1/4 top-0 h-72 w-72 rounded-full bg-emerald-500/10 blur-[120px] animate-aurora" />
-        <div className="pointer-events-none absolute right-1/4 top-8 h-72 w-72 rounded-full bg-indigo-500/10 blur-[120px] animate-aurora-2" />
+        <div className="pointer-events-none absolute right-1/4 top-8 h-72 w-72 rounded-full bg-accent/10 blur-[120px] animate-aurora-2" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-amber-400/8 blur-[110px]" />
 
-        <div className="relative">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tight leading-[1.02]">
+        <div className="relative max-w-3xl">
+          <h1 className="text-balance text-5xl md:text-7xl lg:text-8xl font-display font-black text-slate-900 dark:text-white tracking-tight leading-[1.02]">
             Money Matters
           </h1>
           <div className="font-display text-2xl md:text-4xl font-black tracking-tight text-gradient-cool mt-2">
             Overlay Wealth
           </div>
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
+          <p className="text-pretty text-lg md:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl leading-relaxed mt-4">
             An easy, step-by-step guide to how modern money works: from digital payments and bank apps to stocks, crypto, and starting your own app.
           </p>
         </div>
@@ -140,8 +140,8 @@ export function Dashboard({
             whileHover={{ y: -3 }}
             className="group relative mx-auto flex w-full max-w-3xl items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 to-indigo-500" />
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-indigo-500 text-white shadow-md">
+            <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-emerald-500 to-emerald-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-md">
               <Icon size={22} />
             </div>
             <div className="min-w-0 flex-1">

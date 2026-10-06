@@ -28,7 +28,7 @@ export function EmergencyFundCalculator() {
           <input type="number" value={targetMonths} onChange={e => setTargetMonths(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold" min={1} max={24} step={1} /></div>
       </div>
       <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
-        <div className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
       </div>
       <div className="bg-sky-50 dark:bg-sky-950/30 rounded-2xl p-5 border border-sky-100 dark:border-sky-900/50 space-y-2">
         <div className="flex justify-between"><span className="text-xs font-bold text-slate-500">Months of Coverage</span>

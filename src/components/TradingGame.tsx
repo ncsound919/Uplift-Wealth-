@@ -205,7 +205,7 @@ export function TradingGame({ onComplete }: TradingGameProps) {
   const riskGrade = RiskAnalytics.riskGrade(metrics.risk);
 
   return (
-    <div className="flex flex-col h-full bg-[#080b10] text-slate-100 font-sans selection:bg-blue-500 selection:text-white overflow-hidden rounded-2xl border border-slate-850 shadow-2xl">
+    <div className="flex flex-col h-full bg-[#080b10] text-slate-100 font-sans selection:bg-accent selection:text-white overflow-hidden rounded-2xl border border-slate-850 shadow-2xl">
       
       {/* TERMINAL TOP HEADER */}
       <div className="bg-[#0d1117] border-b border-slate-850 px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0">
@@ -338,7 +338,7 @@ export function TradingGame({ onComplete }: TradingGameProps) {
                 value={searchSymbol}
                 onChange={(e) => setSearchSymbol(e.target.value.toUpperCase())}
                 placeholder="Add Symbol (e.g. NVDA)..."
-                className="w-full bg-[#11151f] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
+                className="w-full bg-[#11151f] border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-accent font-mono"
               />
             </div>
           </form>

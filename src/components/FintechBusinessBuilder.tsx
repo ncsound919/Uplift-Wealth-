@@ -706,7 +706,7 @@ export function FintechBusinessBuilder({
                         value={customLane}
                         onChange={(e) => setCustomLane(e.target.value)}
                         placeholder="e.g. Micro-remittance loyalty, decentralized escrow, corporate sweeps"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-accent focus:outline-none"
                       />
                     </div>
                   )}
@@ -750,7 +750,7 @@ export function FintechBusinessBuilder({
                         value={customProblem}
                         onChange={(e) => setCustomProblem(e.target.value)}
                         placeholder="State the exact pain point (e.g. Cross border invoice clearing is slow...)"
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none min-h-[80px]"
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-accent focus:outline-none min-h-[80px]"
                       />
                     </div>
                   )}
@@ -949,7 +949,7 @@ export function FintechBusinessBuilder({
                           value={businessName}
                           onChange={(e) => setBusinessName(e.target.value)}
                           placeholder="e.g. Velo, Bold, Aura, Nexa"
-                          className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold focus:ring-2 focus:ring-accent focus:outline-none"
                         />
                       </div>
 
@@ -979,7 +979,7 @@ export function FintechBusinessBuilder({
                             value={founderName}
                             onChange={(e) => setFounderName(e.target.value)}
                             placeholder="Your Full Legal Name"
-                            className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold focus:ring-2 focus:ring-accent focus:outline-none"
                           />
                         </div>
                         <div>
@@ -987,7 +987,7 @@ export function FintechBusinessBuilder({
                           <select
                             value={founderState}
                             onChange={(e) => setFounderState(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-md"
+                            className="w-full px-3 py-2 border border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:ring-2 focus:ring-accent focus:outline-none rounded-md"
                           >
                             {['California', 'Texas', 'New York', 'Florida', 'Wyoming', 'Delaware', 'Illinois', 'Washington', 'Other'].map(st => (
                               <option key={st} value={st}>{st}</option>

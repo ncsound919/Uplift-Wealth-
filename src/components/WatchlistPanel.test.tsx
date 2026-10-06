@@ -22,9 +22,11 @@ vi.mock('../stores/watchlistStore', () => ({
 }));
 
 const mockGetBatchQuotes = vi.fn();
+const mockGetQuote = vi.fn((..._args: any[]) => Promise.resolve({ symbol: 'SPY', simulated: true }));
 vi.mock('../lib/alphaVantageClient', () => ({
   alphaVantage: {
     getBatchQuotes: (...args: any[]) => mockGetBatchQuotes(...args),
+    getQuote: (...args: any[]) => mockGetQuote(...args),
   },
   StockQuote: class {},
 }));
@@ -63,6 +65,16 @@ describe('useMarketDataStatus', () => {
     expect(status.mode).toBe('simulated');
     expect(status.provider).toBe('Random Walk Simulation');
     expect(status.apiKeyPresent).toBe(false);
+  });
+
+  it('reports live only when the server data is not simulated', async () => {
+    mockGetQuote.mockResolvedValueOnce({ symbol: 'SPY', simulated: false });
+    let status: any;
+    function TestHook() { status = useMarketDataStatus(); return null; }
+    render(<TestHook />);
+    await waitFor(() => expect(status.mode).toBe('live'));
+    expect(status.provider).toBe('Alpha Vantage');
+    expect(status.apiKeyPresent).toBe(true);
   });
 });
 

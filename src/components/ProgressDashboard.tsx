@@ -25,7 +25,7 @@ export function ProgressDashboard({
 }: ProgressDashboardProps) {
   const totalModules = modules.length;
   const totalLessons = modules.reduce((sum, m) => sum + (m.level === 'beginner' ? 12 : 8), 0);
-  const moduleProgress = Math.round((completedModules.length / totalModules) * 100);
+  const moduleProgress = totalModules > 0 ? Math.round((completedModules.length / totalModules) * 100) : 0;
   const lessonProgress = Math.round((completedLessons.length / Math.max(1, totalLessons)) * 100);
   const level = Math.floor(Math.sqrt(xp / 100)) + 1;
 

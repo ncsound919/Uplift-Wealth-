@@ -57,7 +57,7 @@ export function getSupabaseAdmin(): SupabaseClient | null {
 
 /**
  * Verify a Supabase access token (issued by the shared project) and map it to
- * Wealth's AuthUser shape. Role comes from the user's `role` user_metadata,
+ * Wealth's AuthUser shape. Role comes from the user's `role` app_metadata,
  * defaulting to `student`. Returns null when the token is absent/invalid.
  */
 export async function verifySupabaseToken(bearerToken: string): Promise<AuthUser | null> {
@@ -67,7 +67,10 @@ export async function verifySupabaseToken(bearerToken: string): Promise<AuthUser
   try {
     const { data, error } = await admin.auth.getUser(bearerToken);
     if (error || !data.user) return null;
-    const metaRole = data.user.user_metadata?.role as string | undefined;
+    // Role MUST come from app_metadata (server-controlled). user_metadata is
+    // writable by the authenticated user (updateUser({data:{role}})), so trusting
+    // it here was a privilege-escalation hole.
+    const metaRole = data.user.app_metadata?.role as string | undefined;
     const role: AuthUser['role'] =
       metaRole && ALLOWED_ROLES.includes(metaRole as AuthUser['role']) ? (metaRole as AuthUser['role']) : 'student';
     return { id: data.user.id, role };
@@ -215,13 +218,14 @@ export async function getEcosystemUser(accessToken: string): Promise<EcosystemUs
 
 /**
  * Map an ecosystem identity to Wealth's AuthUser shape. Role comes from the
- * user's `role` user_metadata, defaulting to `student`. Null when the token
- * is absent/invalid or the ecosystem project is unconfigured.
+ * user's `role` app_metadata (server-controlled), defaulting to `student`.
+ * Null when the token is absent/invalid or the ecosystem project is unconfigured.
  */
 export async function verifyEcosystemToken(bearerToken: string): Promise<AuthUser | null> {
   const user = await getEcosystemUser(bearerToken);
   if (!user) return null;
-  const metaRole = (user.userMetadata as Record<string, unknown> | undefined)?.role as string | undefined;
+  // Trust app_metadata only: user_metadata is settable by the user themselves.
+  const metaRole = (user.appMetadata as Record<string, unknown> | undefined)?.role as string | undefined;
   const role: AuthUser['role'] =
     metaRole && ALLOWED_ROLES.includes(metaRole as AuthUser['role']) ? (metaRole as AuthUser['role']) : 'student';
   return { id: user.id, role };

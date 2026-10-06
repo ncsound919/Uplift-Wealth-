@@ -209,7 +209,7 @@ export function ModuleBuilder({ onSave, onCancel, initialModule }: ModuleBuilder
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Modern Payments Engineering" 
                 required
-                className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-blue-500 bg-slate-50/50"
+                className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-accent bg-slate-50/50"
               />
             </div>
 
@@ -222,7 +222,7 @@ export function ModuleBuilder({ onSave, onCancel, initialModule }: ModuleBuilder
                 placeholder="Briefly describe what students will learn in this core module..." 
                 rows={3}
                 required
-                className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-blue-500 bg-slate-50/50 leading-relaxed"
+                className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-accent bg-slate-50/50 leading-relaxed"
               />
             </div>
 
@@ -410,7 +410,7 @@ export function ModuleBuilder({ onSave, onCancel, initialModule }: ModuleBuilder
                     onChange={(e) => handleUpdateLessonField('title', e.target.value)}
                     placeholder="e.g. Cleared Settlement and Timelines"
                     required
-                    className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-blue-500 bg-white"
+                    className="w-full text-xs font-semibold p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-accent bg-white"
                   />
                 </div>
 
@@ -428,7 +428,7 @@ export function ModuleBuilder({ onSave, onCancel, initialModule }: ModuleBuilder
                         placeholder="### Lesson core headings...&#10;Write comprehensive, thorough curriculum materials here using markdown format."
                         rows={10}
                         required
-                        className="w-full text-xs font-mono p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-blue-500 bg-white leading-relaxed"
+                        className="w-full text-xs font-mono p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:border-accent bg-white leading-relaxed"
                       />
                     </div>
                   </div>
@@ -482,7 +482,7 @@ export function ModuleBuilder({ onSave, onCancel, initialModule }: ModuleBuilder
                                 onChange={(e) => handleUpdateQuizQuestion(qIdx, { ...q, question: e.target.value })}
                                 placeholder="Write the question prompt..."
                                 required
-                                className="w-full text-xs font-bold p-2.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-blue-500 bg-slate-50/50"
+                                className="w-full text-xs font-bold p-2.5 rounded-lg border border-slate-200 focus:outline-hidden focus:border-accent bg-slate-50/50"
                               />
                             </div>
 
