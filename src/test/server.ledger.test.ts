@@ -64,7 +64,7 @@ describe('billing webhook → ledger spine', () => {
   it('posts the first subscription payment as charge.settled', async () => {
     const res = await send({
       type: 'checkout.session.completed',
-      data: { object: { id: 'cs_1', amount_total: 9900, customer: 'cus_1', subscription: 'sub_1' } },
+      data: { object: { id: 'cs_1', amount_total: 9900, customer: 'cus_1', subscription: 'sub_1', payment_status: 'paid' } },
     });
     expect(res.status).toBe(200);
     expect(postLedgerEvent).toHaveBeenCalledWith(

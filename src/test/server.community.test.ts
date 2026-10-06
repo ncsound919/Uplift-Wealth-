@@ -209,7 +209,7 @@ describe('server (community, cohorts, billing)', () => {
 
     const completed = await req('POST', '/api/billing/webhook', {
       headers: { 'stripe-signature': 'sig' },
-      body: { type: 'checkout.session.completed', data: { object: { id: 'cs_1', customer: 'cus_1', subscription: 'sub_1', customer_email: 'school@test.dev' } } },
+      body: { type: 'checkout.session.completed', data: { object: { id: 'cs_1', customer: 'cus_1', subscription: 'sub_1', customer_email: 'school@test.dev', payment_status: 'paid' } } },
     });
     expect(completed.status).toBe(200);
     expect(completed.json.received).toBe(true);

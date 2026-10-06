@@ -98,12 +98,12 @@ describe('supabaseAuth: verifySupabaseToken', () => {
     expect(fakeClient.auth.getUser).toHaveBeenCalledWith('valid-token');
   });
 
-  it('honors an admin role in user_metadata', async () => {
+  it('honors a role from app_metadata (server-controlled)', async () => {
     process.env.AUTH_MODE = 'supabase';
     process.env.SUPABASE_URL = 'https://x.supabase.co';
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'sb-key';
     fakeClient.auth.getUser.mockResolvedValue({
-      data: { user: { id: 'uuid-2', user_metadata: { role: 'institution' } } },
+      data: { user: { id: 'uuid-2', app_metadata: { role: 'institution' } } },
       error: null,
     });
 

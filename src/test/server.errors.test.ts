@@ -183,7 +183,7 @@ describe('server (edge cases, validation, errors)', () => {
     stripeMocks.verifyWebhookSignature.mockReturnValue(true);
     await req('POST', '/api/billing/webhook', {
       headers: { 'stripe-signature': 'sig' },
-      body: { type: 'checkout.session.completed', data: { object: { id: 'cs_2', customer: 'cus_2', subscription: 'sub_2', customer_email: 'edge.school@test.dev' } } },
+      body: { type: 'checkout.session.completed', data: { object: { id: 'cs_2', customer: 'cus_2', subscription: 'sub_2', customer_email: 'edge.school@test.dev', payment_status: 'paid' } } },
     });
     stripeMocks.createPortalSession.mockRejectedValue(new Error('portal boom'));
     const portal = await req('POST', '/api/billing/portal', { token });
