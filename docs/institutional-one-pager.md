@@ -22,8 +22,12 @@ Overlay Wealth is a financial literacy platform built **for Black communities** 
 ## Pricing
 | Tier | Price | Includes |
 |---|---|---|
-| Free Member | $0 | Complete access — all 16 modules, games, certificates |
-| Institutional | $99/mo | Up to 50 seats, group/classroom management, roster analytics, curriculum guide (PDF) |
+| **Learner** | **Free** | Complete access — all 16 modules, games, simulators, certificates |
+| **Institutional (classroom)** | **$99/mo** | Up to 50 seats, group/classroom management, roster analytics, curriculum guide (PDF) |
+
+The learner platform is free and stays free — no paywalls, no ads, no data selling.
+The classroom tier carries a seat-based price ($99/mo, up to 50 seats); the learner
+experience is never gated.
 
 Institutional pilots available — contact us for a demo and guest pass.
 
