@@ -311,7 +311,7 @@ export function KnowledgeBase() {
           </div>
 
           {/* Sub-tab Navigation */}
-          <div className="flex bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl gap-1 shadow-inner border border-slate-200/80 dark:border-slate-800/80">
+          <div className="flex bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl gap-1 shadow-inner border border-slate-200/80 dark:border-slate-800/80 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveSubTab('slides')}
               className={cn(
