@@ -23,9 +23,16 @@ import { spawnSync } from 'node:child_process';
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const skip = /^(1|true|yes|on)$/i.test(String(process.env.SKIP_CI ?? '').trim());
 
+// Wealth's tests assert the "unconfigured" paths (no Supabase/Stripe/auth mode).
+// On Vercel those env vars ARE configured, so clear them for the test step only.
+const testEnv = { ...process.env, NODE_ENV: 'test' };
+for (const k of Object.keys(testEnv)) {
+  if (/^(SUPABASE|STRIPE|AUTH_MODE)/i.test(k)) delete testEnv[k];
+}
+
 const STEPS = [
   { name: 'typecheck (tsc --noEmit)', args: ['run', 'lint'] },
-  { name: 'tests + coverage (vitest --coverage)', args: ['run', 'test:coverage'] },
+  { name: 'tests + coverage (vitest --coverage)', args: ['run', 'test:coverage'], env: { NODE_ENV: 'test' } },
   { name: 'production build', args: ['run', 'build'] },
 ];
 
@@ -39,7 +46,7 @@ for (const step of STEPS) {
   const started = Date.now();
   const run = spawnSync(npm, step.args, {
     stdio: 'inherit',
-    env: process.env,
+    env: step.env ? { ...process.env, ...step.env } : process.env,
     shell: process.platform === 'win32',
   });
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
