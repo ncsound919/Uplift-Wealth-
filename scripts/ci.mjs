@@ -27,7 +27,7 @@ const skip = /^(1|true|yes|on)$/i.test(String(process.env.SKIP_CI ?? '').trim())
 // On Vercel those env vars ARE configured, so clear them for the test step only.
 const testEnv = { ...process.env, NODE_ENV: 'test' };
 for (const k of Object.keys(testEnv)) {
-  if (/^(SUPABASE|STRIPE|AUTH_MODE)/i.test(k)) delete testEnv[k];
+  if (/^(SUPABASE|STRIPE|AUTH_MODE|VITE_|POSTHOG|VERCEL)/i.test(k)) delete testEnv[k];
 }
 
 const STEPS = [
