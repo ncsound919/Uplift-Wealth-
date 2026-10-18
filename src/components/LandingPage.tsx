@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import {
   GraduationCap, Gamepad2, Briefcase, Sparkles, Landmark, LineChart,
-  BookOpen, ShieldCheck, ArrowRight, Layers, Coins, Trophy, Users
+  BookOpen, ShieldCheck, ArrowRight, Layers, Coins, Trophy, Users, Menu, X
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -24,18 +25,20 @@ const PATHWAYS = [
 ];
 
 export function LandingPage({ onEnter }: LandingPageProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-canvas text-ink font-sans">
       <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-          <div className="flex items-center gap-2">
-            <img src="/overlay-logo-192.png" alt="Overlay Wealth logo" className="h-9 w-9 rounded-lg object-contain" />
-            <span className="text-sm font-black tracking-tight">
+          <div className="flex min-w-0 items-center gap-2">
+            <img src="/overlay-logo-192.png" alt="Overlay Wealth logo" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+            <span className="whitespace-nowrap text-sm font-black tracking-tight">
               Overlay<span className="text-accent">Wealth</span>
             </span>
           </div>
-          <nav className="flex items-center gap-3">
-            <a href="/guide" className="hidden text-xs font-bold text-muted hover:text-accent sm:inline">Guide</a>
+          <nav className="hidden items-center gap-3 sm:flex">
+            <a href="/guide" className="text-xs font-bold text-muted hover:text-accent">Guide</a>
             <ThemeToggle />
             <button
               onClick={onEnter}
@@ -44,7 +47,33 @@ export function LandingPage({ onEnter }: LandingPageProps) {
               Enter the App
             </button>
           </nav>
+          <button
+            type="button"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-line bg-surface text-ink sm:hidden"
+          >
+            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
+        {menuOpen ? (
+          <div className="border-t border-line bg-surface px-4 py-4 sm:hidden">
+            <nav className="flex flex-col gap-4">
+              <a href="/guide" onClick={() => setMenuOpen(false)} className="text-sm font-bold text-muted hover:text-accent">Site Guide</a>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-muted">Theme</span>
+                <ThemeToggle />
+              </div>
+              <button
+                onClick={() => { setMenuOpen(false); onEnter(); }}
+                className="rounded-lg bg-accent px-4 py-3 text-xs font-black uppercase tracking-wider text-on-accent shadow-sm cursor-pointer"
+              >
+                Enter the App
+              </button>
+            </nav>
+          </div>
+        ) : null}
       </header>
 
       <main id="main-content">
