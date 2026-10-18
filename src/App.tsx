@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { Dashboard } from './components/Dashboard';
 import { LandingPage } from './components/LandingPage';
@@ -614,7 +614,7 @@ export default function App() {
 
 
   return (
-    <div className={cn("min-h-screen font-sans flex flex-col md:flex-row transition-colors duration-200 bg-app", isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900")}>
+    <div className={cn("min-h-dvh font-sans flex flex-col md:flex-row transition-colors duration-200 bg-app", isDarkMode ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900")}>
       
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
@@ -638,7 +638,7 @@ export default function App() {
 
       {/* Sidebar Navigation */}
       <aside aria-label="Main navigation" role="navigation" className={cn(
-        `fixed md:sticky top-0 left-0 h-screen shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between z-40 transition-all duration-300 md:translate-x-0 ${isSidebarCollapsed ? "w-20" : "w-72"}`,
+        `fixed md:sticky top-0 left-0 h-dvh shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between z-40 transition-all duration-300 md:translate-x-0 ${isSidebarCollapsed ? "w-20" : "w-72"}`,
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         {/* Sidebar Content */}
