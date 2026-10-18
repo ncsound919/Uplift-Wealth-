@@ -861,24 +861,24 @@ export function ModuleView({ module, onBack, onComplete, onLessonComplete, curre
           <aside className="xl:col-span-3">
             <div className="sticky top-20 space-y-4">
               <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
-                <div className="mb-4 flex items-center gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-900">
+                <div className="mb-4 flex items-center gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-900 overflow-x-auto no-scrollbar">
                   <button onClick={() => setUtilityTab('outcomes')}
-                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${utilityTab === 'outcomes' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                    className={`flex-1 shrink-0 rounded-lg px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium transition ${utilityTab === 'outcomes' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     Outcomes
                   </button>
                   <button onClick={() => setUtilityTab('terms')}
-                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${utilityTab === 'terms' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                    className={`flex-1 shrink-0 rounded-lg px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium transition ${utilityTab === 'terms' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     Terms
                   </button>
                   <button onClick={() => setUtilityTab('insight')}
-                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${utilityTab === 'insight' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                    className={`flex-1 shrink-0 rounded-lg px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium transition ${utilityTab === 'insight' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     Insight
                   </button>
                   <button onClick={() => setUtilityTab('discussion')}
-                    className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${utilityTab === 'discussion' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
+                    className={`flex-1 shrink-0 rounded-lg px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium transition ${utilityTab === 'discussion' ? 'bg-white text-slate-950 shadow-sm dark:bg-slate-800 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}
                   >
                     Discuss
                   </button>
