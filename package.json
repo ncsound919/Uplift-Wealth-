@@ -19,7 +19,8 @@
     "db:migrate": "tsx src/db/run-migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "stripe:provision": "node scripts/provision-stripe.mjs"
+    "stripe:provision": "node scripts/provision-stripe.mjs",
+    "ci": "node scripts/ci.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
