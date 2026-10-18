@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+﻿import React, { useMemo, useState, useEffect } from 'react';
 import { PlayCircle, ExternalLink, RefreshCw, AlertCircle, Tv, Volume2, VolumeX, Pause, Play, RotateCcw, CheckCircle2 } from 'lucide-react';
 
 interface YouTubeVideoPlayerProps {
@@ -211,30 +211,33 @@ export function YouTubeVideoPlayer({
       </div>
 
       {playerMode === 'simulation' && (
-        <div className="aspect-video bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 relative overflow-hidden flex flex-col justify-between p-6">
+        <div
+          data-testid="yt-simulation-panel"
+          className="relative overflow-hidden flex flex-col justify-between gap-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-4 sm:p-6 min-h-[24rem] sm:min-h-0 sm:aspect-video"
+        >
           {/* Animated Background Graphic */}
           <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]" />
 
           {/* Top Status Banner */}
-          <div className="flex justify-between items-center z-10">
+          <div className="flex flex-wrap items-center justify-between gap-2 z-10">
             <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-emerald-500/30">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-xs font-mono text-emerald-300 font-bold uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-mono text-emerald-300 font-bold uppercase tracking-wider whitespace-nowrap">
                 Simulated Masterclass Lecture
               </span>
             </div>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="hidden sm:inline text-xs font-mono text-slate-400">
               ID: {cleanId}
             </span>
           </div>
 
           {/* Center Content Simulation Card */}
-          <div className="my-auto z-10 max-w-xl mx-auto text-center space-y-3 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 backdrop-blur-xs shadow-2xl">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-3 py-1 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+          <div className="my-auto z-10 w-full max-w-xl mx-auto text-center space-y-3 bg-slate-900/80 p-4 sm:p-6 rounded-2xl border border-slate-800 backdrop-blur-xs shadow-2xl">
+            <div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-3 py-1 rounded-full">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
               <span>Visual Educational Sandbox Lecture</span>
             </div>
-            <h3 className="text-lg md:text-xl font-black text-white leading-tight">
+            <h3 className="text-base sm:text-lg md:text-xl font-black text-white leading-tight">
               {title}
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed font-medium">

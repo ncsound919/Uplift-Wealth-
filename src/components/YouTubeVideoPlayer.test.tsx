@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+﻿import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { extractYouTubeId, YouTubeVideoPlayer } from './YouTubeVideoPlayer';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 
@@ -171,7 +171,7 @@ describe('YouTubeVideoPlayer', () => {
       // Find the play/pause button in the simulation controls (has no text, just an svg)
       const toggleBtn = controlButtons.find(b => {
         const svgs = b.querySelectorAll('svg');
-        return svgs.length > 0 && b.closest('.aspect-video');
+        return svgs.length > 0 && b.closest('[data-testid="yt-simulation-panel"]');
       });
       expect(toggleBtn).toBeTruthy();
       if (toggleBtn) {
@@ -184,7 +184,7 @@ describe('YouTubeVideoPlayer', () => {
       const { container } = render(<YouTubeVideoPlayer videoId="5-O4jQ_aBWA" title="Test" />);
       fireEvent.click(screen.getAllByRole('button', { name: /Interactive Lecture/i })[0]);
 
-      const simPanel = container.querySelector('.aspect-video');
+      const simPanel = container.querySelector('[data-testid="yt-simulation-panel"]');
       const controlBtns = simPanel?.querySelectorAll('button');
       expect(controlBtns?.length).toBeGreaterThanOrEqual(2);
       if (controlBtns && controlBtns[1]) {
@@ -201,9 +201,9 @@ describe('YouTubeVideoPlayer', () => {
       const controlButtons = screen.getAllByRole('button');
       const muteBtn = controlButtons.find(b => {
         const svgs = b.querySelectorAll('svg');
-        return svgs.length > 0 && b.closest('.aspect-video');
+        return svgs.length > 0 && b.closest('[data-testid="yt-simulation-panel"]');
       });
-      const allSimBtns = controlButtons.filter(b => b.closest('.aspect-video'));
+      const allSimBtns = controlButtons.filter(b => b.closest('[data-testid="yt-simulation-panel"]'));
       expect(allSimBtns.length).toBeGreaterThanOrEqual(3);
       fireEvent.click(allSimBtns[2]);
       fireEvent.click(allSimBtns[2]);
@@ -268,7 +268,7 @@ describe('YouTubeVideoPlayer', () => {
     it('seeks the simulation progress by clicking the scrubber', () => {
       const { container } = render(<YouTubeVideoPlayer videoId="5-O4jQ_aBWA" title="Test" />);
       fireEvent.click(screen.getAllByRole('button', { name: /Interactive Lecture/i })[0]);
-      const simPanel = container.querySelector('.aspect-video');
+      const simPanel = container.querySelector('[data-testid="yt-simulation-panel"]');
       const scrubber = simPanel?.querySelector('div[class*="cursor-pointer"]');
       expect(scrubber).toBeTruthy();
       if (scrubber) {

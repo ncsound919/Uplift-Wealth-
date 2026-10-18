@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+﻿import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { 
   Trophy, 
   CheckCircle2, 
@@ -507,16 +507,16 @@ export function PopQuizGame({ onComplete, onExit }: PopQuizGameProps) {
 
           {/* LIFELINES BAR */}
           {gameMode === 'millionaire' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2 shadow-lg">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 shadow-lg">
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 hidden sm:inline">Studio Lifelines:</span>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-around">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-around">
                 {/* Lifeline 1: 50:50 */}
                 <button
                   onClick={handle5050}
                   disabled={!lifelines.fiftyFifty || isAnswered}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer border shadow-sm",
+                    "flex-1 sm:flex-none justify-center whitespace-nowrap px-2.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer border shadow-sm",
                     lifelines.fiftyFifty && !isAnswered
                       ? "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500 hover:text-slate-950 hover:scale-105 active:scale-95"
                       : "bg-slate-950 text-slate-600 border-slate-800 cursor-not-allowed opacity-50 line-through"
@@ -531,7 +531,7 @@ export function PopQuizGame({ onComplete, onExit }: PopQuizGameProps) {
                   onClick={handleAskAudience}
                   disabled={!lifelines.askAudience || isAnswered}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer border shadow-sm",
+                    "flex-1 sm:flex-none justify-center whitespace-nowrap px-2.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer border shadow-sm",
                     lifelines.askAudience && !isAnswered
                       ? "bg-purple-500/20 text-purple-300 border-purple-500/40 hover:bg-purple-500 hover:text-white hover:scale-105 active:scale-95"
                       : "bg-slate-950 text-slate-600 border-slate-800 cursor-not-allowed opacity-50 line-through"
@@ -546,7 +546,7 @@ export function PopQuizGame({ onComplete, onExit }: PopQuizGameProps) {
                   onClick={handlePhoneExpert}
                   disabled={!lifelines.phoneExpert || isAnswered}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer border shadow-sm",
+                    "flex-1 sm:flex-none justify-center whitespace-nowrap px-2.5 sm:px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer border shadow-sm",
                     lifelines.phoneExpert && !isAnswered
                       ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500 hover:text-slate-950 hover:scale-105 active:scale-95"
                       : "bg-slate-950 text-slate-600 border-slate-800 cursor-not-allowed opacity-50 line-through"
@@ -561,7 +561,7 @@ export function PopQuizGame({ onComplete, onExit }: PopQuizGameProps) {
               <button
                 onClick={handleWalkAway}
                 disabled={isAnswered || currentTierIndex === 0}
-                className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-red-950/50 text-red-400 font-bold text-xs flex items-center gap-1 border border-slate-800 hover:border-red-500/40 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-3 py-2 rounded-xl bg-slate-950 hover:bg-red-950/50 text-red-400 font-bold text-xs flex items-center gap-1 border border-slate-800 hover:border-red-500/40 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                 title="Walk Away with accumulated winnings"
               >
                 <span>Walk Away</span>
@@ -573,19 +573,19 @@ export function PopQuizGame({ onComplete, onExit }: PopQuizGameProps) {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-2xl relative overflow-hidden space-y-6">
             
             {/* Top Bar: Question #, Category, Countdown */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="shrink-0 whitespace-nowrap text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
                   Q {currentQuestionIndex + 1} / {quizBank.length}
                 </span>
-                <span className="text-xs font-bold text-slate-400 truncate max-w-[200px] sm:max-w-xs">
+                <span className="min-w-0 text-xs font-bold text-slate-400 truncate max-w-[130px] sm:max-w-xs">
                   {question.category}
                 </span>
               </div>
 
               {/* Countdown Timer */}
               <div className={cn(
-                "flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-black border transition-all",
+                "flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-black border transition-all shrink-0",
                 timeLeft <= 5 
                   ? "bg-red-500/20 text-red-400 border-red-500/50 animate-pulse scale-105" 
                   : "bg-slate-950 text-slate-300 border-slate-800"

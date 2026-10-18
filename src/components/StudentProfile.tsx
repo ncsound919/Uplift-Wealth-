@@ -1,4 +1,4 @@
-import { Module } from '../data/courseData';
+﻿import { Module } from '../data/courseData';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { getJSON, storageKeys } from '../lib/storage';
@@ -195,10 +195,10 @@ export function StudentProfile(props: Props) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
           <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
             <span className="text-xs font-bold text-slate-400 uppercase block">Portfolio NAV</span>
-            <span className="text-xl font-black text-white mt-1 block">
+            <span className="text-xl font-black text-white mt-1 block tabular-nums break-words">
               ${(stockSimMetrics?.totalNAV || 100000).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </span>
             <span className="text-xs text-slate-500 block mt-0.5">Starting: $100,000</span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calculateBlackScholes, Greeks } from '../utils/blackScholes';
 import {
@@ -493,7 +493,7 @@ export function TradingGame({ onComplete }: TradingGameProps) {
               </div>
 
               {/* Technical Summary Bar */}
-              <div className="grid grid-cols-3 gap-3 font-mono text-xs">
+              <div className="grid grid-cols-1 gap-3 font-mono text-xs sm:grid-cols-3">
                 <div className="bg-[#0c1017] p-3 rounded-xl border border-slate-850">
                   <span className="text-xs text-slate-500 block">VOLATILITY (ANNUAL)</span>
                   <span className="font-bold text-slate-200">
