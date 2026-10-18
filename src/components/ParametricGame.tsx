@@ -343,7 +343,7 @@ export function ParametricGame({ onComplete }: ParametricGameProps) {
         {/* Left Side: Game UI (7 columns) */}
         <div className="lg:col-span-7 space-y-6">
           
-          <div className="flex flex-wrap justify-between items-center gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-inner">
+          <div className="flex flex-wrap justify-between items-center gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-inner sm:flex-nowrap sm:gap-0">
             <div>
               <span className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">Agricultural Period</span>
               <h4 className="font-extrabold text-white text-base">Year 2026 - Season {season} / {SEASONS_TOTAL}</h4>
