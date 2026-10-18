@@ -428,7 +428,7 @@ export function TradingGame({ onComplete }: TradingGameProps) {
             </div>
 
             {/* Tab Selectors */}
-            <div className="flex items-center gap-1 bg-[#141922] p-1 rounded-xl border border-slate-800">
+            <div className="flex flex-wrap items-center gap-1 bg-[#141922] p-1 rounded-xl border border-slate-800">
               {(['Chart', 'Trade', 'Analyze', 'Scan', 'Learn'] as const).map((tab) => (
                 <button
                   key={tab}
