@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldAlert, CloudRain, Sun, Flame, ArrowRight, Activity, Cpu, Check, 
@@ -343,7 +343,7 @@ export function ParametricGame({ onComplete }: ParametricGameProps) {
         {/* Left Side: Game UI (7 columns) */}
         <div className="lg:col-span-7 space-y-6">
           
-          <div className="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-inner">
+          <div className="flex flex-wrap justify-between items-center gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-inner">
             <div>
               <span className="text-xs text-slate-500 font-bold uppercase tracking-wider font-mono">Agricultural Period</span>
               <h4 className="font-extrabold text-white text-base">Year 2026 - Season {season} / {SEASONS_TOTAL}</h4>
@@ -620,20 +620,20 @@ export function ParametricGame({ onComplete }: ParametricGameProps) {
             {/* Smart Contract State Machine Diagram (Graphic Enhancement) */}
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-850 space-y-2.5">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono block">INSURANCE STATE:</span>
-              <div className="flex items-center justify-between gap-1 text-xs font-mono">
-                <div className={`p-1 px-1.5 rounded border transition-colors ${contractState === 'IDLE' ? 'bg-indigo-950/50 border-indigo-500 text-indigo-300 shadow-[0_0_8px_rgba(99,102,241,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
+              <div className="grid grid-cols-2 gap-1.5 text-xs font-mono sm:flex sm:items-center sm:justify-between sm:gap-1">
+                <div className={`p-1 px-1.5 rounded border text-center transition-colors ${contractState === 'IDLE' ? 'bg-indigo-950/50 border-indigo-500 text-indigo-300 shadow-[0_0_8px_rgba(99,102,241,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
                   IDLE
                 </div>
-                <div className="text-slate-700">➔</div>
-                <div className={`p-1 px-1.5 rounded border transition-colors ${contractState === 'ACTIVE_COVER' ? 'bg-amber-950/50 border-amber-500 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
+                <div className="hidden text-slate-700 sm:block">➔</div>
+                <div className={`p-1 px-1.5 rounded border text-center transition-colors ${contractState === 'ACTIVE_COVER' ? 'bg-amber-950/50 border-amber-500 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
                   COVERED
                 </div>
-                <div className="text-slate-700">➔</div>
-                <div className={`p-1 px-1.5 rounded border transition-colors ${contractState === 'ORACLE_POLLING' ? 'bg-blue-950/50 border-blue-500 text-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
+                <div className="hidden text-slate-700 sm:block">➔</div>
+                <div className={`p-1 px-1.5 rounded border text-center transition-colors ${contractState === 'ORACLE_POLLING' ? 'bg-blue-950/50 border-blue-500 text-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.2)]' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
                   CHECKING WEATHER
                 </div>
-                <div className="text-slate-700">➔</div>
-                <div className={`p-1 px-1.5 rounded border transition-colors ${contractState === 'LIQUIDATING' ? 'bg-emerald-950/50 border-emerald-500 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)] animate-pulse' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
+                <div className="hidden text-slate-700 sm:block">➔</div>
+                <div className={`p-1 px-1.5 rounded border text-center transition-colors ${contractState === 'LIQUIDATING' ? 'bg-emerald-950/50 border-emerald-500 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)] animate-pulse' : 'bg-slate-900/40 border-slate-800 text-slate-500'}`}>
                   PAYING OUT
                 </div>
               </div>
